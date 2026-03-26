@@ -1,0 +1,20 @@
+{
+  "app": {
+    "title": "My Application",
+    "description": "Application description"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About"
+  },
+  "button": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "message": {
+    "welcome": "Welcome to the application!",
+    "success": "Success!",
+    "error": "An error occurred!"
+  }
+}

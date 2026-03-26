@@ -1,26 +1,87 @@
 <script setup lang="ts">
-import Versions from './components/Versions.vue'
+import { useI18n } from 'vue-i18n';
+import {
+  NLayout,
+  NLayoutHeader,
+  NLayoutContent,
+  NMenu,
+  NButton,
+  NConfigProvider,
+  NMessageProvider,
+  NDialogProvider
+} from 'naive-ui';
+import { h, ref } from 'vue';
+import { RouterLink, RouterView } from 'vue-router';
 
-const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+const { t, locale } = useI18n();
+
+const activeKey = ref<string>('home');
+
+const menuOptions = [
+  {
+    label: () => h(RouterLink, { to: '/' }, { default: () => t('nav.home') }),
+    key: 'home',
+    icon: () => h('font-awesome-icon', { icon: ['fas', 'home'] })
+  },
+  {
+    label: () => h(RouterLink, { to: '/about' }, { default: () => t('nav.about') }),
+    key: 'about',
+    icon: () => h('font-awesome-icon', { icon: ['fas', 'info-circle'] })
+  }
+];
+
+const toggleLanguage = (): void => {
+  locale.value = locale.value === 'vi' ? 'en' : 'vi';
+};
 </script>
 
 <template>
-  <img alt="logo" class="logo" src="./assets/electron.svg" />
-  <div class="creator">Powered by electron-vite</div>
-  <div class="text">
-    Build an Electron app with
-    <span class="vue">Vue</span>
-    and
-    <span class="ts">TypeScript</span>
-  </div>
-  <p class="tip">Please try pressing <code>F12</code> to open the devTool</p>
-  <div class="actions">
-    <div class="action">
-      <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">Documentation</a>
-    </div>
-    <div class="action">
-      <a target="_blank" rel="noreferrer" @click="ipcHandle">Send IPC</a>
-    </div>
-  </div>
-  <Versions />
+  <NConfigProvider>
+    <NMessageProvider>
+      <NDialogProvider>
+        <NLayout class="sora-layout">
+          <NLayoutHeader bordered class="sora-header">
+            <div class="header-content">
+              <h1>{{ t('app.title') }}</h1>
+              <NButton size="small" @click="toggleLanguage">
+                {{ locale === 'vi' ? 'EN' : 'VI' }}
+              </NButton>
+            </div>
+          </NLayoutHeader>
+          <NLayout has-sider class="sora-layout">
+            <NLayoutSider bordered class="sora-sider">
+              <NMenu v-model:value="activeKey" :options="menuOptions" />
+            </NLayoutSider>
+            <NLayoutContent class="sora-content">
+              <RouterView />
+            </NLayoutContent>
+          </NLayout>
+        </NLayout>
+      </NDialogProvider>
+    </NMessageProvider>
+  </NConfigProvider>
 </template>
+
+<style scoped>
+.sora-layout {
+  height: 100vh;
+}
+.sora-header {
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.sora-sider {
+  width: 200px;
+}
+.sora-content {
+  padding: 20px;
+}
+</style>

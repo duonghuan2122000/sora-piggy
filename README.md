@@ -26,6 +26,7 @@ Built with Electron + Vue 3, Sora Piggy is designed to be fast, distraction-free
 ## ✨ Features
 
 ### 💸 Transaction Management
+
 - Log income, expenses, and internal transfers in seconds
 - Quick-entry shortcut (`Ctrl+N`) with auto-focus on amount field
 - Attach receipt photos to any transaction
@@ -34,6 +35,7 @@ Built with Electron + Vue 3, Sora Piggy is designed to be fast, distraction-free
 - Import transactions from bank CSV statements
 
 ### 📊 Budget Tracking
+
 - Set monthly spending limits per category
 - Visual progress bars that shift green → yellow → red as you approach limits
 - Desktop notifications when a category hits 80% of budget
@@ -41,12 +43,14 @@ Built with Electron + Vue 3, Sora Piggy is designed to be fast, distraction-free
 - Envelope budgeting: roll unused amounts forward to next month
 
 ### 🎯 Savings Goals
+
 - Create goals with a target amount and optional deadline
 - Track progress with milestone notifications at 25%, 50%, 75%, and 100%
 - Auto-contribute: schedule a fixed amount to be moved each month
 - View contribution history as a growth chart
 
 ### 📈 Reports & Analytics
+
 - Monthly overview: cash flow, net balance, top spending categories
 - Trend comparison: this month vs. last month vs. 3-month average
 - Category breakdown: treemap and horizontal bar charts
@@ -54,6 +58,7 @@ Built with Electron + Vue 3, Sora Piggy is designed to be fast, distraction-free
 - Export reports to PDF or Excel
 
 ### ⚙️ Settings & Data
+
 - Manage multiple accounts (cash, bank, e-wallets like MoMo/ZaloPay)
 - Custom categories with icon and color
 - Automatic scheduled backups to any local folder
@@ -107,16 +112,16 @@ Distributable files will be output to the `dist/` folder.
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Desktop shell | Electron 28+ |
-| UI framework | Vue 3 + Composition API |
-| UI components | Naive UI |
-| State management | Pinia |
-| Database | SQLite via `better-sqlite3` |
-| Charts | Apache ECharts |
-| Build tool | Vite + electron-builder |
-| Date handling | Day.js |
+| Layer            | Technology                  |
+| ---------------- | --------------------------- |
+| Desktop shell    | Electron 28+                |
+| UI framework     | Vue 3 + Composition API     |
+| UI components    | Naive UI                    |
+| State management | Pinia                       |
+| Database         | SQLite via `better-sqlite3` |
+| Charts           | Apache ECharts              |
+| Build tool       | Vite + electron-builder     |
+| Date handling    | Day.js                      |
 
 ---
 

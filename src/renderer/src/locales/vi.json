@@ -1,0 +1,20 @@
+{
+  "app": {
+    "title": "Ứng dụng của tôi",
+    "description": "Mô tả ứng dụng"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu"
+  },
+  "button": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa"
+  },
+  "message": {
+    "welcome": "Chào mừng bạn đến với ứng dụng!",
+    "success": "Thành công!",
+    "error": "Đã xảy ra lỗi!"
+  }
+}
