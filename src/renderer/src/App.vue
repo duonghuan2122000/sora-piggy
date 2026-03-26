@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import {
-  NLayout,
-  NLayoutHeader,
-  NLayoutContent,
-  NMenu,
   NButton,
   NConfigProvider,
-  NMessageProvider,
-  NDialogProvider
+  NDialogProvider,
+  NLayout,
+  NLayoutContent,
+  NLayoutHeader,
+  NMenu,
+  NMessageProvider
 } from 'naive-ui';
 import { h, ref } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
