@@ -1,54 +1,62 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import { NButton } from 'naive-ui';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-const { locale } = useI18n();
+const emit = defineEmits<{
+  addTransaction: [];
+}>();
 
-const toggleLanguage = (): void => {
-  locale.value = locale.value === 'vi' ? 'en' : 'vi';
+const handleAddTransaction = (): void => {
+  emit('addTransaction');
 };
+
+defineProps<{
+  pageTitle: string;
+}>();
 </script>
 
 <template>
-  <div class="top-nav">
-    <div class="logo">
-      <h1>Vue.js Renderer (Giao diện người dùng)</h1>
-      <span class="subtitle">5 module: Giao dịch · Ngân sách · Mục tiêu · Báo cáo · Cài đặt</span>
+  <div class="sora-top-nav">
+    <div class="sora-left-section">
+      <h1 class="sora-page-title">{{ pageTitle }}</h1>
     </div>
-    <div class="actions">
-      <NButton size="small" @click="toggleLanguage">
-        {{ locale === 'vi' ? 'EN' : 'VI' }}
+    <div class="sora-right-section">
+      <NButton type="primary" size="small" @click="handleAddTransaction">
+        <template #icon>
+          <FontAwesomeIcon :icon="faPlus" />
+        </template>
+        Add Transaction
       </NButton>
     </div>
   </div>
 </template>
 
-<style scoped>
-.top-nav {
+<style scoped lang="scss">
+.sora-top-nav {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 $spacing-md;
   height: 100%;
+  background-color: $bg-primary-light;
+  border-bottom: 1px solid #e5e7eb;
 }
-.logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+
+.sora-left-section {
+  flex: 1;
 }
-.logo h1 {
+
+.sora-page-title {
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: rgb(60, 52, 137);
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: $text-primary-light;
 }
-.subtitle {
-  font-size: 12px;
-  color: rgb(83, 74, 183);
-  margin-top: 2px;
-}
-.actions {
-  display: none;
+
+.sora-right-section {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
 }
 </style>

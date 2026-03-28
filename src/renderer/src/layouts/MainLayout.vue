@@ -23,8 +23,8 @@ const isSidebarCollapsed = ref(false);
       <Sidebar :collapsed="isSidebarCollapsed" />
     </NLayoutSider>
     <NLayout>
-      <NLayoutHeader bordered class="sora-header">
-        <TopNav />
+      <NLayoutHeader class="sora-header">
+        <TopNav page-title="Dashboard" />
       </NLayoutHeader>
       <NLayoutContent class="sora-content">
         <RouterView />
@@ -49,8 +49,7 @@ const isSidebarCollapsed = ref(false);
 .sora-header {
   height: 60px;
   padding: 0;
-  background-color: rgb(238, 237, 254);
-  border-bottom: 1px solid rgb(83, 74, 183);
+  background-color: #ffffff;
 }
 .sora-sider {
   background-color: #f8f9fa;

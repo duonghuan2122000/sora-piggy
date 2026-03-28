@@ -4,15 +4,25 @@ $color-secondary: #647eff;
 $color-success: #3178c6;
 $color-warning: #f0dc4e;
 
-// Text Colors
+// Text Colors (Dark Theme)
 $text-primary: rgba(255, 255, 245, 0.86);
 $text-secondary: rgba(235, 235, 245, 0.6);
 $text-tertiary: rgba(235, 235, 245, 0.38);
 
-// Background Colors
+// Text Colors (Light Theme)
+$text-primary-light: #333333;
+$text-secondary-light: #666666;
+$text-tertiary-light: #999999;
+
+// Background Colors (Dark Theme)
 $bg-primary: #1b1b1f;
 $bg-secondary: #222222;
 $bg-tertiary: #282828;
+
+// Background Colors (Light Theme)
+$bg-primary-light: #ffffff;
+$bg-secondary-light: #f8f9fa;
+$bg-tertiary-light: #e9ecef;
 
 // Gray Scale
 $gray-1: #515c67;
