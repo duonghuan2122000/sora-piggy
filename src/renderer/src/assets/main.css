@@ -1,13 +1,24 @@
 @import './base.css';
 
+html {
+  height: 100%;
+}
+
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
+  height: 100%;
+  width: 100%;
   background-image: url('./wavy-lines.svg');
   background-size: cover;
   user-select: none;
+  font-family:
+    'Anthropic Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 
 code {
@@ -27,11 +38,8 @@ code {
 }
 
 #app {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  margin-bottom: 80px;
+  height: 100%;
+  width: 100%;
 }
 
 .logo {

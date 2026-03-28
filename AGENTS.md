@@ -66,9 +66,10 @@ This project uses **Prettier** for formatting and **ESLint** for linting.
 
 ### Styling
 
-- **CSS Preprocessor**: Use **SCSS** for all styles.
+- **CSS Preprocessor**: Use **SCSS** for all styles. Do not use plain CSS files.
 - **Variables**: Create a `_variables.scss` file to define shared variables (colors, fonts, spacing) for the app.
 - **Class Naming**: Follow BEM or similar methodology prefixed with `sora-` for consistency.
+- **File Extensions**: All style files must use `.scss` extension (e.g., `main.scss`, `base.scss`). Convert existing `.css` files to `.scss`.
 
 ### Error Handling
 
