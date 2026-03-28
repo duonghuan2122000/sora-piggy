@@ -80,7 +80,6 @@ const isSidebarCollapsed = ref(false);
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
   background-color: $bg-secondary-light;
   overflow: hidden;
 }

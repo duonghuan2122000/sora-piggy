@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, h } from 'vue';
-import { NCard, NInput, NSelect, NButton, NDataTable } from 'naive-ui';
+import { NCard, NInput, NSelect, NDataTable } from 'naive-ui';
 import type { DataTableColumns } from 'naive-ui';
 import { ITransaction } from '@renderer/types/transaction';
 
@@ -126,12 +126,26 @@ const formatDate = (date: Date): string => {
 };
 
 // Pagination state
-const pagination = ref({
-  page: 1,
-  pageSize: 10,
-  pageCount: 1,
-  showSizePicker: false
-});
+const page = ref(1);
+const pageSize = ref(10);
+
+const pagination = computed(() => ({
+  page: page.value,
+  pageSize: pageSize.value,
+  pageCount: Math.ceil(filteredTransactions.value.length / pageSize.value),
+  itemCount: filteredTransactions.value.length,
+  pageSizes: [10, 20, 50],
+  showSizePicker: true
+}));
+
+const handlePageChange = (newPage: number): void => {
+  page.value = newPage;
+};
+
+const handlePageSizeChange = (newPageSize: number): void => {
+  pageSize.value = newPageSize;
+  page.value = 1;
+};
 
 // DataTable columns
 const columns: DataTableColumns<ITransaction> = [
@@ -224,7 +238,7 @@ const columns: DataTableColumns<ITransaction> = [
       </NCard>
     </section>
 
-    <!-- Detail Section with Footer -->
+    <!-- Detail Section with Pagination -->
     <NCard class="sora-card sora-detail-card">
       <section class="sora-detail">
         <NDataTable
@@ -232,35 +246,12 @@ const columns: DataTableColumns<ITransaction> = [
           :data="filteredTransactions"
           :bordered="false"
           :single-line="false"
-          :pagination="false"
+          :pagination="pagination"
           class="sora-data-table"
+          @update:page="handlePageChange"
+          @update:page-size="handlePageSizeChange"
         />
       </section>
-      <template #footer>
-        <footer class="sora-footer">
-          <div class="sora-count">Total: {{ filteredTransactions.length }} transactions</div>
-          <div class="sora-pagination">
-            <NButton quaternary class="sora-btn-page" @click="pagination.page--"> &lt; </NButton>
-            <NButton
-              quaternary
-              class="sora-btn-page"
-              :class="{ active: pagination.page === 1 }"
-              @click="pagination.page = 1"
-            >
-              1
-            </NButton>
-            <NButton
-              quaternary
-              class="sora-btn-page"
-              :class="{ active: pagination.page === 2 }"
-              @click="pagination.page = 2"
-            >
-              2
-            </NButton>
-            <NButton quaternary class="sora-btn-page" @click="pagination.page++"> &gt; </NButton>
-          </div>
-        </footer>
-      </template>
     </NCard>
   </div>
 </template>
@@ -336,12 +327,12 @@ const columns: DataTableColumns<ITransaction> = [
   font-weight: bold;
 }
 
-.sora-income {
-  color: $color-success;
+:deep(.sora-income) {
+  color: $color-success !important;
 }
 
-.sora-expense {
-  color: $color-warning;
+:deep(.sora-expense) {
+  color: $color-error !important;
 }
 
 /* Detail Card */
@@ -395,32 +386,5 @@ const columns: DataTableColumns<ITransaction> = [
 .sora-desc {
   font-size: $font-size-xs;
   color: $text-secondary-light;
-}
-
-/* Footer inside DataTable */
-.sora-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-sm $spacing-md;
-  background-color: $bg-tertiary-light;
-  border-top: 1px solid $gray-1-light;
-}
-
-.sora-count {
-  font-size: $font-size-sm;
-  color: $text-secondary-light;
-}
-
-.sora-pagination {
-  display: flex;
-  gap: $spacing-xs;
-}
-
-.sora-btn-page {
-  &.active {
-    background-color: $color-primary;
-    color: #fff;
-  }
 }
 </style>
