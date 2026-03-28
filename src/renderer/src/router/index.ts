@@ -1,44 +1,45 @@
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
+import { ROUTE_NAMES } from '@renderer/constants';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Home',
+    name: ROUTE_NAMES.HOME,
     component: () => import('@renderer/views/HomeView.vue')
   },
   {
     path: '/budget',
-    name: 'Budget',
+    name: ROUTE_NAMES.BUDGET,
     component: () => import('@renderer/views/BudgetView.vue')
   },
   {
     path: '/goals',
-    name: 'Goals',
+    name: ROUTE_NAMES.GOALS,
     component: () => import('@renderer/views/GoalsView.vue')
   },
   {
     path: '/reports',
-    name: 'Reports',
+    name: ROUTE_NAMES.REPORTS,
     component: () => import('@renderer/views/ReportsView.vue')
   },
   {
     path: '/settings',
-    name: 'Settings',
+    name: ROUTE_NAMES.SETTINGS,
     component: () => import('@renderer/views/SettingsView.vue')
   },
   {
     path: '/transactions',
-    name: 'Transaction',
+    name: ROUTE_NAMES.TRANSACTIONS,
     component: () => import('@renderer/views/transactions/SoraTransactionView.vue')
   },
   {
     path: '/transactions/add',
-    name: 'AddTransaction',
+    name: ROUTE_NAMES.TRANSACTIONS_ADD,
     component: () => import('@renderer/views/transactions/SoraAddTransactionView.vue')
   },
   {
     path: '/about',
-    name: 'About',
+    name: ROUTE_NAMES.ABOUT,
     component: () => import('@renderer/views/AboutView.vue')
   }
 ];

@@ -5,5 +5,6 @@ export const ROUTE_NAMES = {
   REPORTS: 'Reports',
   SETTINGS: 'Settings',
   TRANSACTIONS: 'Transaction',
-  TRANSACTIONS_ADD: 'AddTransaction'
+  TRANSACTIONS_ADD: 'AddTransaction',
+  ABOUT: 'About'
 };
