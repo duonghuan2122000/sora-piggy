@@ -27,6 +27,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@renderer/views/SettingsView.vue')
   },
   {
+    path: '/transactions',
+    name: 'Transaction',
+    component: () => import('@renderer/views/SoraTransactionView.vue')
+  },
+  {
     path: '/about',
     name: 'About',
     component: () => import('@renderer/views/AboutView.vue')

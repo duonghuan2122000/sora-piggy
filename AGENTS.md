@@ -71,6 +71,14 @@ This project uses **Prettier** for formatting and **ESLint** for linting.
 - **Class Naming**: Follow BEM or similar methodology prefixed with `sora-` for consistency.
 - **File Extensions**: All style files must use `.scss` extension (e.g., `main.scss`, `base.scss`). Convert existing `.css` files to `.scss`.
 
+#### Theme
+
+- **Default Theme**: All views and components should use **light color theme** as the default theme for the app.
+- **Light Theme Variables**: Use the following variables from `_variables.scss` for light theme styling:
+  - **Backgrounds**: `$bg-primary-light`, `$bg-secondary-light`, `$bg-tertiary-light`
+  - **Text Colors**: `$text-primary-light`, `$text-secondary-light`, `$text-tertiary-light`
+- **Dark Theme Variables**: The existing dark theme variables (`$bg-primary`, `$bg-secondary`, `$bg-tertiary`, `$text-primary`, `$text-secondary`, `$text-tertiary`) are retained for reference but should not be used in default views.
+
 ### Error Handling
 
 - Use `try-catch` blocks for asynchronous operations.
