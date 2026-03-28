@@ -1,19 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { NButton } from 'naive-ui';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const emit = defineEmits<{
   addTransaction: [];
+  saveTransaction: [];
 }>();
 
-const handleAddTransaction = (): void => {
-  emit('addTransaction');
+const props = defineProps<{
+  pageTitle: string;
+  mode?: 'list' | 'add';
+}>();
+
+const currentMode = computed(() => props.mode || 'list');
+
+const handlePrimaryAction = (): void => {
+  if (currentMode.value === 'add') {
+    emit('saveTransaction');
+  } else {
+    emit('addTransaction');
+  }
 };
 
-defineProps<{
-  pageTitle: string;
-}>();
+const buttonLabel = computed(() => (currentMode.value === 'add' ? 'Save' : 'Add Transaction'));
+const buttonIcon = computed(() => (currentMode.value === 'add' ? faSave : faPlus));
 </script>
 
 <template>
@@ -22,11 +34,11 @@ defineProps<{
       <h1 class="sora-page-title">{{ pageTitle }}</h1>
     </div>
     <div class="sora-right-section">
-      <NButton type="primary" size="small" @click="handleAddTransaction">
+      <NButton type="primary" size="small" @click="handlePrimaryAction">
         <template #icon>
-          <FontAwesomeIcon :icon="faPlus" />
+          <FontAwesomeIcon :icon="buttonIcon" />
         </template>
-        Add Transaction
+        {{ buttonLabel }}
       </NButton>
     </div>
   </div>

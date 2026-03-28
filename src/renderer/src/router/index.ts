@@ -29,7 +29,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/transactions',
     name: 'Transaction',
-    component: () => import('@renderer/views/SoraTransactionView.vue')
+    component: () => import('@renderer/views/transactions/SoraTransactionView.vue')
+  },
+  {
+    path: '/transactions/add',
+    name: 'AddTransaction',
+    component: () => import('@renderer/views/transactions/SoraAddTransactionView.vue')
   },
   {
     path: '/about',
