@@ -1,48 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue';
+import { ref, computed, h, onMounted } from 'vue';
 import { NCard, NInput, NSelect, NDataTable } from 'naive-ui';
 import type { DataTableColumns } from 'naive-ui';
 import { ITransaction } from '@renderer/types/transaction';
 
-// Mock Data
-const transactions = ref<ITransaction[]>([
-  {
-    id: 1,
-    name: 'Grocery Shopping',
-    description: 'Weekly groceries',
-    category: 'Expense',
-    account: 'Cash',
-    amount: -500000,
-    time: new Date('2023-10-25')
-  },
-  {
-    id: 2,
-    name: 'Salary',
-    description: 'Monthly salary',
-    category: 'Income',
-    account: 'Bank account A',
-    amount: 15000000,
-    time: new Date('2023-10-24')
-  },
-  {
-    id: 3,
-    name: 'Coffee',
-    description: 'Morning coffee',
-    category: 'Expense',
-    account: 'Cash',
-    amount: -30000,
-    time: new Date('2023-10-24')
-  },
-  {
-    id: 4,
-    name: 'Freelance Payment',
-    description: 'Web design project',
-    category: 'Income',
-    account: 'Bank account B',
-    amount: 5000000,
-    time: new Date('2023-10-23')
+// Transactions data from database
+const transactions = ref<ITransaction[]>([]);
+
+onMounted(async () => {
+  try {
+    transactions.value = await window.api.getAllTransactions();
+  } catch (error) {
+    console.error('Failed to fetch transactions:', error);
   }
-]);
+});
 
 // Filter State
 const searchQuery = ref('');

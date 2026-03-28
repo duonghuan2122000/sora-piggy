@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { ITransaction } from '@renderer/types/transaction';
 
 export interface Transaction {
   id: string;
@@ -22,14 +23,31 @@ export const useTransactionFormStore = defineStore('transactionForm', () => {
     // This store just triggers the submission
   };
 
-  const addTransaction = (transaction: Omit<Transaction, 'id'>): void => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: Date.now().toString() // Simple ID generation
-    };
-    transactions.value.push(newTransaction);
-    console.log('Transaction added:', newTransaction);
-    // In a real app, you would make an API call here
+  const addTransaction = async (transaction: Omit<Transaction, 'id'>): Promise<void> => {
+    try {
+      // Convert timestamp to Date for the API
+      const apiTransaction: Omit<ITransaction, 'id'> = {
+        name: transaction.name,
+        description: transaction.description,
+        time: transaction.time ? new Date(transaction.time) : new Date(),
+        amount: transaction.amount,
+        category: transaction.category || '',
+        account: transaction.account || ''
+      };
+
+      // Call the API
+      const id = await window.api.addTransaction(apiTransaction);
+      console.log('Transaction added with ID:', id);
+
+      // Update local state (optional, can be refreshed from DB)
+      const newTransaction: Transaction = {
+        ...transaction,
+        id: id.toString()
+      };
+      transactions.value.push(newTransaction);
+    } catch (error) {
+      console.error('Failed to add transaction:', error);
+    }
   };
 
   return {

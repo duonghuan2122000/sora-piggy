@@ -2,6 +2,20 @@ import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import { join } from 'path';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
+import {
+  initDb,
+  getAllTransactions,
+  getTransactionById,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+  getCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  closeDatabase
+} from './database';
 
 function createWindow(): void {
   // Create the browser window.
@@ -48,8 +62,28 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
+  // Initialize database
+  initDb();
+
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
+
+  // Database IPC handlers
+  // Transaction handlers
+  ipcMain.handle('db:getAllTransactions', () => getAllTransactions());
+  ipcMain.handle('db:getTransactionById', (_, id) => getTransactionById(id));
+  ipcMain.handle('db:addTransaction', (_, transaction) => addTransaction(transaction));
+  ipcMain.handle('db:updateTransaction', (_, id, transaction) =>
+    updateTransaction(id, transaction)
+  );
+  ipcMain.handle('db:deleteTransaction', (_, id) => deleteTransaction(id));
+
+  // Category handlers
+  ipcMain.handle('db:getCategories', () => getCategories());
+  ipcMain.handle('db:getCategoryById', (_, id) => getCategoryById(id));
+  ipcMain.handle('db:createCategory', (_, category) => createCategory(category));
+  ipcMain.handle('db:updateCategory', (_, id, category) => updateCategory(id, category));
+  ipcMain.handle('db:deleteCategory', (_, id) => deleteCategory(id));
 
   createWindow();
 
@@ -64,6 +98,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  closeDatabase();
   if (process.platform !== 'darwin') {
     app.quit();
   }

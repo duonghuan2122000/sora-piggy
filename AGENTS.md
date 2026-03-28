@@ -9,6 +9,10 @@
 - `npm run build:unpack`: Build unpacked directory.
 - `npm run build:win`: Build for Windows.
 
+**Native Modules:**
+
+- `npm run rebuild`: Rebuild native modules (like better-sqlite3) for Electron. This is automatically run during `npm install` via the postinstall script.
+
 **Lint & Format:**
 
 - `npm run lint`: Run ESLint on the codebase.
