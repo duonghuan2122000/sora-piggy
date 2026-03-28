@@ -113,7 +113,11 @@ export const createCategory = (category: {
   const stmt = db!.prepare(
     'INSERT INTO categories (name, type, icon, color) VALUES (@name, @type, @icon, @color)'
   );
-  return stmt.run(category);
+  return stmt.run({
+    ...category,
+    icon: category.icon ?? null,
+    color: category.color ?? null
+  });
 };
 
 export const updateCategory = (
