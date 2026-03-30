@@ -7,8 +7,6 @@ import {
   ElInput,
   ElDatePicker,
   ElInputNumber,
-  ElSelect,
-  ElOption,
   ElAutocomplete,
   ElDialog,
   ElButton
@@ -23,6 +21,13 @@ interface CategoryOption {
   isAdd?: boolean;
 }
 
+interface AccountOption {
+  value: string;
+  label?: string;
+  class?: string;
+  isAdd?: boolean;
+}
+
 const formRef = ref<FormInstance | null>(null);
 const formValue = ref({
   name: '',
@@ -30,7 +35,7 @@ const formValue = ref({
   time: null,
   amount: 0,
   category: null as string | null,
-  account: null
+  account: null as string | null
 });
 
 const rules: FormRules = {
@@ -45,10 +50,20 @@ const categoryOptions = ref<CategoryOption[]>([]);
 const categorySearchValue = ref('');
 const isLoadingCategories = ref(false);
 
+// Account state
+const accountOptions = ref<AccountOption[]>([]);
+const accountSearchValue = ref('');
+const isLoadingAccounts = ref(false);
+
 // Add Category Modal state
 const showCategoryModal = ref(false);
 const newCategoryName = ref('');
 const modalOpenedAt = ref(0);
+
+// Add Account Modal state
+const showAccountModal = ref(false);
+const newAccountName = ref('');
+const accountModalOpenedAt = ref(0);
 
 // Load categories from database
 const loadCategories = async (): Promise<void> => {
@@ -65,6 +80,114 @@ const loadCategories = async (): Promise<void> => {
     isLoadingCategories.value = false;
   }
 };
+
+// Load accounts from database
+const loadAccounts = async (): Promise<void> => {
+  isLoadingAccounts.value = true;
+  try {
+    const accounts = await window.api.getAccounts();
+    // Convert database rows to select options
+    accountOptions.value = accounts.map((acc: { name: string }) => ({
+      value: acc.name
+    }));
+  } catch (error) {
+    console.error('Failed to load accounts:', error);
+  } finally {
+    isLoadingAccounts.value = false;
+  }
+};
+
+// Check if the typed account already exists
+const isAccountNew = computed(() => {
+  if (!accountSearchValue.value) return false;
+  const search = accountSearchValue.value.toLowerCase();
+  return !accountOptions.value.some((option) => option.value?.toString().toLowerCase() === search);
+});
+
+// Fetch account suggestions for ElAutocomplete
+const queryAccountSearch = (queryString: string, cb: (options: AccountOption[]) => void): void => {
+  let results = accountOptions.value;
+
+  if (queryString) {
+    results = accountOptions.value.filter((option) =>
+      option.value?.toString().toLowerCase().includes(queryString.toLowerCase())
+    );
+  }
+
+  // Add "Add Account" option at the bottom if the typed text is new
+  if (isAccountNew.value && accountSearchValue.value.trim()) {
+    const accountName = accountSearchValue.value.trim();
+    results = [
+      ...results,
+      {
+        value: `Add Account "${accountName}"`,
+        label: accountName, // Store the actual account name separately
+        isAdd: true
+      }
+    ];
+  }
+
+  cb(results);
+};
+
+// Handle account selection
+const handleAccountSelect = (item: Record<string, unknown>): void => {
+  // Prevent processing if modal is already open
+  if (showAccountModal.value) return;
+
+  const itemValue = item.value as string;
+
+  if ((item as { isAdd?: boolean }).isAdd) {
+    // Use the label property which contains the actual account name
+    const accountName = (item as { label?: string }).label || accountSearchValue.value.trim();
+
+    // Open modal with pre-filled account name
+    newAccountName.value = accountName;
+    showAccountModal.value = true;
+    accountModalOpenedAt.value = Date.now(); // Record timestamp when modal opens
+    return;
+  }
+
+  // Normal account selection - update form value and search field
+  formValue.value.account = itemValue;
+  accountSearchValue.value = itemValue;
+};
+
+// Save account from modal
+const saveAccountFromModal = async (): Promise<void> => {
+  // Ignore calls that happen too soon after modal opens (prevents auto-save from Enter key)
+  if (Date.now() - accountModalOpenedAt.value < 100) return;
+
+  if (!newAccountName.value.trim()) return;
+
+  const accountName = newAccountName.value.trim();
+  try {
+    await window.api.createAccount({
+      name: accountName,
+      type: 'general' // Default type
+    });
+
+    // Refresh accounts list
+    await loadAccounts();
+
+    // Select the newly added account
+    formValue.value.account = accountName;
+    accountSearchValue.value = '';
+
+    // Close modal
+    showAccountModal.value = false;
+    newAccountName.value = '';
+  } catch (error) {
+    console.error('Failed to add account:', error);
+  }
+};
+
+// Clear account modal state when closed
+watch(showAccountModal, (isOpen) => {
+  if (!isOpen) {
+    newAccountName.value = '';
+  }
+});
 
 // Check if the typed category already exists
 const isNewCategory = computed(() => {
@@ -85,10 +208,12 @@ const querySearch = (queryString: string, cb: (options: CategoryOption[]) => voi
 
   // Add "Add Category" option at the bottom if the typed text is new
   if (isNewCategory.value && categorySearchValue.value.trim()) {
+    const categoryName = categorySearchValue.value.trim();
     results = [
       ...results,
       {
-        value: `Add Category "${categorySearchValue.value.trim()}"`,
+        value: `Add Category "${categoryName}"`,
+        label: categoryName, // Store the actual category name separately
         isAdd: true
       }
     ];
@@ -103,8 +228,11 @@ const handleCategorySelect = (item: Record<string, unknown>): void => {
   if (showCategoryModal.value) return;
 
   if ((item as { isAdd?: boolean }).isAdd) {
+    // Use the label property which contains the actual category name
+    const categoryName = (item as { label?: string }).label || categorySearchValue.value.trim();
+
     // Open modal with pre-filled category name
-    newCategoryName.value = categorySearchValue.value.trim();
+    newCategoryName.value = categoryName;
     showCategoryModal.value = true;
     modalOpenedAt.value = Date.now(); // Record timestamp when modal opens
     return;
@@ -148,12 +276,6 @@ const handleCategoryFocus = (): void => {
   // Ensure dropdown opens when focused
 };
 
-const accountOptions = [
-  { label: 'Cash', value: 'Cash' },
-  { label: 'Bank Account A', value: 'Bank account A' },
-  { label: 'Bank Account B', value: 'Bank account B' }
-];
-
 // Clear modal state when closed
 watch(showCategoryModal, (isOpen) => {
   if (!isOpen) {
@@ -188,9 +310,10 @@ watch(
   }
 );
 
-// Load categories on mount
+// Load categories and accounts on mount
 onMounted(() => {
   loadCategories();
+  loadAccounts();
 });
 </script>
 
@@ -240,14 +363,19 @@ onMounted(() => {
         </ElFormItem>
 
         <ElFormItem label="Account" prop="account">
-          <ElSelect v-model="formValue.account" placeholder="Select account">
-            <ElOption
-              v-for="item in accountOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </ElSelect>
+          <ElAutocomplete
+            v-model="accountSearchValue"
+            :fetch-suggestions="queryAccountSearch"
+            placeholder="Search or add account"
+            clearable
+            @select="handleAccountSelect"
+          >
+            <template #default="{ item }">
+              <div :class="{ 'account-add-option': item.isAdd }">
+                {{ item.value }}
+              </div>
+            </template>
+          </ElAutocomplete>
         </ElFormItem>
       </ElForm>
     </ElCard>
@@ -268,6 +396,26 @@ onMounted(() => {
         <div style="display: flex; justify-content: flex-end; gap: 8px">
           <ElButton @click="showCategoryModal = false">Cancel</ElButton>
           <ElButton type="primary" @click="saveCategoryFromModal">Save</ElButton>
+        </div>
+      </template>
+    </ElDialog>
+
+    <!-- Add Account Modal -->
+    <ElDialog v-model="showAccountModal" title="Add Account" width="400px">
+      <ElForm>
+        <ElFormItem label="Account Name">
+          <ElInput
+            v-model="newAccountName"
+            placeholder="Enter account name"
+            @keyup.enter="saveAccountFromModal"
+            @keydown.enter.prevent
+          />
+        </ElFormItem>
+      </ElForm>
+      <template #footer>
+        <div style="display: flex; justify-content: flex-end; gap: 8px">
+          <ElButton @click="showAccountModal = false">Cancel</ElButton>
+          <ElButton type="primary" @click="saveAccountFromModal">Save</ElButton>
         </div>
       </template>
     </ElDialog>
@@ -297,6 +445,16 @@ onMounted(() => {
 
 :deep(.el-autocomplete-suggestion__list) {
   li.category-add-option {
+    color: #1890ff;
+    font-style: italic;
+    border-top: 1px solid #e0e0e0;
+
+    &:hover {
+      background-color: #f0f7ff !important;
+    }
+  }
+
+  li.account-add-option {
     color: #1890ff;
     font-style: italic;
     border-top: 1px solid #e0e0e0;

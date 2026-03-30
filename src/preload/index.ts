@@ -41,7 +41,22 @@ const api = {
       color?: string;
     }
   ) => ipcRenderer.invoke('db:updateCategory', id, category),
-  deleteCategory: (id: number) => ipcRenderer.invoke('db:deleteCategory', id)
+  deleteCategory: (id: number) => ipcRenderer.invoke('db:deleteCategory', id),
+
+  // Account APIs
+  getAccounts: () => ipcRenderer.invoke('db:getAccounts'),
+  getAccountById: (id: number) => ipcRenderer.invoke('db:getAccountById', id),
+  createAccount: (account: { name: string; type: string; balance?: number }) =>
+    ipcRenderer.invoke('db:createAccount', account),
+  updateAccount: (
+    id: number,
+    account: {
+      name?: string;
+      type?: string;
+      balance?: number;
+    }
+  ) => ipcRenderer.invoke('db:updateAccount', id, account),
+  deleteAccount: (id: number) => ipcRenderer.invoke('db:deleteAccount', id)
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -10,6 +10,14 @@ interface Category {
   color?: string;
 }
 
+// Account type definitions
+interface Account {
+  id: number;
+  name: string;
+  type: string;
+  balance?: number;
+}
+
 // API interface
 interface API {
   // Transaction APIs
@@ -38,6 +46,20 @@ interface API {
     }
   ) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
+
+  // Account APIs
+  getAccounts: () => Promise<Account[]>;
+  getAccountById: (id: number) => Promise<Account | undefined>;
+  createAccount: (account: { name: string; type: string; balance?: number }) => Promise<number>;
+  updateAccount: (
+    id: number,
+    account: {
+      name?: string;
+      type?: string;
+      balance?: number;
+    }
+  ) => Promise<void>;
+  deleteAccount: (id: number) => Promise<void>;
 }
 
 declare global {

@@ -41,6 +41,13 @@ export const initDb = (): Database.Database => {
       icon TEXT,
       color TEXT
     );
+    
+    CREATE TABLE IF NOT EXISTS accounts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      type TEXT NOT NULL,
+      balance INTEGER DEFAULT 0
+    );
   `);
 
   return db;
@@ -139,6 +146,52 @@ export const updateCategory = (
 export const deleteCategory = (id: number): Database.RunResult => {
   if (!db) initDb();
   return db!.prepare('DELETE FROM categories WHERE id = ?').run(id);
+};
+
+// CRUD operations for accounts
+export const getAccounts = (): unknown[] => {
+  if (!db) initDb();
+  return db!.prepare('SELECT * FROM accounts ORDER BY name').all();
+};
+
+export const getAccountById = (id: number): unknown => {
+  if (!db) initDb();
+  return db!.prepare('SELECT * FROM accounts WHERE id = ?').get(id);
+};
+
+export const createAccount = (account: {
+  name: string;
+  type: string;
+  balance?: number;
+}): Database.RunResult => {
+  if (!db) initDb();
+  const stmt = db!.prepare(
+    'INSERT INTO accounts (name, type, balance) VALUES (@name, @type, @balance)'
+  );
+  return stmt.run({
+    ...account,
+    balance: account.balance ?? 0
+  });
+};
+
+export const updateAccount = (
+  id: number,
+  account: {
+    name?: string;
+    type?: string;
+    balance?: number;
+  }
+): Database.RunResult => {
+  if (!db) initDb();
+  const stmt = db!.prepare(
+    'UPDATE accounts SET name = @name, type = @type, balance = @balance WHERE id = @id'
+  );
+  return stmt.run({ ...account, id });
+};
+
+export const deleteAccount = (id: number): Database.RunResult => {
+  if (!db) initDb();
+  return db!.prepare('DELETE FROM accounts WHERE id = ?').run(id);
 };
 
 // Close database connection when app quits

@@ -14,6 +14,11 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  getAccounts,
+  getAccountById,
+  createAccount,
+  updateAccount,
+  deleteAccount,
   closeDatabase
 } from './database';
 
@@ -84,6 +89,13 @@ app.whenReady().then(() => {
   ipcMain.handle('db:createCategory', (_, category) => createCategory(category));
   ipcMain.handle('db:updateCategory', (_, id, category) => updateCategory(id, category));
   ipcMain.handle('db:deleteCategory', (_, id) => deleteCategory(id));
+
+  // Account handlers
+  ipcMain.handle('db:getAccounts', () => getAccounts());
+  ipcMain.handle('db:getAccountById', (_, id) => getAccountById(id));
+  ipcMain.handle('db:createAccount', (_, account) => createAccount(account));
+  ipcMain.handle('db:updateAccount', (_, id, account) => updateAccount(id, account));
+  ipcMain.handle('db:deleteAccount', (_, id) => deleteAccount(id));
 
   createWindow();
 
