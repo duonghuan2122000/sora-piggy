@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { NLayout, NLayoutHeader, NLayoutSider, NLayoutContent } from 'naive-ui';
+import { ElContainer, ElAside, ElHeader, ElMain } from 'element-plus';
 import { RouterView, useRoute, useRouter } from 'vue-router';
 import TopNav from './TopNav.vue';
 import Sidebar from './Sidebar.vue';
@@ -37,33 +37,24 @@ const handleSaveTransaction = (): void => {
 </script>
 
 <template>
-  <NLayout class="sora-layout" has-sider>
-    <NLayoutSider
-      v-model:collapsed="isSidebarCollapsed"
-      bordered
-      show-trigger
-      collapse-mode="width"
-      :collapsed-width="64"
-      :width="200"
-      :native-scrollbar="false"
-      class="sora-sider"
-    >
+  <ElContainer class="sora-layout">
+    <ElAside :width="isSidebarCollapsed ? '64px' : '200px'" class="sora-sider">
       <Sidebar :collapsed="isSidebarCollapsed" />
-    </NLayoutSider>
-    <NLayout>
-      <NLayoutHeader class="sora-header">
+    </ElAside>
+    <ElContainer>
+      <ElHeader class="sora-header">
         <TopNav
           :page-title="pageTitle"
           :mode="topNavMode"
           @add-transaction="handleAddTransaction"
           @save-transaction="handleSaveTransaction"
         />
-      </NLayoutHeader>
-      <NLayoutContent class="sora-content">
+      </ElHeader>
+      <ElMain class="sora-content">
         <RouterView />
-      </NLayoutContent>
-    </NLayout>
-  </NLayout>
+      </ElMain>
+    </ElContainer>
+  </ElContainer>
 </template>
 
 <style scoped lang="scss">
@@ -81,22 +72,6 @@ const handleSaveTransaction = (): void => {
     sans-serif;
 }
 
-/* Target the nested NLayout inside has-sider layout */
-:deep(.n-layout--has-sider) {
-  height: 100%;
-}
-
-:deep(.n-layout--has-sider .n-layout) {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-:deep(.n-layout-scroll-container) {
-  display: flex;
-  flex-direction: column;
-}
-
 .sora-header {
   height: 60px;
   padding: 0;
@@ -107,6 +82,7 @@ const handleSaveTransaction = (): void => {
 .sora-sider {
   background-color: #f8f9fa;
   border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
 }
 
 .sora-content {

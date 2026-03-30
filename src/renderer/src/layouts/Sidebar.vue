@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { NTooltip } from 'naive-ui';
+import { ElTooltip } from 'element-plus';
 import {
   faChartLine,
   faExchangeAlt,
@@ -93,15 +93,12 @@ defineProps<Props>();
             :class="{ 'sora-menu-item--active': isActive(item.key) }"
             @click="setActive(item.key)"
           >
-            <n-tooltip placement="right" :disabled="!collapsed">
-              <template #trigger>
-                <div class="sora-menu-item__content">
-                  <font-awesome-icon :icon="item.icon" class="sora-menu-item__icon" />
-                  <span v-if="!collapsed" class="sora-menu-item__label">{{ item.label }}</span>
-                </div>
-              </template>
-              {{ item.label }}
-            </n-tooltip>
+            <ElTooltip placement="right" :disabled="!collapsed" :content="item.label">
+              <div class="sora-menu-item__content">
+                <font-awesome-icon :icon="item.icon" class="sora-menu-item__icon" />
+                <span v-if="!collapsed" class="sora-menu-item__label">{{ item.label }}</span>
+              </div>
+            </ElTooltip>
           </RouterLink>
         </div>
       </div>

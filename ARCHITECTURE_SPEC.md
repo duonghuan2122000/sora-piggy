@@ -4,18 +4,18 @@ Based on the SVG layout provided, the following specification defines the exact 
 
 ## 1. Layout Structure
 
-The application uses a standard **Sidebar Layout** pattern implemented with `naive-ui` components.
+The application uses a standard **Sidebar Layout** pattern implemented with `element-plus` components.
 
 **Structure Hierarchy:**
 
 - `MainLayout.vue` (Root Container)
-  - `NLayout` (Full Screen)
-    - `NLayoutSider` (Sidebar)
+  - `ElContainer` (Full Screen)
+    - `ElAside` (Sidebar)
       - `Sidebar.vue` (Navigation Menu)
-    - `NLayout` (Inner Container)
-      - `NLayoutHeader` (Top Navigation)
+    - `ElContainer` (Inner Container)
+      - `ElHeader` (Top Navigation)
         - `TopNav.vue` (Header Content)
-      - `NLayoutContent` (Main Content Area)
+      - `ElMain` (Main Content Area)
         - `RouterView` (Dynamic Route Views)
 
 **Visual Flow:**
@@ -41,7 +41,7 @@ The color scheme is strictly derived from the SVG diagram and implemented in `Ma
 - **Purpose**: Orchestrates the overall page structure.
 - **Key Features**:
   - Full viewport height (`100vh`).
-  - Uses `naive-ui` layout components for responsive behavior.
+  - Uses `element-plus` layout components for responsive behavior.
   - Handles sidebar collapse/expand state.
 - **Location**: `src/renderer/src/layouts/MainLayout.vue`
 

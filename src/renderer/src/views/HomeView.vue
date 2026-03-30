@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { NButton, NCard } from 'naive-ui';
+import { ElButton, ElCard } from 'element-plus';
 
 const { t } = useI18n();
 </script>
 
 <template>
   <div class="home-view">
-    <NCard title="Home">
+    <ElCard>
+      <template #header>
+        <div>Home</div>
+      </template>
       <p>{{ t('message.welcome') }}</p>
-      <NButton type="primary">
+      <ElButton type="primary">
         <font-awesome-icon :icon="['fas', 'home']" />
         {{ t('nav.home') }}
-      </NButton>
-    </NCard>
+      </ElButton>
+    </ElCard>
   </div>
 </template>
 

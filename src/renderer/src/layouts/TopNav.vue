@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { NButton } from 'naive-ui';
+import { ElButton } from 'element-plus';
 import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
@@ -34,12 +34,12 @@ const buttonIcon = computed(() => (currentMode.value === 'add' ? faSave : faPlus
       <h1 class="sora-page-title">{{ pageTitle }}</h1>
     </div>
     <div class="sora-right-section">
-      <NButton type="primary" size="small" @click="handlePrimaryAction">
+      <ElButton type="primary" size="small" @click="handlePrimaryAction">
         <template #icon>
           <FontAwesomeIcon :icon="buttonIcon" />
         </template>
         {{ buttonLabel }}
-      </NButton>
+      </ElButton>
     </div>
   </div>
 </template>

@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, h, onMounted } from 'vue';
-import { NCard, NInput, NSelect, NDataTable } from 'naive-ui';
-import type { DataTableColumns } from 'naive-ui';
+import { ref, computed, onMounted } from 'vue';
+import {
+  ElCard,
+  ElInput,
+  ElSelect,
+  ElOption,
+  ElTable,
+  ElTableColumn,
+  ElPagination
+} from 'element-plus';
 import { ITransaction } from '@renderer/types/transaction';
 
 // Transactions data from database
@@ -100,15 +107,6 @@ const formatDate = (date: Date): string => {
 const page = ref(1);
 const pageSize = ref(10);
 
-const pagination = computed(() => ({
-  page: page.value,
-  pageSize: pageSize.value,
-  pageCount: Math.ceil(filteredTransactions.value.length / pageSize.value),
-  itemCount: filteredTransactions.value.length,
-  pageSizes: [10, 20, 50],
-  showSizePicker: true
-}));
-
 const handlePageChange = (newPage: number): void => {
   page.value = newPage;
 };
@@ -117,113 +115,121 @@ const handlePageSizeChange = (newPageSize: number): void => {
   pageSize.value = newPageSize;
   page.value = 1;
 };
-
-// DataTable columns
-const columns: DataTableColumns<ITransaction> = [
-  {
-    title: 'Transaction Name',
-    key: 'name',
-    width: 250,
-    render: (row: ITransaction) => {
-      return h('div', { class: 'sora-transaction-name' }, [
-        h('div', { class: 'sora-icon-wrapper' }, [row.category === 'Income' ? '+' : '-']),
-        h('div', { class: 'sora-text-wrapper' }, [
-          h('div', { class: 'sora-name' }, row.name),
-          h('div', { class: 'sora-desc' }, row.description)
-        ])
-      ]);
-    }
-  },
-  {
-    title: 'Category',
-    key: 'category',
-    width: 100
-  },
-  {
-    title: 'Account',
-    key: 'account',
-    width: 120
-  },
-  {
-    title: 'Transaction Time',
-    key: 'time',
-    width: 120,
-    render: (row: ITransaction) => formatDate(row.time)
-  },
-  {
-    title: 'Amount',
-    key: 'amount',
-    width: 120,
-    render: (row: ITransaction) => {
-      return h(
-        'div',
-        {
-          class: row.amount >= 0 ? 'sora-income' : 'sora-expense'
-        },
-        formatCurrency(row.amount)
-      );
-    }
-  }
-];
 </script>
 
 <template>
   <div class="sora-transaction-view">
     <!-- Header Section -->
-    <NCard class="sora-card">
+    <ElCard class="sora-card">
       <header class="sora-header">
         <div class="sora-search-wrapper">
-          <NInput
-            v-model:value="searchQuery"
+          <ElInput
+            v-model="searchQuery"
             placeholder="Search transaction"
             class="sora-search-input"
           />
         </div>
         <div class="sora-filters">
-          <NSelect v-model:value="selectedCategory" :options="categories" class="sora-select" />
-          <NSelect v-model:value="selectedAccount" :options="accounts" class="sora-select" />
-          <NSelect v-model:value="selectedSort" :options="sortOptions" class="sora-select" />
+          <ElSelect v-model="selectedCategory" class="sora-select">
+            <ElOption
+              v-for="cat in categories"
+              :key="cat.value"
+              :label="cat.label"
+              :value="cat.value"
+            />
+          </ElSelect>
+          <ElSelect v-model="selectedAccount" class="sora-select">
+            <ElOption
+              v-for="acc in accounts"
+              :key="acc.value"
+              :label="acc.label"
+              :value="acc.value"
+            />
+          </ElSelect>
+          <ElSelect v-model="selectedSort" class="sora-select">
+            <ElOption
+              v-for="sort in sortOptions"
+              :key="sort.value"
+              :label="sort.label"
+              :value="sort.value"
+            />
+          </ElSelect>
         </div>
       </header>
-    </NCard>
+    </ElCard>
 
     <!-- Summary Section -->
     <section class="sora-summary">
-      <NCard class="sora-card">
+      <ElCard class="sora-card">
         <div class="sora-card-title">Total Income</div>
         <div class="sora-card-amount sora-income">
           {{ formatCurrency(totalIncome) }}
         </div>
-      </NCard>
-      <NCard class="sora-card">
+      </ElCard>
+      <ElCard class="sora-card">
         <div class="sora-card-title">Total Expense</div>
         <div class="sora-card-amount sora-expense">
           {{ formatCurrency(totalExpense) }}
         </div>
-      </NCard>
-      <NCard class="sora-card">
+      </ElCard>
+      <ElCard class="sora-card">
         <div class="sora-card-title">Latest Balance</div>
         <div class="sora-card-amount">
           {{ formatCurrency(latestBalance) }}
         </div>
-      </NCard>
+      </ElCard>
     </section>
 
     <!-- Detail Section with Pagination -->
-    <NCard class="sora-card sora-detail-card">
+    <ElCard class="sora-card sora-detail-card">
       <section class="sora-detail">
-        <NDataTable
-          :columns="columns"
+        <ElTable
           :data="filteredTransactions"
-          :bordered="false"
-          :single-line="false"
-          :pagination="pagination"
           class="sora-data-table"
-          @update:page="handlePageChange"
-          @update:page-size="handlePageSizeChange"
-        />
+          height="100%"
+          style="width: 100%"
+        >
+          <ElTableColumn prop="name" label="Transaction Name" width="250">
+            <template #default="scope">
+              <div class="sora-transaction-name">
+                <div class="sora-icon-wrapper">
+                  {{ scope.row.category === 'Income' ? '+' : '-' }}
+                </div>
+                <div class="sora-text-wrapper">
+                  <div class="sora-name">{{ scope.row.name }}</div>
+                  <div class="sora-desc">{{ scope.row.description }}</div>
+                </div>
+              </div>
+            </template>
+          </ElTableColumn>
+          <ElTableColumn prop="category" label="Category" width="100" />
+          <ElTableColumn prop="account" label="Account" width="120" />
+          <ElTableColumn prop="time" label="Transaction Time" width="120">
+            <template #default="scope">
+              {{ formatDate(scope.row.time) }}
+            </template>
+          </ElTableColumn>
+          <ElTableColumn prop="amount" label="Amount" width="120">
+            <template #default="scope">
+              <div :class="scope.row.amount >= 0 ? 'sora-income' : 'sora-expense'">
+                {{ formatCurrency(scope.row.amount) }}
+              </div>
+            </template>
+          </ElTableColumn>
+        </ElTable>
+        <div class="sora-pagination-wrapper">
+          <ElPagination
+            v-model:current-page="page"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="filteredTransactions.length"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handlePageSizeChange"
+            @current-change="handlePageChange"
+          />
+        </div>
       </section>
-    </NCard>
+    </ElCard>
   </div>
 </template>
 
@@ -322,8 +328,21 @@ const columns: DataTableColumns<ITransaction> = [
 
 .sora-data-table {
   height: 100%;
-  --n-td-padding: 8px 16px;
-  --n-th-padding: 12px 16px;
+  flex: 1; /* Take available space */
+}
+
+:deep(.el-table__cell) {
+  padding: 8px 16px;
+}
+
+:deep(.el-table th.el-table__cell) {
+  padding: 12px 16px;
+}
+
+.sora-pagination-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0;
 }
 
 /* Transaction Name cell styling */
