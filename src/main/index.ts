@@ -19,6 +19,10 @@ import {
   createAccount,
   updateAccount,
   deleteAccount,
+  getLanguages,
+  getLanguageByCode,
+  getUserPreference,
+  setUserPreference,
   closeDatabase
 } from './database';
 
@@ -96,6 +100,15 @@ app.whenReady().then(() => {
   ipcMain.handle('db:createAccount', (_, account) => createAccount(account));
   ipcMain.handle('db:updateAccount', (_, id, account) => updateAccount(id, account));
   ipcMain.handle('db:deleteAccount', (_, id) => deleteAccount(id));
+
+  // Language handlers
+  ipcMain.handle('db:getLanguages', () => getLanguages());
+  ipcMain.handle('db:getLanguageByCode', (_, code) => getLanguageByCode(code));
+  ipcMain.handle('db:getLanguagePreference', (_, userId) => getUserPreference(userId, 'language'));
+  ipcMain.handle('db:setLanguagePreference', (_, userId, language) => {
+    setUserPreference(userId, 'language', language);
+    return true;
+  });
 
   createWindow();
 

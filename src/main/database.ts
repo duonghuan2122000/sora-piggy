@@ -33,7 +33,7 @@ export const initDb = (): Database.Database => {
       amount INTEGER NOT NULL,
       time TEXT NOT NULL
     );
-    
+
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
@@ -41,14 +41,43 @@ export const initDb = (): Database.Database => {
       icon TEXT,
       color TEXT
     );
-    
+
     CREATE TABLE IF NOT EXISTS accounts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
       type TEXT NOT NULL,
       balance INTEGER DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS languages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      nameEn TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS user_preferences (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      preferenceKey TEXT NOT NULL,
+      preferenceValue TEXT NOT NULL,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL,
+      UNIQUE(userId, preferenceKey)
+    );
   `);
+
+  // Seed initial language data if empty
+  const languageCount = db.prepare('SELECT COUNT(*) as count FROM languages').get() as {
+    count: number;
+  };
+  if (languageCount.count === 0) {
+    const insertLanguage = db.prepare(
+      'INSERT INTO languages (code, name, nameEn) VALUES (@code, @name, @nameEn)'
+    );
+    insertLanguage.run({ code: 'vi', name: 'Tiếng Việt', nameEn: 'Vietnamese' });
+    insertLanguage.run({ code: 'en', name: 'English', nameEn: 'English' });
+  }
 
   return db;
 };
@@ -192,6 +221,45 @@ export const updateAccount = (
 export const deleteAccount = (id: number): Database.RunResult => {
   if (!db) initDb();
   return db!.prepare('DELETE FROM accounts WHERE id = ?').run(id);
+};
+
+// CRUD operations for languages
+export const getLanguages = (): unknown[] => {
+  if (!db) initDb();
+  return db!.prepare('SELECT * FROM languages ORDER BY code').all();
+};
+
+export const getLanguageByCode = (code: string): unknown => {
+  if (!db) initDb();
+  return db!.prepare('SELECT * FROM languages WHERE code = ?').get(code);
+};
+
+// CRUD operations for user preferences
+export const getUserPreference = (userId: string, preferenceKey: string): string | null => {
+  if (!db) initDb();
+  const result = db!
+    .prepare('SELECT preferenceValue FROM user_preferences WHERE userId = ? AND preferenceKey = ?')
+    .get(userId, preferenceKey) as { preferenceValue: string } | undefined;
+  return result?.preferenceValue ?? null;
+};
+
+export const setUserPreference = (
+  userId: string,
+  preferenceKey: string,
+  preferenceValue: string
+): void => {
+  if (!db) initDb();
+  const now = new Date().toISOString();
+  const stmt = db!.prepare(
+    'INSERT OR REPLACE INTO user_preferences (userId, preferenceKey, preferenceValue, createdAt, updatedAt) VALUES (@userId, @preferenceKey, @preferenceValue, @createdAt, @updatedAt)'
+  );
+  stmt.run({
+    userId,
+    preferenceKey,
+    preferenceValue,
+    createdAt: now,
+    updatedAt: now
+  });
 };
 
 // Close database connection when app quits
