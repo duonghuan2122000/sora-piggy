@@ -97,12 +97,11 @@ fi
 
 # Bước 3: Chuẩn bị thông tin cho agent
 echo ""
-echo "🤖 Gọi agent business-analyst để tạo spec.md và tasks.md..."
+echo "🤖 Gọi agent business-analyst để tạo spec.md"
 echo ""
 echo "Agent cần thực hiện:"
 echo "1. Phân tích yêu cầu: $REQUIREMENT_SUMMARY"
 echo "2. Tạo file spec.md trong: $FULL_PATH/"
-echo "3. Tạo file tasks.md trong: $FULL_PATH/"
 echo "4. Báo cáo kết quả khi hoàn thành"
 echo ""
 echo "📂 Thư mục đích: $FULL_PATH"
