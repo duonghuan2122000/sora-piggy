@@ -31,8 +31,8 @@ export const useLanguageStore = defineStore('language', {
         this.error = 'Failed to load languages';
         // Fallback to hardcoded languages
         this.languages = [
-          { id: 1, code: 'vi', name: 'Tiếng Việt', nameEn: 'Vietnamese' },
-          { id: 2, code: 'en', name: 'English', nameEn: 'English' }
+          { id: 1, code: 'vi', name: 'Tiếng Việt', nameEn: 'Vietnamese', order: 1 },
+          { id: 2, code: 'en', name: 'English', nameEn: 'English', order: 2 }
         ];
       } finally {
         this.isLoading = false;

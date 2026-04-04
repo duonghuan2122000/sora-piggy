@@ -53,7 +53,8 @@ export const initDb = (): Database.Database => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       code TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
-      nameEn TEXT
+      nameEn TEXT,
+      "order" INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS user_preferences (
@@ -67,16 +68,34 @@ export const initDb = (): Database.Database => {
     );
   `);
 
+  // Migration: Add 'order' column to languages table if it doesn't exist
+  const tableInfo = db.prepare("PRAGMA table_info('languages')").all() as Array<{
+    name: string;
+    type: string;
+    notnull: number;
+    dflt_value: string | null;
+    pk: number;
+  }>;
+  const hasOrderColumn = tableInfo.some((col) => col.name === 'order');
+  if (!hasOrderColumn) {
+    db.exec('ALTER TABLE languages ADD COLUMN "order" INTEGER DEFAULT 0');
+  }
+
   // Seed initial language data if empty
   const languageCount = db.prepare('SELECT COUNT(*) as count FROM languages').get() as {
     count: number;
   };
   if (languageCount.count === 0) {
     const insertLanguage = db.prepare(
-      'INSERT INTO languages (code, name, nameEn) VALUES (@code, @name, @nameEn)'
+      'INSERT INTO languages (code, name, nameEn, "order") VALUES (@code, @name, @nameEn, @order)'
     );
-    insertLanguage.run({ code: 'vi', name: 'Tiếng Việt', nameEn: 'Vietnamese' });
-    insertLanguage.run({ code: 'en', name: 'English', nameEn: 'English' });
+    insertLanguage.run({ code: 'vi', name: 'Tiếng Việt', nameEn: 'Vietnamese', order: 1 });
+    insertLanguage.run({ code: 'en', name: 'English', nameEn: 'English', order: 2 });
+  } else {
+    // Update existing language data to ensure order values
+    const updateLanguage = db.prepare('UPDATE languages SET "order" = @order WHERE code = @code');
+    updateLanguage.run({ code: 'vi', order: 1 });
+    updateLanguage.run({ code: 'en', order: 2 });
   }
 
   return db;
@@ -226,7 +245,7 @@ export const deleteAccount = (id: number): Database.RunResult => {
 // CRUD operations for languages
 export const getLanguages = (): unknown[] => {
   if (!db) initDb();
-  return db!.prepare('SELECT * FROM languages ORDER BY code').all();
+  return db!.prepare('SELECT * FROM languages ORDER BY "order" ASC, code ASC').all();
 };
 
 export const getLanguageByCode = (code: string): unknown => {
