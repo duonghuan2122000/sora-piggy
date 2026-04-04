@@ -18,6 +18,14 @@ interface Account {
   balance?: number;
 }
 
+// Language type definitions
+interface Language {
+  id: number;
+  code: string;
+  name: string;
+  nameEn?: string;
+}
+
 // API interface
 interface API {
   // Transaction APIs
@@ -60,6 +68,12 @@ interface API {
     }
   ) => Promise<void>;
   deleteAccount: (id: number) => Promise<void>;
+
+  // Language APIs
+  getLanguages: () => Promise<Language[]>;
+  getLanguageByCode: (code: string) => Promise<Language | undefined>;
+  getLanguagePreference: (userId: string) => Promise<string | null>;
+  setLanguagePreference: (userId: string, language: string) => Promise<boolean>;
 }
 
 declare global {

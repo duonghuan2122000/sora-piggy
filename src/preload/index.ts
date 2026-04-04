@@ -56,7 +56,14 @@ const api = {
       balance?: number;
     }
   ) => ipcRenderer.invoke('db:updateAccount', id, account),
-  deleteAccount: (id: number) => ipcRenderer.invoke('db:deleteAccount', id)
+  deleteAccount: (id: number) => ipcRenderer.invoke('db:deleteAccount', id),
+
+  // Language APIs
+  getLanguages: () => ipcRenderer.invoke('db:getLanguages'),
+  getLanguageByCode: (code: string) => ipcRenderer.invoke('db:getLanguageByCode', code),
+  getLanguagePreference: (userId: string) => ipcRenderer.invoke('db:getLanguagePreference', userId),
+  setLanguagePreference: (userId: string, language: string) =>
+    ipcRenderer.invoke('db:setLanguagePreference', userId, language)
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to
