@@ -3,4 +3,5 @@ export interface Language {
   code: string;
   name: string;
   nameEn?: string;
+  order: number;
 }
