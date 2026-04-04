@@ -1,15 +1,14 @@
 ---
-name: "speckit-constitution"
-description: "Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync."
-argument-hint: "Principles or values for the project constitution"
-compatibility: "Requires spec-kit project structure with .specify/ directory"
+name: 'speckit-constitution'
+description: 'Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.'
+argument-hint: 'Principles or values for the project constitution'
+compatibility: 'Requires spec-kit project structure with .specify/ directory'
 metadata:
-  author: "github-spec-kit"
-  source: "templates/commands/constitution.md"
+  author: 'github-spec-kit'
+  source: 'templates/commands/constitution.md'
 user-invocable: true
 disable-model-invocation: true
 ---
-
 
 ## User Input
 
@@ -29,7 +28,7 @@ Follow this execution flow:
 
 1. Load the existing constitution at `.specify/memory/constitution.md`.
    - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
-   **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
+     **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
 
 2. Collect/derive values for placeholders:
    - If user input (conversation) supplies a value, use it.

@@ -17,23 +17,29 @@ Follow-up TODOs: None
 ## Core Principles
 
 ### I. Local-First Architecture (NON-NEGOTIABLE)
+
 All data must be stored locally on the user's machine using SQLite. The application must function fully offline without requiring internet connectivity. Cloud synchronization is optional and must never block core functionality.
 
 ### II. Type-Safe Development (NON-NEGOTIABLE)
+
 All code must be written in TypeScript. No `any` types are permitted in production code. All database operations, IPC handlers, and component props must have proper type definitions.
 
 ### III. Data Integrity & Validation
+
 All user input must be validated at multiple layers: client-side validation in Vue components, server-side validation in database operations, and schema enforcement via SQLite constraints. No data corruption or loss should occur during operations.
 
 ### IV. Component-Based UI Architecture
+
 UI must be built using Vue 3 Composition API with reusable, scoped components. State management must use Pinia stores. Element Plus components are preferred but custom components must follow established patterns.
 
 ### V. Offline-First User Experience
+
 The app must provide seamless offline experience. All features must work without network connectivity. Network-dependent features must have clear offline states and graceful degradation.
 
 ## Technical Standards
 
 ### Technology Stack
+
 - **Frontend**: Vue 3 + Composition API + TypeScript + Element Plus UI
 - **State Management**: Pinia stores
 - **Styling**: SCSS with CSS variables
@@ -42,12 +48,14 @@ The app must provide seamless offline experience. All features must work without
 - **Build Tool**: Vite
 
 ### Code Quality Requirements
+
 - All code must pass TypeScript type checking (`npm run typecheck`)
 - ESLint must pass with no errors (`npm run lint`)
 - Code must be formatted with Prettier (`npm run format`)
 - No test files exist currently - consider adding Vitest for future tests
 
 ### Database Standards
+
 - SQLite database stored in user's userData directory: `~/.config/Sora Piggy/sora-piggy.db`
 - Transactions must be used for any multi-operation database writes
 - Queries must be efficient (synchronous better-sqlite3 operations)
@@ -56,6 +64,7 @@ The app must provide seamless offline experience. All features must work without
 ## Development Workflow
 
 ### Project Structure
+
 ```
 src/
 ├── main/                    # Electron main process
@@ -79,12 +88,14 @@ src/
 ```
 
 ### IPC Communication Pattern
+
 - Main process registers IPC handlers for database operations
 - Preload script uses contextBridge to expose APIs safely
 - Renderer calls `window.api.methodName()` for all IPC calls
 - IPC calls are async in renderer, synchronous in main
 
 ### Code Review Checklist
+
 - [ ] TypeScript type checking passes
 - [ ] ESLint passes with no errors
 - [ ] Code follows existing patterns and conventions
@@ -95,6 +106,7 @@ src/
 ## Governance
 
 ### Amendment Procedure
+
 1. Propose changes via pull request with clear justification
 2. Update constitution version according to semantic versioning:
    - MAJOR: Backward incompatible principle changes
@@ -105,12 +117,14 @@ src/
 5. Ensure all templates remain consistent with constitution
 
 ### Compliance Review
+
 - All PRs must verify compliance with constitution principles
 - Code review must check for TypeScript type safety
 - Database operations must respect local-first architecture
 - UI changes must follow component-based patterns
 
 ### Versioning Policy
+
 - Constitution versions follow semantic versioning (MAJOR.MINOR.PATCH)
 - Version changes must be documented in Sync Impact Report
 - Retroactive updates to past versions are not permitted
