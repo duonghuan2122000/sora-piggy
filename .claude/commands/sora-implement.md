@@ -1,91 +1,133 @@
-Thực hiện bước IMPLEMENT. Task ID cụ thể (nếu có): $ARGUMENTS
+#!/bin/bash
 
-## Cấu hình
+# /sora-implement
+# Thực hiện bước IMPLEMENT
 
-max_review_iterations: 3
+## Cú pháp
+# /sora-implement <pbi_id> [task_id]
+# /sora-implement <pbi_id> [nội dung mô tả bổ sung]
+## Ví dụ: /sora-implement 003
+## Ví dụ: /sora-implement 003 task-001
 
-## Chuẩn bị
+# Kiểm tra argument
+if [ -z "$1" ]; then
+    echo "❌ ERROR: Cần cung cấp mã PBI"
+    echo "Ví dụ: /sora-implement 003"
+    echo "Ví dụ: /sora-implement 003 task-001"
+    exit 1
+fi
 
-Đọc `tasks.md`:
+# Lấy mã PBI
+PBI_ID="$1"
+shift
+TASK_ID="$@"
 
-- Nếu $ARGUMENTS có Task ID cụ thể → chỉ xử lý task đó
-- Nếu không → lấy tất cả task có Status "Todo", sắp xếp theo Priority và Depends on
+echo "📝 Bắt đầu thực hiện IMPLEMENT..."
+echo "   Mã PBI: $PBI_ID"
+if [ -n "$TASK_ID" ]; then
+    echo "   Task ID: $TASK_ID"
+fi
 
-## Với mỗi task — thực hiện tuần tự
+# Xác định thư mục spec
+SPEC_FOLDER="specs/${PBI_ID}"
+SPEC_FILE="${SPEC_FOLDER}/spec.md"
+TASKS_FILE="${SPEC_FOLDER}/tasks.md"
+TEST_CASE_FILE="${SPEC_FOLDER}/test-case.md"
 
-### Bước A — Generate
+# Kiểm tra file spec.md có tồn tại không
+if [ ! -f "$SPEC_FILE" ]; then
+    echo "❌ ERROR: Không tìm thấy file spec.md tại $SPEC_FILE"
+    echo "Vui lòng chạy /sora-specify trước hoặc kiểm tra lại mã PBI"
+    exit 1
+fi
 
-Gọi agent `dev` với context:
+# Kiểm tra file tasks.md có tồn tại không
+if [ ! -f "$TASKS_FILE" ]; then
+    echo "❌ ERROR: Không tìm thấy file tasks.md tại $TASKS_FILE"
+    echo "Vui lòng chạy /sora-tasks trước hoặc kiểm tra lại mã PBI"
+    exit 1
+fi
 
-- Nội dung task từ `tasks.md`
-- Các test cases liên quan từ `test-case.md` (map theo Task ID hoặc tên feature)
-- Codebase hiện tại (nếu có)
+echo "📁 Tìm thấy spec.md tại: $SPEC_FILE"
+echo "📁 Tìm thấy tasks.md tại: $TASKS_FILE"
 
-Agent `dev` phải:
+# Đọc branch từ file spec.md
+BRANCH_FROM_SPEC=$(grep -E "Branch git:|branch:" "$SPEC_FILE" | head -1 | sed 's/.*Branch git: *//' | sed 's/.*branch: *//' | tr -d '\r')
 
-1. Generate code implementation
-2. Generate unit tests tương ứng với test cases trong `test-case.md`
-3. Báo cáo danh sách file đã tạo/sửa
+if [ -z "$BRANCH_FROM_SPEC" ]; then
+    echo "⚠️  Không tìm thấy branch trong spec.md, sử dụng branch mặc định"
+    BRANCH_FROM_SPEC="feature/${PBI_ID}"
+fi
 
-### Bước B — Review song song (vòng lặp, tối đa 3 lần)
+echo "🌿 Đọc branch từ spec.md: $BRANCH_FROM_SPEC"
 
-Với mỗi review_iteration (đếm từ 1):
+# Switch sang branch
+echo "🔄 Switch sang branch: $BRANCH_FROM_SPEC"
+git checkout "$BRANCH_FROM_SPEC" 2>/dev/null
 
-Chạy đồng thời:
+if [ $? -eq 0 ]; then
+    echo "✅ Đã switch sang branch: $BRANCH_FROM_SPEC"
+else
+    echo "⚠️  Không thể switch sang branch, sử dụng branch hiện tại"
+    BRANCH_FROM_SPEC=$(git branch --show-current)
+    echo "   Branch hiện tại: $BRANCH_FROM_SPEC"
+fi
 
-- `qc`: chạy unit tests, đối chiếu từng test case trong `test-case.md`
-  → trả về: PASSED hoặc danh sách test case failed + lý do
-- `solution-architect`: review code vừa được generate
-  → trả về: APPROVED hoặc danh sách vấn đề (code smell, security, design)
+# Chuẩn bị thông tin cho agent
+echo ""
+echo "🤖 Gọi agent dev để implement tasks"
+echo ""
+echo "## Cấu hình"
+echo "max_review_iterations: 3"
+echo ""
+echo "## Chuẩn bị"
+echo "Đọc tasks.md ($TASKS_FILE):"
+if [ -n "$TASK_ID" ]; then
+    echo "- Có Task ID cụ thể: $TASK_ID → chỉ xử lý task đó"
+else
+    echo "- Không có Task ID → lấy tất cả task có Status 'Todo'"
+fi
+echo ""
+echo "## Với mỗi task — thực hiện tuần tự"
+echo "### Bước A — Generate"
+echo "Gọi agent dev với context:"
+echo "- Nội dung task từ tasks.md"
+echo "- Các test cases liên quan từ test-case.md"
+echo "- Codebase hiện tại (nếu có)"
+echo ""
+echo "Agent dev phải:"
+echo "1. Generate code implementation"
+echo "2. Generate unit tests tương ứng với test cases trong test-case.md"
+echo "3. Báo cáo danh sách file đã tạo/sửa"
+echo ""
+echo "### Bước B — Review song song (vòng lặp, tối đa 3 lần)"
+echo "Với mỗi review_iteration (đếm từ 1):"
+echo "Chạy đồng thời:"
+echo "- qc: chạy unit tests, đối chiếu test case trong test-case.md → PASSED hoặc danh sách failed"
+echo "- solution-architect: review code → APPROVED hoặc danh sách vấn đề"
+echo ""
+echo "Sau khi cả hai xong:"
+echo "- Nếu QC PASSED và Architect APPROVED → chuyển sang Bước C"
+echo "- Nếu có vấn đề và review_iteration < 3:"
+echo "  + Tổng hợp feedback từ QC và Architect thành report"
+echo "  + Gửi report cho dev để fix"
+echo "  + Tăng review_iteration, quay lại review"
+echo "- Nếu đã đủ 3 iterations mà vẫn còn vấn đề:"
+echo "  + Dừng loop, ghi vấn đề vào implement-issues.md"
+echo "  + Đánh dấu task Status '⚠ Needs Manual Review'"
+echo ""
+echo "### Bước C — Checkpoint (ngay lập tức sau khi task passed)"
+echo "Ngay khi task được QC PASSED + Architect APPROVED:"
+echo "1. Cập nhật tasks.md: Đổi Status Todo → Done, thêm Checkpoint"
+echo "2. Cập nhật test-case.md: Đổi Status Pending → Passed, thêm Actual Result"
+echo ""
+echo "📂 Thông tin:"
+echo "   - Mã PBI: $PBI_ID"
+echo "   - Task ID: ${TASK_ID:-Tất cả task}"
+echo "   - Thư mục: $SPEC_FOLDER"
+echo "   - Branch: $BRANCH_FROM_SPEC"
+echo "   - File tasks: $TASKS_FILE"
+echo "   - File test-case: $TEST_CASE_FILE"
 
-Sau khi cả hai xong:
-
-**Nếu QC PASSED và Architect APPROVED** → chuyển sang Bước C.
-
-**Nếu có vấn đề** và review_iteration < 3:
-
-- Tổng hợp toàn bộ feedback từ QC và Architect thành một report
-- Gửi report cho `dev` để fix
-- `dev` fix xong báo cáo danh sách thay đổi
-- Tăng review_iteration, quay lại review
-
-**Nếu đã đủ 3 review_iterations mà vẫn còn vấn đề**:
-
-- Dừng loop cho task này
-- Ghi vấn đề vào `implement-issues.md` với format:
-
-## Task [ID] — Unresolved after 3 iterations
-
-### QC Issues
-
-[danh sách]
-
-### Architect Issues
-
-[danh sách]
-
-- Đánh dấu task với Status "⚠ Needs Manual Review" trong `tasks.md`
-- Chuyển sang task tiếp theo
-
-### Bước C — Checkpoint (ngay lập tức sau khi task passed)
-
-Không chờ đến cuối. Ngay khi task được QC PASSED + Architect APPROVED:
-
-1. Dùng Edit tool cập nhật `tasks.md`:
-   - Đổi `- **Status:** [ ] Todo` → `- **Status:** [x] Done`
-   - Điền `- **Checkpoint:** Completed <timestamp> — <tóm tắt 1 dòng những gì đã implement>`
-
-2. Dùng Edit tool cập nhật `test-case.md` cho từng test case của task này:
-   - Đổi `- **Status:** [ ] Pending` → `- **Status:** [x] Passed`
-   - Điền `- **Actual Result:** <kết quả thực tế từ test run>`
-
-3. Confirm checkpoint đã ghi xong trước khi chuyển task tiếp theo.
-
-## Báo cáo tổng kết (sau khi xử lý hết các task)
-
-### Implement Summary
-
-- Tasks Done: X / Y
-- Tasks Pending: Z (xem implement-issues.md nếu có)
-- Total iterations: tổng số review iterations đã dùng
-- Files changed: danh sách file code đã tạo/sửa
+# Mặc định exit code 0
+exit 0

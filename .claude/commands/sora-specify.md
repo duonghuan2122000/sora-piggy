@@ -95,17 +95,48 @@ else
     echo "⚠️  Branch đã tồn tại hoặc lỗi khi tạo"
 fi
 
-# Bước 3: Chuẩn bị thông tin cho agent
+# Bước 3: Tạo template spec.md với thông tin branch
+SPEC_FILE="${FULL_PATH}/spec.md"
+CURRENT_BRANCH=$(git branch --show-current)
+
+cat > "$SPEC_FILE" << EOF
+# SPEC: $REQUIREMENT_SUMMARY
+
+## Thông tin PBI
+- **Mã PBI**: $PBI_ID
+- **Branch git**: $CURRENT_BRANCH
+- **Thư mục**: $FULL_PATH
+
+## Mô tả yêu cầu
+$REQUIREMENT_SUMMARY
+
+## Phạm vi
+...
+
+## Yêu cầu kỹ thuật
+...
+
+## acceptance criteria
+...
+
+## Ghi chú
+...
+EOF
+
+echo "✅ Đã tạo template spec.md: $SPEC_FILE"
+
+# Bước 4: Chuẩn bị thông tin cho agent
 echo ""
 echo "🤖 Gọi agent business-analyst để tạo spec.md"
 echo ""
 echo "Agent cần thực hiện:"
 echo "1. Phân tích yêu cầu: $REQUIREMENT_SUMMARY"
-echo "2. Tạo file spec.md trong: $FULL_PATH/"
-echo "4. Báo cáo kết quả khi hoàn thành"
+echo "2. Cập nhật file spec.md: $SPEC_FILE"
+echo "3. Báo cáo kết quả khi hoàn thành"
 echo ""
 echo "📂 Thư mục đích: $FULL_PATH"
-echo "🌿 Branch hiện tại: $(git branch --show-current)"
+echo "🌿 Branch hiện tại: $CURRENT_BRANCH"
+echo "📄 File spec: $SPEC_FILE"
 
 # Mặc định exit code 0
 exit 0

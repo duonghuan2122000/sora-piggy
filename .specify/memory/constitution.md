@@ -103,6 +103,75 @@ src/
 - [ ] Database operations use transactions for writes
 - [ ] Components follow Vue 3 Composition API patterns
 
+## Development Workflow - AI Agent Pipeline
+
+Dự án sử dụng spec-driven development với Claude Code agents tự động hóa SDLC.
+
+### Quy trình chi tiết
+
+| Bước         | Command                                          | Agents                               |
+| ------------ | ------------------------------------------------ | ------------------------------------ |
+| 1. Specify   | `/sora-specify <pbi_id> <yêu cầu>`              | business-analyst                     |
+| 2. Clarify   | `/sora-clarify <pbi_id> [notes]`                | product-manager                      |
+| 3. Plan      | `/sora-plan <pbi_id> [notes]`                   | solution-architect                   |
+| 4. Tasks     | `/sora-tasks <pbi_id> [notes]`                  | tech-lead + qc → architect + qc-lead |
+| 5. Implement | `/sora-implement <pbi_id> [task_id]`            | dev → qc + architect (loop)          |
+
+### Cấu trúc thư mục theo PBI
+
+Mỗi Product Backlog Item có thư mục riêng trong `specs/`:
+
+```
+specs/
+└── {PBI_ID}/          # Ví dụ: specs/003/
+    ├── spec.md        # Thông tin PBI + branch git
+    ├── plan.md        # Giải pháp kỹ thuật
+    ├── tasks.md       # Danh sách tasks
+    └── test-case.md   # Test cases
+```
+
+### Command Details
+
+#### /sora-specify
+- **Cú pháp**: `/sora-specify <pbi_id> <yêu cầu>`
+- **Tác vụ**: Tạo branch, folder specs/{PBI_ID}/, và template spec.md với branch info
+- **Ví dụ**: `/sora-specify 003 Tạo tính năng đăng nhập bằng email`
+
+#### /sora-clarify
+- **Cú pháp**: `/sora-clarify <pbi_id> [nội dung mô tả bổ sung]`
+- **Tác vụ**: Đọc branch từ spec.md, switch sang branch, gọi product-manager
+- **Ví dụ**: `/sora-clarify 003 Xác nhận tính năng cần bảo mật`
+
+#### /sora-plan
+- **Cú pháp**: `/sora-plan <pbi_id> [nội dung mô tả bổ sung]`
+- **Tác vụ**: Đọc branch từ spec.md, switch sang branch, gọi solution-architect
+- **Ví dụ**: `/sora-plan 003 Xác nhận yêu cầu bảo mật cho giải pháp`
+
+#### /sora-tasks
+- **Cú pháp**: `/sora-tasks <pbi_id> [nội dung mô tả bổ sung]`
+- **Tác vụ**: Đọc branch từ spec.md, switch sang branch, tạo tasks.md và test-case.md
+- **Ví dụ**: `/sora-tasks 003 Xác nhận yêu cầu bổ sung cho tasks`
+
+#### /sora-implement
+- **Cú pháp**: `/sora-implement <pbi_id> [task_id]`
+- **Tác vụ**: Đọc branch từ spec.md, switch sang branch, implement tasks
+- **Ví dụ**: `/sora-implement 003` (all tasks) hoặc `/sora-implement 003 task-001` (specific task)
+
+### Files được quản lý
+
+- `spec.md` - Giải pháp nghiệp vụ + thông tin branch
+- `plan.md` - Giải pháp kỹ thuật
+- `tasks.md` - Danh sách task với checkpoint
+- `test-case.md` - Test cases với trạng thái
+
+### Conventions
+
+- Luôn chạy đủ quy trình từ specify → implement
+- Sử dụng PBI ID để xác định thư mục làm việc
+- Đọc branch từ spec.md để đảm bảo làm việc trên đúng nhánh
+- Không skip bước review (tối đa 3 iterations cho mỗi task)
+- Cập nhật checkpoint ngay sau khi task hoàn thành
+
 ## Governance
 
 ### Amendment Procedure

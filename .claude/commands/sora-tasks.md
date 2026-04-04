@@ -1,47 +1,108 @@
-Thực hiện bước TASKS từ plan.md.
+#!/bin/bash
 
-## Cấu hình
+# /sora-tasks
+# Thực hiện bước TASKS từ plan.md
 
-max_iterations: 3
+## Cú pháp
+# /sora-tasks <pbi_id> [nội dung mô tả bổ sung]
+## Ví dụ: /sora-tasks 003 Xác nhận yêu cầu bổ sung cho tasks
 
-## Giai đoạn 1 — Song song tạo file
+# Kiểm tra argument
+if [ -z "$1" ]; then
+    echo "❌ ERROR: Cần cung cấp mã PBI"
+    echo "Ví dụ: /sora-tasks 003 Xác nhận yêu cầu bổ sung"
+    exit 1
+fi
 
-Chạy đồng thời hai agent:
+# Lấy mã PBI và nội dung bổ sung
+PBI_ID="$1"
+shift
+ADDITIONAL_NOTES="$@"
 
-- `tech-lead`: đọc `plan.md`, tạo `tasks.md`
-- `qc`: đọc `spec.md` và `plan.md`, tạo `test-case.md`
+echo "📝 Bắt đầu thực hiện TASKS..."
+echo "   Mã PBI: $PBI_ID"
+if [ -n "$ADDITIONAL_NOTES" ]; then
+    echo "   Nội dung bổ sung: $ADDITIONAL_NOTES"
+fi
 
-Chờ cả hai hoàn thành trước khi chuyển sang giai đoạn 2.
+# Xác định thư mục spec
+SPEC_FOLDER="specs/${PBI_ID}"
+SPEC_FILE="${SPEC_FOLDER}/spec.md"
+PLAN_FILE="${SPEC_FOLDER}/plan.md"
 
-## Giai đoạn 2 — Song song review (vòng lặp, tối đa 3 lần)
+# Kiểm tra file spec.md có tồn tại không
+if [ ! -f "$SPEC_FILE" ]; then
+    echo "❌ ERROR: Không tìm thấy file spec.md tại $SPEC_FILE"
+    echo "Vui lòng chạy /sora-specify trước hoặc kiểm tra lại mã PBI"
+    exit 1
+fi
 
-Với mỗi iteration (đếm từ 1):
+# Kiểm tra file plan.md có tồn tại không
+if [ ! -f "$PLAN_FILE" ]; then
+    echo "❌ ERROR: Không tìm thấy file plan.md tại $PLAN_FILE"
+    echo "Vui lòng chạy /sora-plan trước hoặc kiểm tra lại mã PBI"
+    exit 1
+fi
 
-Chạy đồng thời:
+echo "📁 Tìm thấy spec.md tại: $SPEC_FILE"
+echo "📁 Tìm thấy plan.md tại: $PLAN_FILE"
 
-- `solution-architect`: review `tasks.md` → trả về APPROVED hoặc danh sách vấn đề
-- `qc-lead`: review `test-case.md` → trả về APPROVED hoặc danh sách vấn đề
+# Đọc branch từ file spec.md
+BRANCH_FROM_SPEC=$(grep -E "Branch git:|branch:" "$SPEC_FILE" | head -1 | sed 's/.*Branch git: *//' | sed 's/.*branch: *//' | tr -d '\r')
 
-Sau khi cả hai review xong:
+if [ -z "$BRANCH_FROM_SPEC" ]; then
+    echo "⚠️  Không tìm thấy branch trong spec.md, sử dụng branch mặc định"
+    BRANCH_FROM_SPEC="feature/${PBI_ID}"
+fi
 
-**Nếu cả hai đều APPROVED** → kết thúc, báo cáo thành công.
+echo "🌿 Đọc branch từ spec.md: $BRANCH_FROM_SPEC"
 
-**Nếu có vấn đề** và iteration < 3:
+# Switch sang branch
+echo "🔄 Switch sang branch: $BRANCH_FROM_SPEC"
+git checkout "$BRANCH_FROM_SPEC" 2>/dev/null
 
-- Nếu architect có vấn đề → gửi feedback cho `tech-lead` để fix `tasks.md`
-- Nếu qc-lead có vấn đề → gửi feedback cho `qc` để fix `test-case.md`
-- Tăng iteration, quay lại review
+if [ $? -eq 0 ]; then
+    echo "✅ Đã switch sang branch: $BRANCH_FROM_SPEC"
+else
+    echo "⚠️  Không thể switch sang branch, sử dụng branch hiện tại"
+    BRANCH_FROM_SPEC=$(git branch --show-current)
+    echo "   Branch hiện tại: $BRANCH_FROM_SPEC"
+fi
 
-**Nếu đã đủ 3 iterations mà vẫn còn vấn đề**:
+# Chuẩn bị thông tin cho agent
+echo ""
+echo "🤖 Gọi agent tech-lead và qc để tạo tasks.md và test-case.md"
+echo ""
+echo "## Cấu hình"
+echo "max_iterations: 3"
+echo ""
+echo "## Giai đoạn 1 — Song song tạo file"
+echo "Chạy đồng thời hai agent:"
+echo "- tech-lead: đọc plan.md ($PLAN_FILE), tạo tasks.md"
+echo "- qc: đọc spec.md và plan.md, tạo test-case.md"
+echo ""
+echo "## Giai đoạn 2 — Song song review (vòng lặp, tối đa 3 lần)"
+echo "Với mỗi iteration (đếm từ 1):"
+echo "- solution-architect: review tasks.md → APPROVED hoặc danh sách vấn đề"
+echo "- qc-lead: review test-case.md → APPROVED hoặc danh sách vấn đề"
+echo ""
+echo "Sau khi cả hai review xong:"
+echo "- Nếu cả hai đều APPROVED → kết thúc, báo cáo thành công"
+echo "- Nếu có vấn đề và iteration < 3:"
+echo "  + Nếu architect có vấn đề → gửi feedback cho tech-lead để fix tasks.md"
+echo "  + Nếu qc-lead có vấn đề → gửi feedback cho qc để fix test-case.md"
+echo "  + Tăng iteration, quay lại review"
+echo "- Nếu đã đủ 3 iterations mà vẫn còn vấn đề:"
+echo "  + Dừng loop, ghi file tasks-review-issues.md"
+echo ""
+echo "📂 Thông tin:"
+echo "   - Mã PBI: $PBI_ID"
+echo "   - Thư mục: $SPEC_FOLDER"
+echo "   - Branch: $BRANCH_FROM_SPEC"
+echo "   - File plan: $PLAN_FILE"
+if [ -n "$ADDITIONAL_NOTES" ]; then
+    echo "   - Lưu ý bổ sung: $ADDITIONAL_NOTES"
+fi
 
-- Dừng loop
-- Ghi file `tasks-review-issues.md` với toàn bộ feedback chưa resolve
-- Báo cáo: "Đã đạt max_iterations (3). Vui lòng xem `tasks-review-issues.md` và xử lý thủ công."
-
-## Báo cáo kết thúc
-
-Tóm tắt:
-
-- Số iterations đã thực hiện
-- Trạng thái cuối: tasks.md [APPROVED/PENDING], test-case.md [APPROVED/PENDING]
-- Danh sách file đã tạo/cập nhật
+# Mặc định exit code 0
+exit 0
