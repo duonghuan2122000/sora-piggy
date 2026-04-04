@@ -57,7 +57,12 @@
       "nameRequired": "Please enter transaction name",
       "amountRequired": "Please enter amount",
       "categoryRequired": "Please select category",
-      "accountRequired": "Please select account"
+      "accountRequired": "Please select account",
+      "amountGreaterThanZero": "Amount must be greater than 0"
+    },
+    "messages": {
+      "success": "Transaction saved successfully",
+      "error": "Failed to save transaction"
     }
   }
 }

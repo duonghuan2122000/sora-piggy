@@ -14,6 +14,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   pageTitle: string;
   mode?: 'list' | 'add';
+  isLoading?: boolean;
 }>();
 
 const languageStore = useLanguageStore();
@@ -43,7 +44,12 @@ onMounted(async () => {
     </div>
     <div class="sora-right-section">
       <LanguageSelector />
-      <ElButton type="primary" size="small" @click="handlePrimaryAction">
+      <ElButton
+        type="primary"
+        size="small"
+        :loading="isLoading"
+        @click="handlePrimaryAction"
+      >
         <template #icon>
           <FontAwesomeIcon :icon="buttonIcon" />
         </template>
