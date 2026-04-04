@@ -56,9 +56,9 @@ SUMMARY_NO_SPECIAL=$(echo "$SUMMARY_NO_ACCENT" | tr -c '[:alnum:]-' '-' | tr -s 
 SUMMARY_NO_LEADING_DASH=$(echo "$SUMMARY_NO_SPECIAL" | sed 's/^-//')
 SUMMARY_NO_TRAILING_DASH=$(echo "$SUMMARY_NO_LEADING_DASH" | sed 's/-$//')
 
-# Giới hạn độ dài (max 30 ký tự)
-if [ ${#SUMMARY_NO_TRAILING_DASH} -gt 30 ]; then
-    SUMMARY_NO_TRAILING_DASH="${SUMMARY_NO_TRAILING_DASH:0:30}"
+# Giới hạn độ dài (max 20 ký tự)
+if [ ${#SUMMARY_NO_TRAILING_DASH} -gt 20 ]; then
+    SUMMARY_NO_TRAILING_DASH="${SUMMARY_NO_TRAILING_DASH:0:20}"
     SUMMARY_NO_TRAILING_DASH=$(echo "$SUMMARY_NO_TRAILING_DASH" | sed 's/-$//')
 fi
 
