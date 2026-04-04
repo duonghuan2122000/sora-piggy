@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   ElCard,
   ElForm,
@@ -13,6 +14,8 @@ import {
 } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
+
+const { t } = useI18n();
 
 interface CategoryOption {
   value: string;
@@ -39,10 +42,34 @@ const formValue = ref({
 });
 
 const rules: FormRules = {
-  name: [{ required: true, message: 'Please enter transaction name', trigger: ['blur', 'change'] }],
-  amount: [{ required: true, message: 'Please enter amount', trigger: ['blur', 'change'] }],
-  category: [{ required: true, message: 'Please select category', trigger: ['change'] }],
-  account: [{ required: true, message: 'Please select account', trigger: ['change'] }]
+  name: [
+    {
+      required: true,
+      message: t('transactionForm.validation.nameRequired'),
+      trigger: ['blur', 'change']
+    }
+  ],
+  amount: [
+    {
+      required: true,
+      message: t('transactionForm.validation.amountRequired'),
+      trigger: ['blur', 'change']
+    }
+  ],
+  category: [
+    {
+      required: true,
+      message: t('transactionForm.validation.categoryRequired'),
+      trigger: ['change']
+    }
+  ],
+  account: [
+    {
+      required: true,
+      message: t('transactionForm.validation.accountRequired'),
+      trigger: ['change']
+    }
+  ]
 };
 
 // Category state
@@ -321,35 +348,38 @@ onMounted(() => {
   <div class="sora-add-transaction-view">
     <ElCard class="sora-card">
       <template #header>
-        <div>Add Transaction</div>
+        <div>{{ $t('transactionForm.title') }}</div>
       </template>
       <ElForm ref="formRef" :model="formValue" :rules="rules" label-position="top">
-        <ElFormItem label="Transaction Name" prop="name">
-          <ElInput v-model="formValue.name" placeholder="Enter transaction name" />
+        <ElFormItem :label="$t('transactionForm.labels.name')" prop="name">
+          <ElInput
+            v-model="formValue.name"
+            :placeholder="$t('transactionForm.placeholders.name')"
+          />
         </ElFormItem>
 
-        <ElFormItem label="Description" prop="description">
+        <ElFormItem :label="$t('transactionForm.labels.description')" prop="description">
           <ElInput
             v-model="formValue.description"
             type="textarea"
-            placeholder="Enter transaction description"
+            :placeholder="$t('transactionForm.placeholders.description')"
             :rows="3"
           />
         </ElFormItem>
 
-        <ElFormItem label="Date & Time" prop="time">
+        <ElFormItem :label="$t('transactionForm.labels.time')" prop="time">
           <ElDatePicker v-model="formValue.time" type="datetime" clearable />
         </ElFormItem>
 
-        <ElFormItem label="Amount" prop="amount">
-          <ElInputNumber v-model="formValue.amount" :min="0" placeholder="0.00" />
+        <ElFormItem :label="$t('transactionForm.labels.amount')" prop="amount">
+          <ElInputNumber v-model="formValue.amount" :min="0" />
         </ElFormItem>
 
-        <ElFormItem label="Category" prop="category">
+        <ElFormItem :label="$t('transactionForm.labels.category')" prop="category">
           <ElAutocomplete
             v-model="categorySearchValue"
             :fetch-suggestions="querySearch"
-            placeholder="Search or add category"
+            :placeholder="$t('transactionForm.placeholders.category')"
             clearable
             @select="handleCategorySelect"
             @focus="handleCategoryFocus"
@@ -362,11 +392,11 @@ onMounted(() => {
           </ElAutocomplete>
         </ElFormItem>
 
-        <ElFormItem label="Account" prop="account">
+        <ElFormItem :label="$t('transactionForm.labels.account')" prop="account">
           <ElAutocomplete
             v-model="accountSearchValue"
             :fetch-suggestions="queryAccountSearch"
-            placeholder="Search or add account"
+            :placeholder="$t('transactionForm.placeholders.account')"
             clearable
             @select="handleAccountSelect"
           >
@@ -381,12 +411,16 @@ onMounted(() => {
     </ElCard>
 
     <!-- Add Category Modal -->
-    <ElDialog v-model="showCategoryModal" title="Add Category" width="400px">
+    <ElDialog
+      v-model="showCategoryModal"
+      :title="$t('transactionForm.dialogs.addCategory')"
+      width="400px"
+    >
       <ElForm>
-        <ElFormItem label="Category Name">
+        <ElFormItem :label="$t('transactionForm.categoryName')">
           <ElInput
             v-model="newCategoryName"
-            placeholder="Enter category name"
+            :placeholder="$t('transactionForm.placeholders.categoryName')"
             @keyup.enter="saveCategoryFromModal"
             @keydown.enter.prevent
           />
@@ -401,12 +435,16 @@ onMounted(() => {
     </ElDialog>
 
     <!-- Add Account Modal -->
-    <ElDialog v-model="showAccountModal" title="Add Account" width="400px">
+    <ElDialog
+      v-model="showAccountModal"
+      :title="$t('transactionForm.dialogs.addAccount')"
+      width="400px"
+    >
       <ElForm>
-        <ElFormItem label="Account Name">
+        <ElFormItem :label="$t('transactionForm.accountName')">
           <ElInput
             v-model="newAccountName"
-            placeholder="Enter account name"
+            :placeholder="$t('transactionForm.placeholders.accountName')"
             @keyup.enter="saveAccountFromModal"
             @keydown.enter.prevent
           />

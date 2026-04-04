@@ -16,5 +16,36 @@
     "welcome": "Chào mừng bạn đến với ứng dụng!",
     "success": "Thành công!",
     "error": "Đã xảy ra lỗi!"
+  },
+  "transactionForm": {
+    "title": "Thêm giao dịch",
+    "labels": {
+      "name": "Tên khoản thu/chi",
+      "description": "Mô tả/Nội dung khoản thu/chi",
+      "time": "Thời gian",
+      "amount": "Số tiền",
+      "category": "Danh mục",
+      "account": "Tài khoản"
+    },
+    "placeholders": {
+      "name": "Nhập tên khoản thu/chi",
+      "description": "Nhập mô tả/nội dung khoản thu/chi",
+      "category": "Tìm hoặc thêm danh mục",
+      "account": "Tìm hoặc thêm tài khoản",
+      "categoryName": "Nhập tên danh mục",
+      "accountName": "Nhập tên tài khoản"
+    },
+    "dialogs": {
+      "addCategory": "Thêm danh mục",
+      "addAccount": "Thêm tài khoản"
+    },
+    "categoryName": "Tên danh mục",
+    "accountName": "Tên tài khoản",
+    "validation": {
+      "nameRequired": "Vui lòng nhập tên khoản thu/chi",
+      "amountRequired": "Vui lòng nhập số tiền",
+      "categoryRequired": "Vui lòng chọn danh mục",
+      "accountRequired": "Vui lòng chọn tài khoản"
+    }
   }
 }
