@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { Language } from '@renderer/types/language';
+import i18n from '@renderer/locales';
 
 export const useLanguageStore = defineStore('language', {
   state: () => ({
@@ -72,16 +73,15 @@ export const useLanguageStore = defineStore('language', {
         await window.api.setLanguagePreference(userId, code);
         this.currentLanguage = code;
 
-        // Update i18n locale
-        const i18n = (window as { $i18n?: { global: { locale: { value: string } } } }).$i18n;
-        if (i18n) {
-          i18n.global.locale.value = code;
-        }
+        // Update i18n locale using the imported instance
+        i18n.global.locale.value = code as any;
       } catch (err) {
         console.error('Failed to set language preference:', err);
         this.error = 'Failed to save language preference';
         // Still update local state
         this.currentLanguage = code;
+        // Attempt to update locale even on error to keep UI in sync
+        i18n.global.locale.value = code as any;
       } finally {
         this.isLoading = false;
       }
