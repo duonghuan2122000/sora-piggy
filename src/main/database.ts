@@ -54,7 +54,7 @@ export const initDb = (): Database.Database => {
       code TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
       nameEn TEXT,
-      order INTEGER DEFAULT 0
+      "order" INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS user_preferences (
@@ -78,7 +78,7 @@ export const initDb = (): Database.Database => {
   }>;
   const hasOrderColumn = tableInfo.some((col) => col.name === 'order');
   if (!hasOrderColumn) {
-    db.exec('ALTER TABLE languages ADD COLUMN order INTEGER DEFAULT 0');
+    db.exec('ALTER TABLE languages ADD COLUMN "order" INTEGER DEFAULT 0');
   }
 
   // Seed initial language data if empty
@@ -87,13 +87,13 @@ export const initDb = (): Database.Database => {
   };
   if (languageCount.count === 0) {
     const insertLanguage = db.prepare(
-      'INSERT INTO languages (code, name, nameEn, order) VALUES (@code, @name, @nameEn, @order)'
+      'INSERT INTO languages (code, name, nameEn, "order") VALUES (@code, @name, @nameEn, @order)'
     );
     insertLanguage.run({ code: 'vi', name: 'Tiếng Việt', nameEn: 'Vietnamese', order: 1 });
     insertLanguage.run({ code: 'en', name: 'English', nameEn: 'English', order: 2 });
   } else {
     // Update existing language data to ensure order values
-    const updateLanguage = db.prepare('UPDATE languages SET order = @order WHERE code = @code');
+    const updateLanguage = db.prepare('UPDATE languages SET "order" = @order WHERE code = @code');
     updateLanguage.run({ code: 'vi', order: 1 });
     updateLanguage.run({ code: 'en', order: 2 });
   }
@@ -245,7 +245,7 @@ export const deleteAccount = (id: number): Database.RunResult => {
 // CRUD operations for languages
 export const getLanguages = (): unknown[] => {
   if (!db) initDb();
-  return db!.prepare('SELECT * FROM languages ORDER BY order ASC, code ASC').all();
+  return db!.prepare('SELECT * FROM languages ORDER BY "order" ASC, code ASC').all();
 };
 
 export const getLanguageByCode = (code: string): unknown => {
