@@ -1,50 +1,118 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+==================
+Version change: [UNINITIALIZED] → 1.0.0 (initial constitution)
+Modified principles: N/A (new file)
+Added sections: Core Principles (5), Technical Standards, Development Workflow, Governance
+Removed sections: N/A
+Templates requiring updates:
+  ✅ .specify/templates/plan-template.md - No change needed
+  ✅ .specify/templates/spec-template.md - No change needed
+  ✅ .specify/templates/tasks-template.md - No change needed
+Follow-up TODOs: None
+-->
+
+# Sora Piggy Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Local-First Architecture (NON-NEGOTIABLE)
+All data must be stored locally on the user's machine using SQLite. The application must function fully offline without requiring internet connectivity. Cloud synchronization is optional and must never block core functionality.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Type-Safe Development (NON-NEGOTIABLE)
+All code must be written in TypeScript. No `any` types are permitted in production code. All database operations, IPC handlers, and component props must have proper type definitions.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Data Integrity & Validation
+All user input must be validated at multiple layers: client-side validation in Vue components, server-side validation in database operations, and schema enforcement via SQLite constraints. No data corruption or loss should occur during operations.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Component-Based UI Architecture
+UI must be built using Vue 3 Composition API with reusable, scoped components. State management must use Pinia stores. Element Plus components are preferred but custom components must follow established patterns.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Offline-First User Experience
+The app must provide seamless offline experience. All features must work without network connectivity. Network-dependent features must have clear offline states and graceful degradation.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technical Standards
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### Technology Stack
+- **Frontend**: Vue 3 + Composition API + TypeScript + Element Plus UI
+- **State Management**: Pinia stores
+- **Styling**: SCSS with CSS variables
+- **Backend**: Electron main process with IPC handlers
+- **Database**: SQLite via better-sqlite3 (local storage)
+- **Build Tool**: Vite
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Code Quality Requirements
+- All code must pass TypeScript type checking (`npm run typecheck`)
+- ESLint must pass with no errors (`npm run lint`)
+- Code must be formatted with Prettier (`npm run format`)
+- No test files exist currently - consider adding Vitest for future tests
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Database Standards
+- SQLite database stored in user's userData directory: `~/.config/Sora Piggy/sora-piggy.db`
+- Transactions must be used for any multi-operation database writes
+- Queries must be efficient (synchronous better-sqlite3 operations)
+- Schema must include: transactions, categories, accounts tables
+
+## Development Workflow
+
+### Project Structure
+```
+src/
+├── main/                    # Electron main process
+│   ├── index.ts            # App entry point, IPC handlers
+│   └── database.ts         # SQLite CRUD operations
+├── preload/                 # Preload scripts (context bridge)
+│   └── index.ts            # Exposes IPC APIs to renderer
+└── renderer/                # Vue frontend
+    └── src/
+        ├── App.vue
+        ├── main.ts
+        ├── router/
+        ├── stores/
+        ├── views/
+        ├── layouts/
+        ├── components/
+        ├── types/
+        ├── constants/
+        ├── locales/
+        └── assets/scss/
+```
+
+### IPC Communication Pattern
+- Main process registers IPC handlers for database operations
+- Preload script uses contextBridge to expose APIs safely
+- Renderer calls `window.api.methodName()` for all IPC calls
+- IPC calls are async in renderer, synchronous in main
+
+### Code Review Checklist
+- [ ] TypeScript type checking passes
+- [ ] ESLint passes with no errors
+- [ ] Code follows existing patterns and conventions
+- [ ] IPC handlers properly exposed via preload
+- [ ] Database operations use transactions for writes
+- [ ] Components follow Vue 3 Composition API patterns
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### Amendment Procedure
+1. Propose changes via pull request with clear justification
+2. Update constitution version according to semantic versioning:
+   - MAJOR: Backward incompatible principle changes
+   - MINOR: New principles or substantial guidance additions
+   - PATCH: Clarifications and wording improvements
+3. Update `LAST_AMENDED_DATE` to current date
+4. Document changes in Sync Impact Report at top of file
+5. Ensure all templates remain consistent with constitution
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+### Compliance Review
+- All PRs must verify compliance with constitution principles
+- Code review must check for TypeScript type safety
+- Database operations must respect local-first architecture
+- UI changes must follow component-based patterns
+
+### Versioning Policy
+- Constitution versions follow semantic versioning (MAJOR.MINOR.PATCH)
+- Version changes must be documented in Sync Impact Report
+- Retroactive updates to past versions are not permitted
+
+**Version**: 1.0.0 | **Ratified**: 2026-04-04 | **Last Amended**: 2026-04-04
