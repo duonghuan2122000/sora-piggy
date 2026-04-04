@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -28,6 +28,7 @@ npm run rebuild                # Rebuild native dependencies (better-sqlite3)
 ## Architecture Overview
 
 **Sora Piggy** is a local-first desktop expense tracking app built with:
+
 - **Electron** for desktop shell (main process + preload)
 - **Vue 3 + Composition API** for the renderer (UI)
 - **TypeScript** for type safety
@@ -81,15 +82,15 @@ src/
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/main/database.ts` | SQLite CRUD operations for transactions, categories, accounts |
-| `src/main/index.ts` | Electron main process, IPC handlers, app lifecycle |
-| `src/preload/index.ts` | Context bridge exposing APIs to renderer |
-| `src/renderer/src/main.ts` | Vue app initialization (plugins, router, Pinia, i18n) |
-| `src/renderer/src/router/index.ts` | Vue Router routes configuration |
-| `src/renderer/src/stores/transactionForm.ts` | Pinia store for transaction form state |
-| `src/renderer/src/constants/index.ts` | Route names constants |
+| File                                         | Purpose                                                       |
+| -------------------------------------------- | ------------------------------------------------------------- |
+| `src/main/database.ts`                       | SQLite CRUD operations for transactions, categories, accounts |
+| `src/main/index.ts`                          | Electron main process, IPC handlers, app lifecycle            |
+| `src/preload/index.ts`                       | Context bridge exposing APIs to renderer                      |
+| `src/renderer/src/main.ts`                   | Vue app initialization (plugins, router, Pinia, i18n)         |
+| `src/renderer/src/router/index.ts`           | Vue Router routes configuration                               |
+| `src/renderer/src/stores/transactionForm.ts` | Pinia store for transaction form state                        |
+| `src/renderer/src/constants/index.ts`        | Route names constants                                         |
 
 ## Styling
 
@@ -98,7 +99,7 @@ src/
 - **Element Plus** for base UI components with custom styling
 - Variables are auto-imported via `electron.vite.config.ts`:
   ```scss
-  @use "@scss/variables" as *;
+  @use '@scss/variables' as *;
   ```
 
 ## TypeScript Configuration

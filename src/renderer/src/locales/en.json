@@ -16,5 +16,36 @@
     "welcome": "Welcome to the application!",
     "success": "Success!",
     "error": "An error occurred!"
+  },
+  "transactionForm": {
+    "title": "Add Transaction",
+    "labels": {
+      "name": "Transaction Name",
+      "description": "Description",
+      "time": "Date & Time",
+      "amount": "Amount",
+      "category": "Category",
+      "account": "Account"
+    },
+    "placeholders": {
+      "name": "Enter transaction name",
+      "description": "Enter transaction description",
+      "category": "Search or add category",
+      "account": "Search or add account",
+      "categoryName": "Enter category name",
+      "accountName": "Enter account name"
+    },
+    "dialogs": {
+      "addCategory": "Add Category",
+      "addAccount": "Add Account"
+    },
+    "categoryName": "Category Name",
+    "accountName": "Account Name",
+    "validation": {
+      "nameRequired": "Please enter transaction name",
+      "amountRequired": "Please enter amount",
+      "categoryRequired": "Please select category",
+      "accountRequired": "Please select account"
+    }
   }
 }
