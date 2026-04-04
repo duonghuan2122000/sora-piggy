@@ -129,7 +129,11 @@ export const addTransaction = (transaction: Omit<ITransaction, 'id'>): number =>
   const stmt = db!.prepare(
     'INSERT INTO transactions (name, description, category, account, amount, time) VALUES (@name, @description, @category, @account, @amount, @time)'
   );
-  const info = stmt.run({ ...transaction, time: transaction.time.toISOString() });
+  // Handle both Date object and ISO string
+  const timeValue = transaction.time instanceof Date
+    ? transaction.time.toISOString()
+    : new Date(transaction.time).toISOString();
+  const info = stmt.run({ ...transaction, time: timeValue });
   return Number(info.lastInsertRowid);
 };
 
@@ -138,7 +142,13 @@ export const updateTransaction = (id: number, transaction: Partial<ITransaction>
   const stmt = db!.prepare(
     'UPDATE transactions SET name = @name, description = @description, category = @category, account = @account, amount = @amount, time = @time WHERE id = @id'
   );
-  stmt.run({ ...transaction, id, time: transaction.time?.toISOString() });
+  // Handle both Date object and ISO string
+  const timeValue = transaction.time
+    ? (transaction.time instanceof Date
+        ? transaction.time.toISOString()
+        : new Date(transaction.time).toISOString())
+    : undefined;
+  stmt.run({ ...transaction, id, time: timeValue });
 };
 
 export const deleteTransaction = (id: number): void => {
