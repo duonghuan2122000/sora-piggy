@@ -130,4 +130,10 @@ echo "   - File tasks: $TASKS_FILE"
 echo "   - File test-case: $TEST_CASE_FILE"
 
 # Mặc định exit code 0
+
+## Ghi chú về commit
+# Sau khi hoàn thành tất cả tasks:
+# - Bạn cần tự commit các file đã thay đổi
+# - Sử dụng: `git add .` và `git commit -m "PBI_ID: Mô tả commit"`
+# - Hoặc dùng kèm với /sora-commit để tự động commit
 exit 0
