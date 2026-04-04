@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { ElTooltip } from 'element-plus';
+import { useI18n } from 'vue-i18n';
 import {
   faChartLine,
   faExchangeAlt,
@@ -15,6 +16,7 @@ import {
   faPiggyBank
 } from '@fortawesome/free-solid-svg-icons';
 
+const { t } = useI18n();
 const route = useRoute();
 const activeKey = ref<string>(route.name as string);
 
@@ -55,6 +57,18 @@ const menuGroups: MenuGroup[] = [
   }
 ];
 
+// Computed property to get localized menu groups
+const localizedMenuGroups = computed(() => {
+  return menuGroups.map(group => ({
+    ...group,
+    title: t(`sidebar.${group.title.toLowerCase()}`),
+    items: group.items.map(item => ({
+      ...item,
+      label: t(`sidebar.${item.key.toLowerCase()}`)
+    }))
+  }));
+});
+
 const isActive = (key: string): boolean => {
   return activeKey.value === key;
 };
@@ -82,7 +96,7 @@ defineProps<Props>();
 
     <!-- Bottom Section: Menu -->
     <div class="sora-sidebar__menu">
-      <div v-for="group in menuGroups" :key="group.title" class="sora-menu-group">
+      <div v-for="group in localizedMenuGroups" :key="group.title" class="sora-menu-group">
         <div v-if="!collapsed" class="sora-menu-group__title">{{ group.title }}</div>
         <div class="sora-menu-group__items">
           <RouterLink

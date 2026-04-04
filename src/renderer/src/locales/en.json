@@ -17,6 +17,18 @@
     "success": "Success!",
     "error": "An error occurred!"
   },
+  "sidebar": {
+    "summary": "Summary",
+    "management": "Management",
+    "account": "Account",
+    "dashboard": "Dashboard",
+    "transaction": "Transaction",
+    "budget": "Budget",
+    "target": "Target",
+    "report": "Report",
+    "cash": "Cash",
+    "bank": "Bank"
+  },
   "transactionForm": {
     "title": "Add Transaction",
     "labels": {

@@ -17,6 +17,18 @@
     "success": "Thành công!",
     "error": "Đã xảy ra lỗi!"
   },
+  "sidebar": {
+    "summary": "Tóm tắt",
+    "management": "Quản lý",
+    "account": "Tài khoản",
+    "dashboard": "Trang chủ",
+    "transaction": "Giao dịch",
+    "budget": "Ngân sách",
+    "target": "Mục tiêu",
+    "report": "Báo cáo",
+    "cash": "Tiền mặt",
+    "bank": "Ngân hàng"
+  },
   "transactionForm": {
     "title": "Thêm giao dịch",
     "labels": {
