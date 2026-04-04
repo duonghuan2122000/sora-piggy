@@ -131,6 +131,7 @@ No test files currently exist in the repository. Consider using Vitest for futur
 - For styling issues, check `_variables.scss` for available CSS variables
 
 <!-- gitnexus:start -->
+
 # GitNexus — Code Intelligence
 
 This project is indexed by GitNexus as **sora-piggy** (171 symbols, 182 relationships, 0 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
@@ -167,35 +168,36 @@ This project is indexed by GitNexus as **sora-piggy** (171 symbols, 182 relation
 
 ## Tools Quick Reference
 
-| Tool | When to use | Command |
-|------|-------------|---------|
-| `query` | Find code by concept | `gitnexus_query({query: "auth validation"})` |
-| `context` | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})` |
-| `impact` | Blast radius before editing | `gitnexus_impact({target: "X", direction: "upstream"})` |
-| `detect_changes` | Pre-commit scope check | `gitnexus_detect_changes({scope: "staged"})` |
-| `rename` | Safe multi-file rename | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
-| `cypher` | Custom graph queries | `gitnexus_cypher({query: "MATCH ..."})` |
+| Tool             | When to use                   | Command                                                                 |
+| ---------------- | ----------------------------- | ----------------------------------------------------------------------- |
+| `query`          | Find code by concept          | `gitnexus_query({query: "auth validation"})`                            |
+| `context`        | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})`                              |
+| `impact`         | Blast radius before editing   | `gitnexus_impact({target: "X", direction: "upstream"})`                 |
+| `detect_changes` | Pre-commit scope check        | `gitnexus_detect_changes({scope: "staged"})`                            |
+| `rename`         | Safe multi-file rename        | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
+| `cypher`         | Custom graph queries          | `gitnexus_cypher({query: "MATCH ..."})`                                 |
 
 ## Impact Risk Levels
 
-| Depth | Meaning | Action |
-|-------|---------|--------|
-| d=1 | WILL BREAK — direct callers/importers | MUST update these |
-| d=2 | LIKELY AFFECTED — indirect deps | Should test |
-| d=3 | MAY NEED TESTING — transitive | Test if critical path |
+| Depth | Meaning                               | Action                |
+| ----- | ------------------------------------- | --------------------- |
+| d=1   | WILL BREAK — direct callers/importers | MUST update these     |
+| d=2   | LIKELY AFFECTED — indirect deps       | Should test           |
+| d=3   | MAY NEED TESTING — transitive         | Test if critical path |
 
 ## Resources
 
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/sora-piggy/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/sora-piggy/clusters` | All functional areas |
-| `gitnexus://repo/sora-piggy/processes` | All execution flows |
-| `gitnexus://repo/sora-piggy/process/{name}` | Step-by-step execution trace |
+| Resource                                    | Use for                                  |
+| ------------------------------------------- | ---------------------------------------- |
+| `gitnexus://repo/sora-piggy/context`        | Codebase overview, check index freshness |
+| `gitnexus://repo/sora-piggy/clusters`       | All functional areas                     |
+| `gitnexus://repo/sora-piggy/processes`      | All execution flows                      |
+| `gitnexus://repo/sora-piggy/process/{name}` | Step-by-step execution trace             |
 
 ## Self-Check Before Finishing
 
 Before completing any code modification task, verify:
+
 1. `gitnexus_impact` was run for all modified symbols
 2. No HIGH/CRITICAL risk warnings were ignored
 3. `gitnexus_detect_changes()` confirms changes match expected scope
@@ -221,13 +223,41 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 
 ## CLI
 
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Task                                         | Read this skill file                                        |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md`       |
+| Blast radius / "What breaks if I change X?"  | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?"             | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md`       |
+| Rename / extract / split / refactor          | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md`     |
+| Tools, resources, schema reference           | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md`           |
+| Index, status, clean, wiki CLI commands      | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md`             |
 
 <!-- gitnexus:end -->
+
+# Project AI Agent Pipeline
+
+Dự án sử dụng spec-driven development với Claude Code agents tự động hóa SDLC.
+
+## Quy trình
+
+| Bước         | Command                     | Agents                               |
+| ------------ | --------------------------- | ------------------------------------ |
+| 1. Specify   | `/sora-specify <yêu cầu>`   | business-analyst                     |
+| 2. Clarify   | `/sora-clarify`             | product-manager                      |
+| 3. Plan      | `/sora-plan`                | solution-architect                   |
+| 4. Tasks     | `/sora-tasks`               | tech-lead + qc → architect + qc-lead |
+| 5. Implement | `/sora-implement [task-id]` | dev → qc + architect (loop)          |
+
+## Files được quản lý
+
+- `spec.md` - Giải pháp nghiệp vụ
+- `plan.md` - Giải pháp kỹ thuật
+- `tasks.md` - Danh sách task với checkpoint
+- `test-case.md` - Test cases với trạng thái
+
+## Conventions
+
+- Luôn chạy đủ quy trình từ specify → implement
+- Không skip bước review
+- Cập nhật checkpoint ngay sau khi task hoàn thành
+- Dùng `/sora-implement <task-id>` để implement từng task cụ thể
