@@ -1,5 +1,13 @@
 AGENTS.md
 
+I only speak Vietnamese so you must always respond in Vietnamese.
+
+Assume I know little to no english.
+
+<CRITICAL>
+  ALWAYS RESPOND IN VIETNAMESE
+</CRITICAL>
+
 Purpose: Operational guide for autonomous agents working in this repository. This file
 collects build/test/lint commands, coding style rules, safety checks and minimal
 process guidance agents must follow before editing and committing code.
