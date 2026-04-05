@@ -31,8 +31,25 @@ interface API {
   // Transaction APIs
   getAllTransactions: () => Promise<ITransaction[]>;
   getTransactionById: (id: number) => Promise<ITransaction | undefined>;
-  addTransaction: (transaction: Omit<ITransaction, 'id'>) => Promise<number>;
-  updateTransaction: (id: number, transaction: Partial<ITransaction>) => Promise<void>;
+  createTransaction: (transaction: {
+    name: string;
+    description?: string;
+    category: string;
+    account: string;
+    amount: number;
+    time: string;
+  }) => Promise<number>;
+  updateTransaction: (
+    id: number,
+    transaction: {
+      name?: string;
+      description?: string;
+      category?: string;
+      account?: string;
+      amount?: number;
+      time?: string;
+    }
+  ) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
 
   // Category APIs

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   ElCard,
@@ -10,7 +10,8 @@ import {
   ElInputNumber,
   ElAutocomplete,
   ElDialog,
-  ElButton
+  ElButton,
+  ElMessage
 } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
@@ -53,6 +54,16 @@ const rules: FormRules = {
     {
       required: true,
       message: t('transactionForm.validation.amountRequired'),
+      trigger: ['blur', 'change']
+    },
+    {
+      validator: (_rule, value, callback) => {
+        if (value <= 0) {
+          callback(new Error(t('transactionForm.validation.amountGreaterThanZero')));
+        } else {
+          callback();
+        }
+      },
       trigger: ['blur', 'change']
     }
   ],
@@ -312,19 +323,40 @@ watch(showCategoryModal, (isOpen) => {
 
 const transactionFormStore = useTransactionFormStore();
 
-const handleSubmit = (): void => {
-  formRef.value?.validate((valid) => {
+const handleSubmit = async (): Promise<void> => {
+  formRef.value?.validate(async (valid) => {
     if (valid) {
-      transactionFormStore.addTransaction({
-        name: formValue.value.name,
-        description: formValue.value.description,
-        time: formValue.value.time,
-        amount: formValue.value.amount,
-        category: formValue.value.category,
-        account: formValue.value.account
-      });
-      // Optionally reset form after submission
-      // formValue.value = { ...initialValues };
+      transactionFormStore.setLoading(true);
+      try {
+        const success = await transactionFormStore.addTransaction({
+          name: formValue.value.name,
+          description: formValue.value.description,
+          time: formValue.value.time,
+          amount: formValue.value.amount,
+          category: formValue.value.category,
+          account: formValue.value.account
+        });
+
+        if (success) {
+          ElMessage.success(t('transactionForm.messages.success'));
+          // Reset form after successful save
+          formValue.value = {
+            name: '',
+            description: '',
+            time: null,
+            amount: 0,
+            category: null,
+            account: null
+          };
+          // Reset category and account search values
+          categorySearchValue.value = '';
+          accountSearchValue.value = '';
+        }
+      } catch (error) {
+        ElMessage.error(t('transactionForm.messages.error'));
+      } finally {
+        transactionFormStore.setLoading(false);
+      }
     }
   });
 };
@@ -337,10 +369,24 @@ watch(
   }
 );
 
+// Global keyboard listener for Ctrl+S
+const handleKeyPress = (event: KeyboardEvent): void => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+    event.preventDefault();
+    handleSubmit();
+  }
+};
+
 // Load categories and accounts on mount
 onMounted(() => {
   loadCategories();
   loadAccounts();
+  window.addEventListener('keydown', handleKeyPress);
+});
+
+// Clean up event listener on unmount
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress);
 });
 </script>
 
@@ -372,7 +418,7 @@ onMounted(() => {
         </ElFormItem>
 
         <ElFormItem :label="$t('transactionForm.labels.amount')" prop="amount">
-          <ElInputNumber v-model="formValue.amount" :min="0" />
+          <ElInputNumber v-model="formValue.amount" :min="1" />
         </ElFormItem>
 
         <ElFormItem :label="$t('transactionForm.labels.category')" prop="category">
