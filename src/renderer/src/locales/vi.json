@@ -9,6 +9,7 @@
   },
   "button": {
     "save": "Lưu",
+    "add": "Thêm",
     "cancel": "Hủy",
     "delete": "Xóa"
   },
@@ -29,6 +30,9 @@
     "cash": "Tiền mặt",
     "bank": "Ngân hàng"
   },
+  "common": {
+    "all": "Tất cả"
+  },
   "transactionForm": {
     "title": "Thêm giao dịch",
     "labels": {
@@ -37,7 +41,9 @@
       "time": "Thời gian",
       "amount": "Số tiền",
       "category": "Danh mục",
-      "account": "Tài khoản"
+      "account": "Tài khoản",
+      "income": "Thu",
+      "expense": "Chi"
     },
     "placeholders": {
       "name": "Nhập tên khoản thu/chi",
@@ -64,5 +70,26 @@
       "success": "Giao dịch đã được lưu",
       "error": "Lưu giao dịch thất bại"
     }
+  },
+  "transactions": {
+    "title": "Danh sách giao dịch",
+    "empty": "Không có giao dịch",
+    "columns": {
+      "date": "Ngày",
+      "amount": "Số tiền"
+    },
+    "actions": {
+      "view": "Xem",
+      "edit": "Sửa",
+      "delete": "Xóa"
+    },
+    "sort": {
+      "newest": "Mới nhất",
+      "oldest": "Cũ nhất"
+    }
+  },
+  "accounts": {
+    "bankA": "Ngân hàng A",
+    "bankB": "Ngân hàng B"
   }
 }

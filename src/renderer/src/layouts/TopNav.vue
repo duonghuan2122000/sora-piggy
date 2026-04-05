@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ElButton } from 'element-plus';
 import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -18,6 +19,7 @@ const props = defineProps<{
 }>();
 
 const languageStore = useLanguageStore();
+const { t } = useI18n();
 const currentMode = computed(() => props.mode || 'list');
 
 const handlePrimaryAction = (): void => {
@@ -28,7 +30,9 @@ const handlePrimaryAction = (): void => {
   }
 };
 
-const buttonLabel = computed(() => (currentMode.value === 'add' ? 'Save' : 'Add Transaction'));
+const buttonLabel = computed(() =>
+  currentMode.value === 'add' ? t('button.save') : t('button.add')
+);
 const buttonIcon = computed(() => (currentMode.value === 'add' ? faSave : faPlus));
 
 onMounted(async () => {
@@ -44,12 +48,7 @@ onMounted(async () => {
     </div>
     <div class="sora-right-section">
       <LanguageSelector />
-      <ElButton
-        type="primary"
-        size="small"
-        :loading="isLoading"
-        @click="handlePrimaryAction"
-      >
+      <ElButton type="primary" size="small" :loading="isLoading" @click="handlePrimaryAction">
         <template #icon>
           <FontAwesomeIcon :icon="buttonIcon" />
         </template>
