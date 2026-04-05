@@ -11,6 +11,7 @@ import {
   ElPagination
 } from 'element-plus';
 import { ITransaction } from '@renderer/types/transaction';
+import TransactionItem from '@renderer/components/TransactionItem.vue';
 
 // Transactions data from database
 const transactions = ref<ITransaction[]>([]);
@@ -57,9 +58,16 @@ const accounts = computed(() => [
 ]);
 
 const sortOptions = computed(() => [
-  { label: t('transactions.sort.newest') || 'Newest', value: 'Newest' },
-  { label: t('transactions.sort.oldest') || 'Oldest', value: 'Oldest' }
+  { label: t('transactions.sort.newest') || 'Mới nhất', value: SORT_NEWEST },
+  { label: t('transactions.sort.oldest') || 'Cũ nhất', value: SORT_OLDEST }
 ]);
+
+// Mapping canonical account identifiers to display names used in older datasets
+const ACCOUNT_DISPLAY_MAP: Record<string, string> = {
+  [ACC_CASH]: 'Cash',
+  [ACC_BANK_A]: 'Bank account A',
+  [ACC_BANK_B]: 'Bank account B'
+};
 
 // Computed
 const filteredTransactions = computed(() => {
@@ -68,41 +76,47 @@ const filteredTransactions = computed(() => {
   // Filter by Search
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    result = result.filter(
-      (tx) => tx.name.toLowerCase().includes(query) || tx.description.toLowerCase().includes(query)
-    );
+    result = result.filter((tx) => {
+      const name = (tx.name || '').toString().toLowerCase();
+      const desc = (tx.description || '').toString().toLowerCase();
+      return name.includes(query) || desc.includes(query);
+    });
   }
 
   // Filter by Category
   if (selectedCategory.value !== CAT_ALL) {
     // compare with internal canonical category values or fallback to string match
-    result = result.filter(
-      (tx) =>
-        tx.category === selectedCategory.value ||
-        tx.category === (selectedCategory.value === CAT_INCOME ? 'Income' : 'Expense')
-    );
+    const sel = selectedCategory.value.toString().toLowerCase();
+    result = result.filter((tx) => {
+      const cat = (tx.category || '').toString().toLowerCase();
+      const fallback = sel === CAT_INCOME.toLowerCase() ? 'income' : 'expense';
+      return cat === sel || cat === fallback;
+    });
   }
 
   // Filter by Account
   if (selectedAccount.value !== ACC_ALL) {
     // compare with canonical account identifiers or direct string names
-    result = result.filter(
-      (tx) =>
-        tx.account === selectedAccount.value ||
-        tx.account ===
-          (selectedAccount.value === ACC_CASH
-            ? 'Cash'
-            : selectedAccount.value === ACC_BANK_A
-              ? 'Bank account A'
-              : 'Bank account B')
-    );
+    result = result.filter((tx) => {
+      const acc = (tx.account || '').toString().toLowerCase();
+      const target = (
+        selectedAccount.value === ACC_CASH
+          ? 'cash'
+          : selectedAccount.value === ACC_BANK_A
+            ? 'bank account a'
+            : 'bank account b'
+      ).toLowerCase();
+      return acc === selectedAccount.value.toLowerCase() || acc === target;
+    });
   }
 
   // Sort
   result.sort((a, b) => {
     const dateA = new Date(a.time).getTime();
     const dateB = new Date(b.time).getTime();
-    return selectedSort.value === 'Newest' ? dateB - dateA : dateA - dateB;
+    const ta = Number.isFinite(dateA) ? dateA : 0;
+    const tb = Number.isFinite(dateB) ? dateB : 0;
+    return selectedSort.value === SORT_NEWEST ? tb - ta : ta - tb;
   });
 
   return result;
@@ -110,14 +124,14 @@ const filteredTransactions = computed(() => {
 
 const totalIncome = computed(() =>
   transactions.value
-    .filter((tx) => tx.category === 'Income')
-    .reduce((sum, tx) => sum + tx.amount, 0)
+    .filter((tx) => (tx.category || '').toString().toLowerCase() === 'income')
+    .reduce((sum, tx) => sum + Math.abs(Number(tx.amount || 0)), 0)
 );
 
 const totalExpense = computed(() =>
   transactions.value
-    .filter((tx) => tx.category === 'Expense')
-    .reduce((sum, tx) => sum + tx.amount, 0)
+    .filter((tx) => (tx.category || '').toString().toLowerCase() === 'expense')
+    .reduce((sum, tx) => sum + Math.abs(Number(tx.amount || 0)), 0)
 );
 
 // Note: if expenses are stored as positive numbers and categorized as 'Expense', balance = income - expense
@@ -130,8 +144,14 @@ const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-const formatDate = (date: Date): string => {
-  const d = new Date(date);
+// Expose formatted totals for template to avoid implicit ref unwrapping in complex expressions
+const formattedTotalIncome = computed(() => formatCurrency(totalIncome.value));
+const formattedTotalExpense = computed(() => formatCurrency(totalExpense.value));
+const formattedLatestBalance = computed(() => formatCurrency(latestBalance.value));
+
+const formatDate = (date: string | number | Date): string => {
+  const d = new Date(date as any);
+  if (isNaN(d.getTime())) return '—';
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
@@ -203,16 +223,16 @@ const pagedTransactions = computed(() => {
     <section class="sora-summary">
       <ElCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.income') }}</div>
-        <div class="sora-card-amount sora-income">{{ formatCurrency(totalIncome) }}</div>
+        <div class="sora-card-amount sora-income">{{ formattedTotalIncome }}</div>
       </ElCard>
       <ElCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.expense') }}</div>
-        <div class="sora-card-amount sora-expense">{{ formatCurrency(totalExpense) }}</div>
+        <div class="sora-card-amount sora-expense">{{ formattedTotalExpense }}</div>
       </ElCard>
       <ElCard class="sora-card">
-        <div class="sora-card-title">{{ t('transactions.title') }}</div>
+        <div class="sora-card-title">{{ t('transactions.latestBalance') }}</div>
         <div class="sora-card-amount">
-          {{ formatCurrency(latestBalance) }}
+          {{ formattedLatestBalance }}
         </div>
       </ElCard>
     </section>
@@ -226,17 +246,9 @@ const pagedTransactions = computed(() => {
           height="100%"
           style="width: 100%"
         >
-          <ElTableColumn prop="name" :label="t('transactions.title')" width="250">
+          <ElTableColumn prop="transactionName" :label="t('sidebar.transaction')" width="250">
             <template #default="scope">
-              <div class="sora-transaction-name">
-                <div class="sora-icon-wrapper">
-                  {{ scope.row.category === 'Income' ? '+' : '-' }}
-                </div>
-                <div class="sora-text-wrapper">
-                  <div class="sora-name">{{ scope.row.name }}</div>
-                  <div class="sora-desc">{{ scope.row.description }}</div>
-                </div>
-              </div>
+              <TransactionItem :transaction="scope.row" />
             </template>
           </ElTableColumn>
           <ElTableColumn prop="category" :label="t('sidebar.transaction')" width="100" />
@@ -258,8 +270,8 @@ const pagedTransactions = computed(() => {
               }}</span>
             </template>
             <template #default="scope">
-              <div :class="scope.row.amount >= 0 ? 'sora-income' : 'sora-expense'">
-                {{ formatCurrency(scope.row.amount) }}
+              <div :class="Number(scope.row.amount) >= 0 ? 'sora-income' : 'sora-expense'">
+                {{ formatCurrency(Math.abs(Number(scope.row.amount || 0))) }}
               </div>
             </template>
           </ElTableColumn>

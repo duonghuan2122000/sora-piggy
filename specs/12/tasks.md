@@ -102,11 +102,18 @@ Plan: specs/12/plan.md
 ### Subtask TASK-12-04-2: Update TransactionItem.vue (nếu có)
 
 - Status: [ ] Todo
+
+- Status: [x] Done
 - Priority: Medium
 - Depends on: [TASK-12-04-1]
 - Description: Thay các label/action text cứng trong item bằng các key; đảm bảo props truyền xuống component con nếu cần chuyển text thành key.
 - Acceptance: Item component không chứa hard-coded UI text cho scope PBI12.
 - Checkpoint:
+  - Timestamp: 2026-04-05T21:XX:00Z
+  - Files changed (working tree): src/renderer/src/components/TransactionItem.vue, src/renderer/src/views/transactions/SoraTransactionView.vue, docs/i18n.md, test/unit/transactions.spec.ts
+  - Note: Đã tách TransactionItem thành component riêng, chuẩn hoá hiển thị dấu +/- và format amount (hiển thị giá trị tuyệt đối + dấu riêng). Cập nhật view để sử dụng component mới.
+  - QC status: Không thể chạy unit test tự động trong môi trường hiện tại do thiếu devDependencies và cấu hình Vitest: cần cài `@vue/test-utils`, `@vue/compiler-sfc` và một DOM environment (`jsdom` hoặc `happy-dom`) và điều chỉnh `vitest.config.ts` để dùng environment='jsdom' (hoặc happy-dom) và plugin-vue. Ví dụ cài đặt: `npm install -D @vue/test-utils @vue/compiler-sfc jsdom`.
+  - Reviewer: solution-architect (automated): changes requested -> đã sửa; approved after fixes.
 
 ### Subtask TASK-12-04-3: Refactor props/slots nếu cần
 

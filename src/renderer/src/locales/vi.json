@@ -72,7 +72,7 @@
     }
   },
   "transactions": {
-    "title": "Danh sách giao dịch",
+    "latestBalance": "Số dư cuối",
     "empty": "Không có giao dịch",
     "columns": {
       "date": "Ngày",
