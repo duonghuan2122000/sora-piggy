@@ -8,6 +8,9 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
+    "test": "vitest",
+    "test:unit": "vitest",
+    "test:watch": "vitest --watch",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
@@ -55,6 +58,7 @@
     "vite": "^7.2.6",
     "vue": "^3.5.25",
     "vue-eslint-parser": "^10.2.0",
-    "vue-tsc": "^3.1.6"
+    "vue-tsc": "^3.1.6",
+    "vitest": "^1.3.0"
   }
 }
