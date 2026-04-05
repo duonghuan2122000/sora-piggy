@@ -1,112 +1,153 @@
 ---
 name: sora-plan
-description: 'Command để tạo TASKS từ plan.md, chạy agents tech-lead và qc, rồi review và lặp lại đến khi APPROVED.'
+description: 'Command để thực hiện bước PLAN từ spec.md đã được approve. Cú pháp: /sora-plan <<pbi>> <<mô tả thêm yêu cầu kỹ thuật (nếu có)>>'
 ---
 
 # sora-plan
 
-Mục đích: tự động hoá bước chuyển plan.md thành danh sách TASKS và test-case, phối hợp giữa các agent technical và QA, đồng thời chạy quy trình review đến khi cả hai được approve.
+Mục đích: Tự động hoá bước PLAN (thiết kế giải pháp kỹ thuật, lập kế hoạch triển khai) dựa trên `spec.md` đã được approve cho một Product Backlog Item (PBI). Command sẽ gọi agent `solution-architect` để tạo `plan.md` và các tệp liên quan, đồng thời báo cáo kiến trúc đề xuất.
 
 Cú pháp chạy:
 
 ```
-/sora-plan <<product backlog item>> <<mô tả thêm yêu cầu về kỹ thuật (nếu có)>>
+/sora-plan <<product backlog item>> <<mô tả thêm yêu cầu kỹ thuật (nếu có)>>
 ```
 
 Ví dụ:
 
 ```
-/sora-plan 123 "Cần hỗ trợ migration DB và tối ưu API"
+/sora-plan 123 "Sử dụng Redis cho session cache, yêu cầu tối ưu latency"
 ```
 
 Hành vi của command:
 
-- Nhận hai tham số: `product backlog item` (số nguyên) và `mô tả thêm` (chuỗi, tuỳ chọn).
-- Mục tiêu chính: từ `plan.md` (của PBI) tạo `tasks.md` (danh sách task chi tiết) và từ `spec.md` + `plan.md` tạo `test-case.md`.
+- Nhận hai tham số: `product backlog item` (số nguyên) và `mô tả thêm yêu cầu kỹ thuật` (chuỗi, tuỳ chọn).
+- Kiểm tra tồn tại file `specs/<pbi>/spec.md`. Nếu không tồn tại, báo lỗi và yêu cầu user tạo hoặc chỉ định đúng PBI.
+- Kiểm tra metadata trong `spec.md` để đảm bảo spec đã được approve. Gợi ý: tìm từ khoá `Approved:`, `Status:` hoặc dòng tương tự (implementer có thể điều chỉnh). Nếu không thấy dấu hiệu approve, cảnh báo user và dừng (hoặc yêu cầu confirm tiếp tục).
+- Trích xuất metadata quan trọng từ `spec.md`: `PBI`, `Branch` (nếu có), `Title`/Summary.
+  - Nếu không tìm thấy `Branch:` trong metadata, command sẽ đề xuất tên nhánh theo mẫu `feature/<pbi>-<short-summary>`.
 
-Luồng chi tiết (flow):
+- Xử lý Git branch (thực hiện ngay sau khi đọc spec.md):
+  - Lấy tên branch từ metadata `Branch:` trong `spec.md` (case-insensitive). Nếu có nhiều dòng `Branch:`, ưu tiên dòng xuất hiện đầu tiên.
+  - Nếu không có `Branch:` trong metadata, sử dụng tên nhánh đề xuất `feature/<pbi>-<short-summary>` và hiển thị cho user trước khi tiếp tục.
+  - Trước khi checkout, kiểm tra workspace git có sạch (không có thay đổi unstaged/uncommitted). Nếu workspace không sạch, cảnh báo user và yêu cầu họ stash/commit thay đổi hoặc xác nhận cho phép command tự stash.
+  - Hướng dẫn hoặc thực hiện checkout:
+    - Nếu implementer chọn chỉ hướng dẫn: hiển thị lệnh
+
+```
+git checkout <branch-name>
+```
+
+    - Nếu implementer hỗ trợ thực thi tự động (tuỳ cấu hình): thực hiện `git checkout <branch-name>` (thực hiện qua Bash tool). Trước khi chạy, yêu cầu xác nhận user nếu workspace bẩn.
+
+- Nếu checkout thất bại vì branch không tồn tại, gợi ý tạo branch mới theo mẫu `git checkout -b <branch-name>` và hỏi user có muốn tạo hay không.
+- Sau khi checkout thành công, tiếp tục gọi agent `solution-architect` và/hoặc lưu `plan.md` trên branch đó (nếu user muốn commit trên branch hiện tại).
+- Gợi ý commit trên branch:
+
+```
+git add specs/<pbi>/plan.md [và file liên quan]
+git commit -m "plan: add implementation plan for PBI <pbi>"
+```
+
+- Lưu ý: KHÔNG tự động push trừ khi user yêu cầu rõ ràng.
+- Gọi agent `solution-architect` để thiết kế giải pháp kỹ thuật và tạo nội dung `plan.md`:
+  - Khi gọi agent qua `functions.task`, set `subagent_type: "solution-architect"`.
+  - Truyền cho agent các dữ liệu sau trong prompt (tiếng Việt):
+    - Product Backlog Item (số) và tiêu đề/spec summary.
+    - Nội dung đầy đủ của `specs/<pbi>/spec.md`.
+    - Mô tả thêm yêu cầu kỹ thuật (nếu user cung cấp).
+    - Tên nhánh git đề xuất (nếu có trong metadata) hoặc khuyến nghị tên nhánh (ví dụ `feature/<pbi>-<short-summary>`).
+    - Định dạng output mong muốn: `plan.md` bằng tiếng Việt, cấu trúc bắt buộc gồm các phần: Executive Summary, Proposed Architecture (kèm sơ đồ/diagram notes), Components & Interfaces, Data Model changes (nếu có), APIs & Contracts, Non-functional Requirements (scalability, security, observability), Migration/Migration Plan (nếu cần), Implementation Tasks (phân nhỏ thành tickets/tasks có estimate), Timeline/Phases, Risks & Mitigations, Open Questions, Dependencies, Acceptance Criteria Mapping (mapping từ spec tới work items).
+  - Yêu cầu thêm: agent trả về
+    1. `plan.md` (markdown) hoàn chỉnh
+    2. Một báo cáo kiến trúc tóm tắt (architectural report) — 1 trang ngắn gọn (có thể lặp lại một phần của plan) để dùng trong review
+    3. Danh sách file/tài nguyên phụ đề xuất (ví dụ: diagram file path, migration scripts placeholder, terraform snippets) và tên các file được tạo.
+
+- Lưu/ghi file `specs/<pbi>/plan.md` với nội dung `plan.md` do agent trả về. Nếu agent đề xuất thêm file (ví dụ `specs/<pbi>/architecture/diagram.drawio` hoặc `docs/arch/<pbi>-diagram.svg`), tạo đường dẫn placeholder kèm hướng dẫn nếu cần (có thể chỉ tạo file README hoặc TODO file chứ không bắt buộc tạo binary diagram).
+- Thêm metadata lên đầu `plan.md` bao gồm ít nhất: `PBI: <pbi>`, `Spec: specs/<pbi>/spec.md`, `Branch: <branch-name hoặc recommended>`.
+- Gợi ý commit (command không tự động commit trừ khi user yêu cầu):
+
+```
+git add specs/<pbi>/plan.md [và file liên quan]
+git commit -m "plan: add implementation plan for PBI <pbi>"
+```
+
+Hướng dẫn chi tiết cho implementer command:
 
 1. Xác thực đầu vào
-   - Nếu `product backlog item` không phải số nguyên, báo lỗi và yêu cầu nhập lại.
+   - Nếu `product backlog item` không phải số nguyên, thông báo lỗi.
 
-2. Xác định vị trí `plan.md` và `spec.md`
-   - Mặc định command kỳ vọng các file nằm trong `specs/<pbi>/plan.md` và `specs/<pbi>/spec.md`.
-   - Nếu không tìm thấy, command nên báo rõ cho user vị trí cần có `plan.md`/`spec.md` và dừng.
+2. Kiểm tra spec tồn tại và trạng thái approve
+   - Đọc `specs/<pbi>/spec.md`.
+   - Tìm các dòng metadata như `Status: approved`/`Approved: true`/`Reviewed: yes` (case-insensitive). Nếu không tìm thấy, command nên cảnh báo: "Spec chưa được approve — có muốn tiếp tục không?" và đợi xác nhận user.
 
-2.1. Xác định và chuyển nhánh Git an toàn
+3. Gọi agent `solution-architect`
+   - Sử dụng `functions.task` với `subagent_type: "solution-architect"`.
+   - Truyền prompt rõ ràng, kèm nội dung spec và yêu cầu output ở định dạng Markdown tiếng Việt như mô tả ở trên.
+   - Yêu cầu agent trả về cấu trúc JSON/Markdown gồm: `plan_md` (string), `architecture_report` (string), `suggested_files` (list of {path, description}).
 
-- Trước khi chạy agents, command nên xác định tên nhánh Git từ metadata trong `spec.md` (dòng có dạng `Branch: <branch-name>`).
-- Nếu tìm thấy `Branch:` trong `spec.md`, command sẽ cố gắng checkout về nhánh đó trước khi tạo tasks/test-case.
-  - Hành động checkout có thể được thực hiện tự động hoặc chỉ hướng dẫn user tuỳ policy dự án; nếu thực hiện tự động, cần kiểm tra workspace sạch (không có thay đổi unstaged hoặc uncommitted).
-  - Nếu workspace không sạch, command phải cảnh báo user và dừng hoặc đề xuất các lựa chọn: stash thay đổi, commit tạm, hoặc user tự checkout.
-- Nếu `Branch:` không có trong `spec.md`, command có thể đề xuất một tên nhánh theo mẫu: `feature/<pbi>-<short-summary>` (dựa trên mô tả thêm) và yêu cầu user xác nhận hoặc cập nhật `spec.md` trước khi tiếp tục.
-- Khi thực hiện checkout tự động, implementer nên dùng `git status --porcelain` để kiểm tra sạch workspace và `git checkout <branch-name>` để chuyển nhánh. Nếu cần, hướng dẫn dùng `git stash push -m "sora-plan auto-stash"` trước khi checkout và `git stash pop` sau.
-- Tóm lại: trước khi gọi agents, command phải đảm bảo đang ở đúng nhánh liên quan đến PBI, hoặc thông báo rõ cho user để họ tự chuyển nhánh.
+4. Lưu file
+   - Tạo thư mục `specs/<pbi>/` nếu chưa có.
+   - Ghi `specs/<pbi>/plan.md` với metadata header và nội dung `plan_md`.
+   - Đối với mỗi `suggested_file` có thể tạo placeholder file text (ví dụ `specs/<pbi>/architecture/README.md` kèm mô tả) để ghi chú nơi sẽ lưu diagram hoặc migration scripts.
 
-3. Chạy song song hai agent (parallel):
-   - `tech-lead`: tạo `tasks.md` từ `plan.md`.
-     - Yêu cầu gửi tới agent `tech-lead` (khi gọi sử dụng `functions.task` đặt `subagent_type: "tech-lead"`):
-       - product backlog item (số), nội dung `plan.md` (nguyên văn), mô tả kỹ thuật thêm (nếu có).
-       - Output mong muốn: file `tasks.md` bằng tiếng Việt, cấu trúc rõ ràng: Metadata (PBI: <pbi>), Summary, List of Tasks (mỗi task gồm: title, description, estimate (h), priority, dependencies, owner-suggestion), Implementation Notes, Checklist.
-       - Ghi metadata đầu file: `PBI: <pbi>` và `Source: specs/<pbi>/plan.md`.
+5. Output cho user
+   - Hiển thị tóm tắt ngắn (3-6 dòng) của plan và link đến `specs/<pbi>/plan.md`.
+   - Hiển thị báo cáo kiến trúc tóm tắt.
+   - Liệt kê các task/tickets/estimates do agent tạo ra.
+   - Hướng dẫn commit và tiếp tục (ví dụ: tạo branch, commit, push, tạo PR).
 
-   - `qc`: tạo `test-case.md` từ `spec.md` và `plan.md`.
-     - Yêu cầu gửi tới agent `qc` (khi gọi sử dụng `functions.task` đặt `subagent_type: "qc"`):
-       - product backlog item (số), nội dung `spec.md`, nội dung `plan.md`.
-       - Output mong muốn: file `test-case.md` bằng tiếng Việt, cấu trúc gồm: Metadata (PBI), Test Summary, Test Cases (Acceptance tests, Integration tests, Edge cases, Non-functional tests), Pre-conditions, Test Data, Steps, Expected Results, Automation notes (nếu có).
-       - Ghi metadata đầu file: `PBI: <pbi>` và `Source: specs/<pbi>/spec.md, specs/<pbi>/plan.md`.
+6. Quy tắc commit
+   - Command KHÔNG tự động commit hoặc push trừ khi user rõ ràng yêu cầu.
+   - Nếu implementer hỗ trợ commit tự động, phải kiểm tra workspace sạch hoặc yêu cầu user stash/commit thay vì tự động mất dữ liệu.
 
-4. Chờ cả hai agent hoàn thành. Lưu file trả về lần lượt vào:
-   - `specs/<pbi>/tasks.md` (từ `tech-lead`)
-   - `specs/<pbi>/test-case.md` (từ `qc`)
-
-5. Sau khi cả hai file có sẵn, chạy song song review:
-   - `solution-architect`: review `tasks.md` (subagent_type: "solution-architect"). Yêu cầu review trả về trạng thái rõ ràng: APPROVED hoặc REQUEST_CHANGES kèm feedback chi tiết (mức độ: blocker/major/minor) và các gợi ý sửa.
-   - `qc-lead`: review `test-case.md` (subagent_type: "qc-lead"). Yêu cầu review trả về trạng thái rõ ràng: APPROVED hoặc REQUEST_CHANGES với feedback chi tiết.
-
-6. Nếu cả hai đều APPROVED => command kết thúc thành công, trả lời user rằng `tasks.md` và `test-case.md` đã được APPROVED và sẵn sàng để assign/implement.
-
-7. Nếu có review trả về `REQUEST_CHANGES`:
-   - Nếu `solution-architect` REQUEST_CHANGES:
-     - Gửi feedback architect cho `tech-lead` (subagent_type: "tech-lead") để sửa `tasks.md` tương ứng. Yêu cầu `tech-lead` trả về phiên bản cập nhật của `tasks.md`.
-   - Nếu `qc-lead` REQUEST_CHANGES:
-     - Gửi feedback qc-lead cho `qc` (subagent_type: "qc") để sửa `test-case.md` tương ứng. Yêu cầu `qc` trả về phiên bản cập nhật của `test-case.md`.
-   - Sau khi các sửa được nộp, lặp lại bước 5 (review) cho các file được cập nhật.
-   - Lặp lại cho đến khi cả hai review trả về APPROVED.
-
-8. Ghi chú commit / hướng dẫn git:
-   - Command này KHÔNG tự động commit hoặc push trừ khi user yêu cầu rõ ràng.
-   - Hướng dẫn commit mẫu:
-
-```
-git add specs/<pbi>/tasks.md specs/<pbi>/test-case.md
-git commit -m "chore(<pbi>): add tasks and test cases generated from plan/spec"
-```
-
-Hướng dẫn chi tiết cho implementer (yêu cầu kỹ thuật khi triển khai command):
-
-- Gọi agent `tech-lead` và `qc` song song: dùng `functions.task` hai lần trong một call `multi_tool_use.parallel` (nếu implementer hỗ trợ), hoặc gọi hai `functions.task` không phụ thuộc.
-- Đảm bảo truyền nội dung file `plan.md` và `spec.md` (đã đọc bằng `functions.read`) vào prompt của agent để agent có đủ ngữ cảnh.
-- Lưu kết quả trả về từ từng agent vào tệp đúng đường dẫn `specs/<pbi>/tasks.md` và `specs/<pbi>/test-case.md`.
-- Khi chạy review, truyền nội dung file và yêu cầu trạng thái review rõ ràng (APPROVED / REQUEST_CHANGES) cùng feedback có cấu trúc (mức độ severity, mô tả, dòng/section liên quan nếu có).
-- Nếu bất kỳ reviewer trả về REQUEST_CHANGES, tự động gửi feedback đó về cho tác nhân tương ứng (`tech-lead` hoặc `qc`) để sửa. Lặp lại cho đến khi reviewer trả về APPROVED.
-
-Yêu cầu định dạng output từ agents (bắt buộc):
-
-- Đầu file phải có metadata rõ ràng, ví dụ:
+Gợi ý cho nội dung `plan.md` (mẫu):
 
 ```
 PBI: 123
-Source: specs/123/plan.md
-Status: DRAFT
+Spec: specs/123/spec.md
+Branch: feature/123-optimize-session-cache
+
+# Plan: <Title>
+
+## Executive Summary
+... (1-3 đoạn ngắn)
+
+## Proposed Architecture
+- Kiến trúc tổng quát
+- Diagram notes: (mô tả sơ đồ hoặc đường dẫn tới file)
+
+## Components & Interfaces
+- Component A: responsibilities
+- API contracts
+
+## Implementation Tasks
+1. Task A - estimate
+2. Task B - estimate
+
+## Risks & Mitigations
+...
+
 ```
 
-- File `tasks.md` phải chứa ít nhất 5 field cho mỗi task: id, title, description, estimate (giờ), dependencies.
-- File `test-case.md` phải chứa test case id, title, steps, expected result, priority.
+Lưu ý triển khai cho implementer command:
 
-Ghi chú cuối:
+- Khi gọi `functions.task` cho `solution-architect`, truyền prompt chi tiết và yêu cầu agent trả về `plan_md` cùng `architecture_report` và `suggested_files` rõ ràng để implementer biết phải lưu gì vào repository.
+- Nếu agent trả về nội dung rất dài hoặc có code snippets, đảm bảo ghi file nguyên vẹn và không cắt bớt.
+- Nếu agent đề xuất thay đổi lớn (ví dụ: thay đổi database scheme), command nên cảnh báo user và tách phần đó vào tasks có tag `requires-approval` để người quản lý review trước khi implement.
+- Giữ mọi output bằng tiếng Việt.
 
-- File command này mô tả hành vi; khi implement, hãy dùng `functions.task` với `subagent_type` tương ứng: `tech-lead`, `qc`, `solution-architect`, `qc-lead`.
-- Quy trình review là một vòng lặp: generate -> review -> feedback -> fix -> review cho đến khi APPROVED. Người triển khai nên đảm bảo timeout / max iterations hợp lý và báo lỗi cho user nếu vượt quá giới hạn (ví dụ 5 vòng).
+Ví dụ luồng tương tác mong muốn:
+
+1. User chạy: `/sora-plan 123 "Sử dụng Redis cho session cache"`
+2. Command kiểm tra `specs/123/spec.md` và thấy `Status: Approved`.
+3. Command trích xuất metadata, xác định tên branch và thực hiện (hoặc hướng dẫn) `git checkout <branch>` theo quy tắc đã mô tả (kiểm tra workspace sạch, đề xuất tạo branch nếu cần).
+4. Sau khi đã ở trên branch đúng, command gọi agent `solution-architect` với nội dung spec và yêu cầu tạo plan.
+5. Agent trả về `plan.md`, `architecture_report`, và `suggested_files`.
+6. Command lưu `specs/123/plan.md`, tạo placeholder cho file diagram, và hiển thị tóm tắt + hướng dẫn commit cho user.
+
+Kết luận:
+
+Command `sora-plan` giúp chuẩn hoá bước thiết kế kỹ thuật và lập kế hoạch triển khai từ spec đã approved bằng cách tận dụng agent `solution-architect`. File `sora-plan.md` này là tài liệu mô tả hành vi — phần implementer cần gọi `functions.task` với `subagent_type: "solution-architect"` và lưu lại các file mà agent trả về.
 
 (End of file)
