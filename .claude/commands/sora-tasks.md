@@ -1,79 +1,92 @@
 #!/bin/bash
 
 # Bao gồm: đọc CLAUDE.md và constitution.md ở gốc repository trước
+
 # Luôn đọc file CLAUDE.md ở cấp repository và file constitution.md ở gốc repository trước khi thực hiện bất kỳ hành động nào.
+
 # Agents (đại lý) nên sử dụng công cụ Read để mở các file này và tuân thủ mọi quy tắc hoặc thông tin được liệt kê trong đó.
 
 # /sora-tasks
+
 # Thực hiện bước TASKS từ plan.md
 
 ## Cú pháp
+
 # /sora-tasks <pbi_id> [nội dung mô tả bổ sung]
+
 ## Ví dụ: /sora-tasks 003 Xác nhận yêu cầu bổ sung cho tasks
 
 # Kiểm tra argument
+
 if [ -z "$1" ]; then
-    echo "❌ ERROR: Cần cung cấp mã PBI"
-    echo "Ví dụ: /sora-tasks 003 Xác nhận yêu cầu bổ sung"
-    exit 1
+echo "❌ ERROR: Cần cung cấp mã PBI"
+echo "Ví dụ: /sora-tasks 003 Xác nhận yêu cầu bổ sung"
+exit 1
 fi
 
 # Lấy mã PBI và nội dung bổ sung
+
 PBI_ID="$1"
 shift
 ADDITIONAL_NOTES="$@"
 
 echo "📝 Bắt đầu thực hiện TASKS..."
-echo "   Mã PBI: $PBI_ID"
+echo " Mã PBI: $PBI_ID"
 if [ -n "$ADDITIONAL_NOTES" ]; then
-    echo "   Nội dung bổ sung: $ADDITIONAL_NOTES"
+echo " Nội dung bổ sung: $ADDITIONAL_NOTES"
 fi
 
 # Xác định thư mục spec
+
 SPEC_FOLDER="specs/${PBI_ID}"
 SPEC_FILE="${SPEC_FOLDER}/spec.md"
 PLAN_FILE="${SPEC_FOLDER}/plan.md"
 
 # Kiểm tra file spec.md có tồn tại không
+
 if [ ! -f "$SPEC_FILE" ]; then
-    echo "❌ ERROR: Không tìm thấy file spec.md tại $SPEC_FILE"
-    echo "Vui lòng chạy /sora-specify trước hoặc kiểm tra lại mã PBI"
-    exit 1
+echo "❌ ERROR: Không tìm thấy file spec.md tại $SPEC_FILE"
+echo "Vui lòng chạy /sora-specify trước hoặc kiểm tra lại mã PBI"
+exit 1
 fi
 
 # Kiểm tra file plan.md có tồn tại không
+
 if [ ! -f "$PLAN_FILE" ]; then
-    echo "❌ ERROR: Không tìm thấy file plan.md tại $PLAN_FILE"
-    echo "Vui lòng chạy /sora-plan trước hoặc kiểm tra lại mã PBI"
-    exit 1
+echo "❌ ERROR: Không tìm thấy file plan.md tại $PLAN_FILE"
+echo "Vui lòng chạy /sora-plan trước hoặc kiểm tra lại mã PBI"
+exit 1
 fi
 
 echo "📁 Tìm thấy spec.md tại: $SPEC_FILE"
 echo "📁 Tìm thấy plan.md tại: $PLAN_FILE"
 
 # Đọc branch từ file spec.md
-BRANCH_FROM_SPEC=$(grep -E "Branch git:|branch:" "$SPEC_FILE" | head -1 | sed 's/.*Branch git: *//' | sed 's/.*branch: *//' | tr -d '\r')
+
+BRANCH_FROM_SPEC=$(grep -E "Branch git:|branch:" "$SPEC_FILE" | head -1 | sed 's/._Branch git: _//' | sed 's/._branch: _//' | tr -d '\r')
 
 if [ -z "$BRANCH_FROM_SPEC" ]; then
-    echo "⚠️  Không tìm thấy branch trong spec.md, sử dụng branch mặc định"
-    BRANCH_FROM_SPEC="feature/${PBI_ID}"
+echo "⚠️ Không tìm thấy branch trong spec.md, sử dụng branch mặc định"
+BRANCH_FROM_SPEC="feature/${PBI_ID}"
 fi
 
 echo "🌿 Đọc branch từ spec.md: $BRANCH_FROM_SPEC"
 
 # Switch sang branch
+
 echo "🔄 Switch sang branch: $BRANCH_FROM_SPEC"
 git checkout "$BRANCH_FROM_SPEC" 2>/dev/null
 
 if [ $? -eq 0 ]; then
-    echo "✅ Đã switch sang branch: $BRANCH_FROM_SPEC"
+echo "✅ Đã switch sang branch: $BRANCH_FROM_SPEC"
 else
     echo "⚠️  Không thể switch sang branch, sử dụng branch hiện tại"
     BRANCH_FROM_SPEC=$(git branch --show-current)
-    echo "   Branch hiện tại: $BRANCH_FROM_SPEC"
+echo " Branch hiện tại: $BRANCH_FROM_SPEC"
 fi
 
 # Chuẩn bị thông tin cho agent
+
 echo ""
 echo "🤖 Gọi agent tech-lead và qc để tạo tasks.md và test-case.md"
 echo ""
@@ -105,8 +118,9 @@ echo "   - Thư mục: $SPEC_FOLDER"
 echo "   - Branch: $BRANCH_FROM_SPEC"
 echo "   - File plan: $PLAN_FILE"
 if [ -n "$ADDITIONAL_NOTES" ]; then
-    echo "   - Lưu ý bổ sung: $ADDITIONAL_NOTES"
+echo " - Lưu ý bổ sung: $ADDITIONAL_NOTES"
 fi
 
 # Mặc định exit code 0
+
 exit 0

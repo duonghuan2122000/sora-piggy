@@ -46,6 +46,7 @@ const handleSaveTransaction = (): void => {
         <TopNav
           :page-title="pageTitle"
           :mode="topNavMode"
+          :is-loading="transactionFormStore.isLoading"
           @add-transaction="handleAddTransaction"
           @save-transaction="handleSaveTransaction"
         />

@@ -57,7 +57,12 @@
       "nameRequired": "Vui lòng nhập tên khoản thu/chi",
       "amountRequired": "Vui lòng nhập số tiền",
       "categoryRequired": "Vui lòng chọn danh mục",
-      "accountRequired": "Vui lòng chọn tài khoản"
+      "accountRequired": "Vui lòng chọn tài khoản",
+      "amountGreaterThanZero": "Số tiền phải lớn hơn 0"
+    },
+    "messages": {
+      "success": "Giao dịch đã được lưu",
+      "error": "Lưu giao dịch thất bại"
     }
   }
 }

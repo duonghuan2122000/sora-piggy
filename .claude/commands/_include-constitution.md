@@ -2,9 +2,10 @@
 
 Trước khi chạy bất kỳ lệnh agent/command nào, agent cần đọc file CLAUDE.md ở cấp repository và file constitution.md ở gốc repository để nắm các quy tắc dự án và ghi nhớ PBI.
 
-Sử dụng: chèn nội dung của file này vào đầu mỗi file .claude/commands/*.md.
+Sử dụng: chèn nội dung của file này vào đầu mỗi file .claude/commands/\*.md.
 
 Các file cần đọc (đường dẫn tuyệt đối hoặc tương đối với repo):
+
 - CLAUDE.md (gốc repo)
 - constitution.md (gốc repo)
 
