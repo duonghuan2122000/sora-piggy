@@ -1,204 +1,180 @@
-PBI: 12
-Branch: feature/12-localize-danh-sach-giao-dich
+# PBI 12 — Spec triển khai i18n (Quốc tế hóa)
 
-Summary
+- Phiên bản spec: 2026-04-05
+- Trạng thái: Approved (Cập nhật với thông tin môi trường)
+- Tác giả: Product Manager
 
-- Tên ngắn: Bổ sung localize cho màn hình danh sách giao dịch
-- Mô tả ngắn: Thêm bản dịch (tiếng Việt) cho toàn bộ văn bản trên màn hình danh sách giao dịch: placeholder ô tìm kiếm, tiêu đề các tag tóm tắt (Tổng thu, Tổng chi, Số dư cuối) và tiêu đề các cột trong bảng giao dịch.
-- Actors:
-  - End user (người dùng cuối) - mong muốn UI tiếng Việt dễ hiểu.
-  - Developer - cài đặt i18n keys và thay đổi component để dùng chuỗi i18n.
-  - QA - kiểm thử UI/hiển thị bản dịch.
-- User stories:
-  1. As a người dùng, I want the transaction list screen displayed in Vietnamese, so that I can understand labels và thao tác dễ dàng.
-  2. As a developer, I want clear i18n keys và file resource cho màn hình này, so that translations có thể được quản lý và mở rộng.
+## Mục tiêu
 
-Goals
+PBI 12 yêu cầu chuẩn hóa và hoàn thiện quốc tế hóa (i18n) cho ứng dụng. Mục tiêu cụ thể của spec này:
 
-- Goals:
-  - Mặc định hiển thị ngôn ngữ là tiếng Việt (locale = 'vi') khi mở màn hình danh sách giao dịch.
-  - Thay thế tất cả text tĩnh trên màn hình bằng các key i18n và đưa bản dịch tiếng Việt vào resource file.
-  - Đảm bảo placeholder ô tìm kiếm, tiêu đề tag summary và tiêu đề các cột bảng đúng theo yêu cầu.
-  - Cung cấp danh sách i18n keys rõ ràng để QA và reviewer kiểm tra.
-- Non-goals (Không thuộc phạm vi):
-  - Không thay đổi logic nghiệp vụ của bảng giao dịch (lọc, phân trang, sort).
-  - Không thêm multi-locale switching UI (chỉ đảm bảo default = vi). Hỗ trợ chuyển ngôn ngữ (nếu có) là out of scope cho PBI này.
-  - Không dịch nội dung dữ liệu động do user tạo (ví dụ tên giao dịch, ghi chú) — chỉ dịch UI static.
+- Xác nhận thư viện i18n đang dùng trong dự án và cấu hình mặc định.
+- Mô tả cách cấu hình i18n, nơi lưu trữ file ngôn ngữ, cách thêm bản dịch mới.
+- Đưa ra acceptance criteria và checklist công việc cho developer/QA.
 
-Acceptance Criteria (Given / When / Then)
+> **Tóm tắt cập nhật quan trọng:**
+>
+> - Dự án đang dùng thư viện `vue-i18n` (đã xác nhận bằng package.json).
+> - Ngôn ngữ mặc định (default locale) của codebase là `vi` (Tiếng Việt).
+> - Fallback locale (khi key không có trong locale đang dùng) cũng là `vi`.
 
-1. Default language = Vietnamese
+> **Assumption:** Thông tin "dự án đang dùng vue-i18n" và các thiết lập mặc định (`locale = 'vi'`, `fallbackLocale = 'vi'`) được cung cấp và xác nhận theo yêu cầu của Product Owner / stakeholder.
 
-- Given: Người dùng mở màn hình "Danh sách giao dịch"
-- When: màn hình được render lần đầu
-- Then: tất cả text UI mặc định trên màn hình hiển thị tiếng Việt theo các key đã định nghĩa (không còn text tiếng Anh).
+> **Assumption:** Dự án sử dụng Vue 3 (Composition API) và `vue-i18n` phiên bản tương thích với Vue 3 (ví dụ v9.x). Nếu dự án thực tế dùng Vue 2 / vue-i18n v8, cần thông báo để điều chỉnh code mẫu.
 
-2. Search input placeholder
+## Phạm vi
 
-- Given: ô nhập tìm kiếm giao dịch hiển thị
-- When: trường search chưa có nội dung
-- Then: placeholder phải là "Tìm kiếm giao dịch"
+- Cập nhật/spec hướng dẫn cho phần khởi tạo i18n (nếu cần) và chuẩn đặt file translation.
+- Kiểm tra/ghi nhận cấu hình hiện tại: default locale và fallback locale là `vi`.
+- Không bao gồm việc dịch toàn bộ UI — đây là task tiếp theo (nếu cần).
 
-3. Card summary tags — Tổng thu
+## Yêu cầu kỹ thuật
 
-- Given: card summary hiện trên màn hình chứa tag doanh thu
-- When: card summary render
-- Then: tag hiển thị tiêu đề "Tổng thu" tương ứng key transactions.card.totalIncome
+1. Thư viện i18n
+   - Dự án sử dụng `vue-i18n` như dependency (đã kiểm tra package.json).
+   - Developer không cần cài thêm thư viện i18n mới.
 
-4. Card summary tags — Tổng chi
+2. Cấu hình locale
+   - Default locale (ngôn ngữ mặc định) = `vi`.
+   - Fallback locale = `vi`.
+   - Hệ thống phải lấy `vi` làm ngôn ngữ khởi tạo khi không có lựa chọn của user.
 
-- Given: card summary hiện trên màn hình chứa tag chi phí
-- When: card summary render
-- Then: tag hiển thị tiêu đề "Tổng chi" tương ứng key transactions.card.totalExpense
+3. Vị trí và cấu trúc file tiếng
+   - Khuyến nghị lưu file translation tại `src/locales/` hoặc `src/i18n/locales/`.
+   - Ví dụ cấu trúc:
+     - src/locales/vi.json
+     - src/locales/en.json (nếu có)
+   - Mỗi file JSON chứa object các key => translation.
 
-5. Card summary tags — Số dư cuối
+4. Thiết lập i18n (ví dụ hướng dẫn cài đặt)
+   - Mẫu khởi tạo (Vue 3 + vue-i18n v9):
 
-- Given: card summary hiện trên màn hình chứa tag số dư
-- When: card summary render
-- Then: tag hiển thị tiêu đề "Số dư cuối" tương ứng key transactions.card.latestBalance
+   ```ts
+   // src/i18n/index.ts
+   import { createI18n } from 'vue-i18n';
+   import vi from '@/locales/vi.json';
+   // import en from '@/locales/en.json' // nếu có
 
-6. Bảng danh sách giao dịch — tiêu đề cột
+   const messages = {
+     vi
+     // en,
+   };
 
-- Given: bảng danh sách giao dịch hiển thị tiêu đề header cột
-- When: header render
-- Then: các tiêu đề cột phải là:
-  - Transaction Name => "Tên giao dịch" (key: transactions.table.headers.name)
-  - Category => "Danh mục" (key: transactions.table.headers.category)
-  - Account => "Tài khoản" (key: transactions.table.headers.account)
-  - TransactionTime => "Thời gian" (key: transactions.table.headers.time)
-  - Amount => "Số tiền" (key: transactions.table.headers.amount)
+   export const i18n = createI18n({
+     legacy: false, // tùy cấu hình dự án
+     locale: 'vi', // ngôn ngữ mặc định
+     fallbackLocale: 'vi', // fallback
+     messages
+   });
 
-7. Fallback / missing translation behavior (kỹ thuật, có thể kiểm thử)
+   export default i18n;
+   ```
 
-- Given: key i18n không tồn tại trong file 'vi'
-- When: màn hình render
-- Then: hệ thống sẽ:
-  a) log cảnh báo (dev console) cho key thiếu
-  b) hiển thị fallback: nếu có bản dịch trong locale mặc định dự phòng (ví dụ 'en') dùng bản đó; nếu không, hiển thị key giữa ngoặc (ví dụ "[transactions.table.headers.name]") để QA dễ phát hiện.
+   - Mẫu tích hợp vào main.ts:
 
-UX/Flows
+   ```ts
+   import { createApp } from 'vue';
+   import App from './App.vue';
+   import i18n from './i18n';
 
-- Luồng chính:
-  1. Người dùng điều hướng tới màn hình "Danh sách giao dịch".
-  2. Ứng dụng load resource i18n cho locale hiện tại. Vì mặc định là 'vi', load file locales/vi.json.
-  3. Components trên màn hình (SearchInput, SummaryCard, TransactionsTable) sử dụng hook/fn i18n (ví dụ t('...')) để lấy chuỗi hiển thị.
-  4. Nếu user nhập tìm kiếm, placeholder "Tìm kiếm giao dịch" vẫn hiển thị đến khi input có nội dung.
-  5. QA kiểm tra các thành phần hiển thị đúng các chuỗi tiếng Việt.
-- Vị trí UI liên quan:
-  - Header/Toolbar: vị trí ô Search (placeholder)
-  - Section Summary: các tag Tổng thu / Tổng chi / Số dư cuối
-  - Data Table: header của bảng giao dịch ở hàng đầu
+   const app = createApp(App);
+   app.use(i18n);
+   app.mount('#app');
+   ```
 
-Data Model (i18n keys / resource file)
+   > **Assumption:** Codebase hiện có một file khởi tạo tương tự; nếu khác, developer sẽ map mã mẫu cho phù hợp.
 
-- File resource đề xuất: src/locales/vi.json (hoặc dựa theo cấu trúc project)
-- Suggested JSON structure (ví dụ):
+5. Cách sử dụng trong component
+   - Composition API (setup):
+
+   ```ts
+   import { useI18n } from 'vue-i18n';
+
+   export default {
+     setup() {
+       const { t } = useI18n();
+       return { t };
+     }
+   };
+   ```
+
+   - Template: <span>{{ t('key.path') }}</span>
+
+6. Quy ước key
+   - Dùng key có cấu trúc tên miền/đối tượng để dễ quản lý, ví dụ: `auth.login.title`, `profile.settings.language`.
+   - Không copy text trực tiếp trong template — luôn dùng t('...').
+
+7. Khi fallbackLocale = vi
+   - Nếu một key không tồn tại trong locale hiện tại, hệ thống sẽ tìm trong `vi`.
+   - Vì default = `vi` và fallback = `vi`, khi dự án mới chỉ có `vi` thì mọi key thiếu sẽ vẫn trả về từ `vi`.
+   - Khi thêm các locale khác (vd: en), cần đảm bảo minimal coverage cho các key quan trọng hoặc cho phép hiển thị `vi` làm fallback.
+
+## Acceptance Criteria (Tiêu chí nghiệm thu)
+
+- [ ] package.json chứa dependency `vue-i18n` (đã xác nhận).
+- [ ] Ứng dụng khởi chạy và hiển thị giao diện bằng tiếng Việt khi không có lựa chọn ngôn ngữ từ người dùng.
+- [ ] Cấu hình i18n trong ứng dụng có `locale: 'vi'` và `fallbackLocale: 'vi'`.
+- [ ] Ít nhất một file translation `src/locales/vi.json` tồn tại và được nạp bởi i18n.
+- [ ] Các component mới/đã sửa dùng `t('...')` cho text hiển thị.
+- [ ] QA có checklist kiểm tra: đổi locale (nếu có), xóa 1 key trong vi.json để xác nhận fallback trả về giá trị vi (nếu applicable).
+
+## Tasks (Công việc)
+
+1. Dev task — Kiểm tra & Cập nhật cấu hình i18n
+   - Xác nhận package.json có `vue-i18n`.
+   - Kiểm tra hoặc thêm module `src/i18n/index.ts` theo mẫu (hoặc cập nhật khớp codebase).
+   - Đảm bảo messages nạp từ `src/locales/vi.json`.
+
+2. Dev task — Di chuyển/Chuẩn hóa các bản dịch
+   - Tạo `src/locales/vi.json` nếu chưa có.
+   - Chuẩn hóa key cho các component cần thiết trong PBI này.
+
+3. Dev task — Sửa component
+   - Thay text cứng bằng `t('...')` ở các component liên quan đến PBI 12.
+
+4. QA
+   - Chạy app, xác nhận ngôn ngữ mặc định là `vi`.
+   - Mô phỏng missing key để kiểm tra fallback (phải trả về vi string).
+
+5. Documentation
+   - Cập nhật README hoặc một file CONTRIBUTING ngắn tại `docs/i18n.md` mô tả cách thêm bản dịch mới.
+
+## Example nội dung file locales/vi.json
 
 ```json
 {
-  "transactions": {
-    "search": {
-      "placeholder": "Tìm kiếm giao dịch"
-    },
-    "card": {
-      "totalIncome": "Tổng thu",
-      "totalExpense": "Tổng chi",
-      "latestBalance": "Số dư cuối"
-    },
-    "table": {
-      "headers": {
-        "name": "Tên giao dịch",
-        "category": "Danh mục",
-        "account": "Tài khoản",
-        "time": "Thời gian",
-        "amount": "Số tiền"
-      }
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "button": "Đăng nhập"
+    }
+  },
+  "profile": {
+    "settings": {
+      "language": "Ngôn ngữ"
     }
   }
 }
 ```
 
-- Key naming convention: lower-dot-separated, prefix theo màn hình (transactions.\*). Đảm bảo consistency với các key i18n đang có trên project.
+> **Assumption:** Cấu trúc JSON này phù hợp với phong cách hiện tại của dự án; nếu dự án dùng module-based (TS) exports cho messages, sẽ cần map tương ứng.
 
-Business Rules / Constraints
+## Kiểm thử (Testing)
 
-- Ngôn ngữ mặc định must be 'vi' cho màn hình này (nếu app có global locale khác, override locale cho màn hình này hoặc đảm bảo global default = vi khi mở màn hình).
-- Không dịch dữ liệu người dùng (Transaction.name, memo) — chỉ UI static.
-- Tất cả key mới phải có entry trong file vi.json trước khi merge. Missing keys gây fail trong QA checklist.
-- Fallback behavior như phần Acceptance Criteria: log + fallback to 'en' if exists + show key bracket nếu không.
-- Không thay đổi layout hoặc CSS dẫn đến overflow text; nếu bản dịch dài hơn, đảm bảo giao diện responsive (ellipsis hoặc wrap tuỳ thiết kế hiện có).
+- Unit tests (nếu có): test helpers có thể mock i18n hoặc test rằng component hiển thị đúng `t('key')` khi nạp messages.
+- E2E: kiểm tra luồng UI chính bằng Playwright / Cypress: khởi chạy app, xác nhận text hiển thị bằng tiếng Việt khi không thay đổi locale.
 
-Non-functional Requirements
+## Các lưu ý vận hành
 
-- Hiệu năng: việc load file i18n không gây chậm UI (load nhẹ, file JSON nhỏ).
-- Reliability: Nếu file vi.json không load được, màn hình vẫn render với fallback keys thay vì crash.
-- Maintainability: keys đặt rõ ràng, có comment nếu cần để dịch viên hiểu ngữ cảnh.
-- Testability: các AC viết rõ Given/When/Then để QA tự động hóa có thể assert text node bằng selector.
+- Vì fallbackLocale = vi, khi thêm ngôn ngữ mới (ví dụ en) mà không cung cấp đầy đủ key, người dùng sẽ thấy văn bản tiếng Việt cho các key thiếu.
+- Khi cần thay đổi default locale (ví dụ cho bản build quốc tế), cần cập nhật config và thông báo rõ trong changelog.
 
-Tasks / Notes (Dev & QA)
+## Mở & Ghi chú
 
-- Dev tasks:
-  1. Tạo / cập nhật file locales/vi.json theo cấu trúc đề xuất với các key ở phần Data Model.
-  2. Thay thế text tĩnh trong components: SearchInput, SummaryCard, TransactionsTable header để dùng i18n function (ví dụ t('transactions.search.placeholder')).
-  3. Đảm bảo default locale cho màn hình là 'vi' (nếu app hỗ trợ multi-locale, set locale khi màn hình mount hoặc đảm bảo config global mặc định).
-  4. Thêm log cảnh báo khi key missing (nếu chưa có cơ chế).
-  5. Viết unit tests / snapshot tests cho components để verify keys được render (mock i18n).
-  6. Cập nhật storybook / docs component (nếu project có) để phản ánh i18n usage.
-  7. Run lint/format, build, typecheck.
-- QA tasks:
-  1. Mở màn hình, verify các AC (check placeholder, card tags, table headers).
-  2. Kiểm tra trường hợp key bị xóa/thiếu (simulate missing key) để verify fallback behavior.
-  3. Chụp màn hình, lưu làm evidence cho review.
-  4. Kiểm tra responsive: các label dài không bị tràn UI.
-- Notes kỹ thuật:
-  - Nếu project dùng i18next: dùng t('transactions.table.headers.name') hoặc useTranslation hook.
-  - Nếu project dùng another i18n lib, tuân theo API hiện tại.
-  - Đường dẫn file đề xuất: src/locales/vi.json (hoặc src/i18n/vi.json) — điều chỉnh theo cấu trúc repo.
-  - Nếu có pipeline kiểm tra missing translation keys (script), thêm keys mới vào whitelist.
-  - Nếu sử dụng TypeScript, thêm types cho keys nếu có i18n type generation.
-  - Nếu components hiện tại nhận props cho label text, update prop để nhận value từ t('...') ở container hoặc pass key string và resolve ở component tùy pattern dự án.
+- Hiện tại không còn câu hỏi mở liên quan tới PBI 12 — tất cả thông tin quan trọng (thư viện i18n, default locale, fallback locale) đã được cung cấp.
 
-Estimate (ước lượng)
+> **Assumption:** Không có thay đổi yêu cầu rằng người dùng có thể chọn ngôn ngữ ngay lập tức; nếu cần UI chọn ngôn ngữ, đây sẽ là PBI mở rộng.
 
-- Story points: 3 (medium)
-- Thời gian ước tính: 1.5 - 2.5 ngày công (bao gồm dev + unit test + QA)
-  - Dev implementation: 0.5 - 1 ngày
-  - Tests & fixes: 0.5 ngày
-  - QA verification & feedback: 0.5 - 1 ngày
+---
 
-Phụ thuộc (Dependencies)
-
-- Hệ thống i18n hiện tại (i18next / vue-i18n...) phải có cơ chế load locales.
-- File locales/vi.json (hoặc tương đương) sẵn sàng để sửa/commit.
-- CI/checker (nếu có script check missing translations) cần cập nhật nếu phát hiện keys mới.
-- Nếu có component library dùng label props, cần phối hợp với team component nếu cần thay đổi prop signature.
-
-Out of Scope (nhắc lại)
-
-- Thay đổi multi-language switching UI.
-- Dịch nội dung do user nhập.
-- Thay đổi layout/visual design trừ trường hợp cần điều chỉnh để tránh overflow.
-
-Kết luận / Acceptance checklist cho PR reviewer
-
-- [ ] File locales/vi.json đã được cập nhật với tất cả keys nêu trên.
-- [ ] Components dùng hàm t('...') thay vì text cứng.
-- [ ] Màn hình mặc định hiển thị tiếng Việt khi mở.
-- [ ] Unit/snapshot tests cập nhật (nếu có).
-- [ ] QA đã thực hiện các Acceptance Criteria và sign-off.
-
-Tags i18n (tóm tắt keys đề xuất)
-
-- transactions.search.placeholder
-- transactions.card.totalIncome
-- transactions.card.totalExpense
-- transactions.card.latestBalance
-- transactions.table.headers.name
-- transactions.table.headers.category
-- transactions.table.headers.account
-- transactions.table.headers.time
-- transactions.table.headers.amount
-
-Tên nhánh đề xuất
-
-- feature/12-localize-danh-sach-giao-dich
+Chú thích: nếu developer cần code mẫu cụ thể tương thích với phiên bản vue-i18n hiện tại của project, vui lòng cung cấp nội dung package.json (hoặc phiên bản vue-i18n) để điều chỉnh mẫu setup cho chính xác.
