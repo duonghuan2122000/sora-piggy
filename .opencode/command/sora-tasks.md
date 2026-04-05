@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Bao gồm: đọc CLAUDE.md và constitution.md ở gốc repository trước
+# Bao gồm: đọc AGENTS.md và constitution.md ở gốc repository trước
 
-# Luôn đọc file CLAUDE.md ở cấp repository và file constitution.md ở gốc repository trước khi thực hiện bất kỳ hành động nào.
+# Luôn đọc file AGENTS.md ở cấp repository và file constitution.md ở gốc repository trước khi thực hiện bất kỳ hành động nào.
 
 # Agents (đại lý) nên sử dụng công cụ Read để mở các file này và tuân thủ mọi quy tắc hoặc thông tin được liệt kê trong đó.
 
