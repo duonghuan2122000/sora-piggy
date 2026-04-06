@@ -62,13 +62,6 @@ const sortOptions = computed(() => [
   { label: t('transactions.sort.oldest') || 'Cũ nhất', value: SORT_OLDEST }
 ]);
 
-// Mapping canonical account identifiers to display names used in older datasets
-const ACCOUNT_DISPLAY_MAP: Record<string, string> = {
-  [ACC_CASH]: 'Cash',
-  [ACC_BANK_A]: 'Bank account A',
-  [ACC_BANK_B]: 'Bank account B'
-};
-
 // Computed
 const filteredTransactions = computed(() => {
   let result = [...transactions.value];
@@ -85,38 +78,21 @@ const filteredTransactions = computed(() => {
 
   // Filter by Category
   if (selectedCategory.value !== CAT_ALL) {
-    // compare with internal canonical category values or fallback to string match
-    const sel = selectedCategory.value.toString().toLowerCase();
-    result = result.filter((tx) => {
-      const cat = (tx.category || '').toString().toLowerCase();
-      const fallback = sel === CAT_INCOME.toLowerCase() ? 'income' : 'expense';
-      return cat === sel || cat === fallback;
-    });
+    // With new schema, filter by categoryId will be handled by API in future tasks
+    // For now, show all transactions
   }
 
   // Filter by Account
   if (selectedAccount.value !== ACC_ALL) {
-    // compare with canonical account identifiers or direct string names
-    result = result.filter((tx) => {
-      const acc = (tx.account || '').toString().toLowerCase();
-      const target = (
-        selectedAccount.value === ACC_CASH
-          ? 'cash'
-          : selectedAccount.value === ACC_BANK_A
-            ? 'bank account a'
-            : 'bank account b'
-      ).toLowerCase();
-      return acc === selectedAccount.value.toLowerCase() || acc === target;
-    });
+    // With new schema, filter by accountId will be handled by API in future tasks
+    // For now, show all transactions
   }
 
-  // Sort
+  // Sort by time (now Unix timestamp in milliseconds)
   result.sort((a, b) => {
-    const dateA = new Date(a.time).getTime();
-    const dateB = new Date(b.time).getTime();
-    const ta = Number.isFinite(dateA) ? dateA : 0;
-    const tb = Number.isFinite(dateB) ? dateB : 0;
-    return selectedSort.value === SORT_NEWEST ? tb - ta : ta - tb;
+    const timeA = Number(a.time) || 0;
+    const timeB = Number(b.time) || 0;
+    return selectedSort.value === SORT_NEWEST ? timeB - timeA : timeA - timeB;
   });
 
   return result;
@@ -124,13 +100,13 @@ const filteredTransactions = computed(() => {
 
 const totalIncome = computed(() =>
   transactions.value
-    .filter((tx) => (tx.category || '').toString().toLowerCase() === 'income')
+    .filter((tx) => Number(tx.amount) > 0) // Income: positive amount
     .reduce((sum, tx) => sum + Math.abs(Number(tx.amount || 0)), 0)
 );
 
 const totalExpense = computed(() =>
   transactions.value
-    .filter((tx) => (tx.category || '').toString().toLowerCase() === 'expense')
+    .filter((tx) => Number(tx.amount) < 0) // Expense: negative amount
     .reduce((sum, tx) => sum + Math.abs(Number(tx.amount || 0)), 0)
 );
 

@@ -4,11 +4,7 @@ import type { ITransaction } from '@renderer/types/transaction';
 
 const props = defineProps<{ transaction: ITransaction }>();
 
-const isIncome = computed(
-  () => (props.transaction.category || '').toString().toLowerCase() === 'income'
-);
-
-// Determine sign from amount to avoid UI inconsistency when category and amount disagree
+// Determine sign from amount: positive is income (+), negative is expense (-)
 const sign = computed(() => (Number(props.transaction.amount) >= 0 ? '+' : '-'));
 
 const formatCurrency = (amount: number): string => {

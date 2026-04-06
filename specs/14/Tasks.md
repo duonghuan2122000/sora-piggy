@@ -20,11 +20,18 @@ Total Estimate: 22 giờ
 
 ### T1: Database migration to UUID v7
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P0
 - Estimate: 3 giờ
 - Dependencies: []
 - Labels: ["P0", "database"]
+- Checkpoint:
+  - Timestamp: 2026-04-06T22:21:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Unit tests: tests/unit/migration.spec.ts passed (8 tests)
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/main/database.ts, src/main/types/transaction.ts, src/renderer/src/types/transaction.ts, tests/unit/migration.spec.ts
+  - Note: Migration includes backup mechanism, rollback on failure, PRAGMA user_version lock, verify categories/accounts before migration, time validation with isNaN check
 
 **Description:**
 
@@ -55,11 +62,18 @@ Thực hiện migration database schema từ auto-increment integer sang UUID v7
 
 ### T2: Create paginated query functions
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P0
 - Estimate: 2 giờ
 - Dependencies: ["T1"]
 - Labels: ["P0", "backend"]
+- Checkpoint:
+  - Timestamp: 2026-04-06T22:27:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Unit tests: tests/unit/paginated-transactions.spec.ts passed (34 tests)
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/main/database.ts, src/main/types/transaction.ts, tests/unit/paginated-transactions.spec.ts
+  - Note: Implemented getTransactionsPaginated() with filter, sort, pagination and summary queries. Uses remove_diacritics for Vietnamese search.
 
 **Description:**
 
