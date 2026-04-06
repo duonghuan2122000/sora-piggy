@@ -24,17 +24,14 @@ process guidance agents must follow before editing and committing code.
 - Format: `npm run format` — run Prettier using repo configuration.
 - Type checks: `npm run typecheck` (root), `npm run typecheck:node`, `npm run typecheck:web`.
 
-Testing notes
+Testing
 
-- This repository currently does not include an opinionated test runner entry in
-  `package.json`. When adding tests prefer Vitest (Vite-friendly) or Jest.
-- Examples for running a single test once Vitest is added:
-  - By file: `npx vitest run path/to/file.spec.ts`
-  - By name: `npx vitest -t "partial name of test"`
-- Examples for Jest:
-  - By file: `npx jest path/to/file.test.ts`
-  - By name: `npx jest -t "partial name of test"`
-- If you add tests, ensure `npm run typecheck` and `npm run lint` pass before committing.
+- Unit tests: `npm run test:unit` hoặc `npx vitest run` (Vitest)
+- E2E tests: Playwright (xem `tests/e2e/`)
+- Run single test: `npx vitest run path/to/file.spec.ts`
+- Run single test by name: `npx vitest -t "test name"`
+- Watch mode: `npm run test:watch`
+- Ensure typecheck + lint pass before committing.
 
 2. Code style and conventions
 
@@ -127,7 +124,7 @@ Quick checklist for autonomous edits
 - Pull latest main and run `npm ci` / `npm install` when dependencies change.
 - Run `npm run typecheck` and `npm run lint` locally; fix errors before pushing.
 - If touching exported symbols: run `gitnexus_impact(...)` and inspect dependents.
-- Add or update unit tests; run the single-test command (Vitest/Jest examples above).
+- Add or update unit tests; run the single-test command (Vitest examples above).
 - Run `gitnexus_detect_changes({scope: "staged"})` and commit only after verification.
 
 Helpful commands summary (copy-paste)
@@ -137,7 +134,7 @@ Helpful commands summary (copy-paste)
 - `npm run lint`
 - `npm run format`
 - `npm run typecheck`
-- `npx vitest run path/to/test` — run a single Vitest file (if added)
+- `npx vitest run path/to/test` — run a single Vitest file
 - `npx vitest -t "test name"` — run a single Vitest test by name
 
 If you make structural changes (moves/renames) consider running a full typecheck and
