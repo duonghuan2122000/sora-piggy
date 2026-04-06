@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ElContainer, ElAside, ElHeader, ElMain } from 'element-plus';
 import { RouterView, useRoute, useRouter } from 'vue-router';
 import TopNav from './TopNav.vue';
@@ -12,15 +13,17 @@ const route = useRoute();
 const router = useRouter();
 const transactionFormStore = useTransactionFormStore();
 
+const { t } = useI18n();
+
 const pageTitle = computed(() => {
   if (route.name === ROUTE_NAMES.TRANSACTIONS_ADD) {
-    return 'Add Transaction';
+    return t('transactionForm.title');
   }
   // Default title based on route name or fallback
   if (typeof route.name === 'string') {
     return route.name;
   }
-  return 'Dashboard';
+  return t('app.title');
 });
 
 const topNavMode = computed(() => {

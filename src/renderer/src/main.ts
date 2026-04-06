@@ -1,7 +1,8 @@
 import './assets/main.css';
 
 import App from './App.vue';
-import i18n from '@renderer/locales';
+// Use central i18n instance from renderer scope
+import i18n from './i18n';
 import pinia from '@renderer/stores';
 import router from '@renderer/router';
 import ElementPlus from 'element-plus';
