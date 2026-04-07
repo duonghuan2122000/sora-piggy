@@ -264,14 +264,6 @@ const sortSelectOptions = computed(() => [
               :value="acc.value"
             />
           </ElSelect>
-          <ElSelect v-model="selectedAccountId" class="sora-select" :loading="accountsLoading">
-            <ElOption
-              v-for="acc in accountSelectOptions"
-              :key="acc.value"
-              :label="acc.label"
-              :value="acc.value"
-            />
-          </ElSelect>
           <ElSelect v-model="selectedSort" class="sora-select">
             <ElOption
               v-for="sort in sortSelectOptions"
@@ -311,7 +303,11 @@ const sortSelectOptions = computed(() => [
               <TransactionItem :transaction="scope.row" />
             </template>
           </ElTableColumn>
-          <ElTableColumn prop="categoryName" :label="t('sidebar.category')" width="150" />
+          <ElTableColumn
+            prop="categoryName"
+            :label="t('transactions.columns.category')"
+            width="150"
+          />
           <ElTableColumn prop="accountName" :label="t('transactionForm.accountName')" width="150" />
           <ElTableColumn prop="time" width="120">
             <template #header>

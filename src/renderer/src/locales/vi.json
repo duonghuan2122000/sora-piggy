@@ -78,7 +78,8 @@
     "retry": "Thử lại",
     "columns": {
       "date": "Ngày",
-      "amount": "Số tiền"
+      "amount": "Số tiền",
+      "category": "Danh mục"
     },
     "actions": {
       "view": "Xem",
