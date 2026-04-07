@@ -1,100 +1,75 @@
-#!/bin/bash
+---
+name: sora-clarify
+description: 'Command để review và làm rõ spec cho một Product Backlog Item (PBI). Cú pháp: /sora-clarify <<pbi>> <<mô tả yêu cầu (nếu có)>>'
+---
 
-# Bao gồm: đọc CLAUDE.md và constitution.md ở gốc repository trước
+# sora-clarify
 
-# Luôn đọc file CLAUDE.md ở cấp repository và file constitution.md ở gốc repository trước khi thực hiện bất kỳ hành động nào.
+Mục đích: hỗ trợ review và làm rõ spec.md của một Product Backlog Item (PBI) bằng cách sử dụng agent `product-manager`, chuyển nhánh Git tương ứng và cập nhật spec theo kết quả trao đổi.
 
-# Agents (đại lý) nên sử dụng công cụ Read để mở các file này và tuân thủ mọi quy tắc hoặc thông tin được liệt kê trong đó.
+Cú pháp chạy:
 
-# /sora-clarify
+```
+/sora-clarify <<product backlog item>> <<mô tả yêu cầu (nếu có)>>
+```
 
-# Thực hiện bước CLARIFY cho spec.md hiện tại
+Ví dụ:
 
-## Cú pháp
+```
+/sora-clarify 123 "Một số chi tiết bổ sung nếu muốn"
+```
 
-# /sora-clarify <pbi_id> [nội dung mô tả bổ sung]
+Hành vi của command:
 
-## Ví dụ: /sora-clarify 003 Xác nhận tính năng đăng nhập cần bảo mật
+- Nhận hai tham số: `product backlog item` (số nguyên) và `mô tả yêu cầu` (chuỗi, tuỳ chọn).
+- Đọc file `specs/<pbi>/spec.md` trong repository.
+- Trích xuất tên nhánh Git từ metadata trong `spec.md` (dòng có dạng `Branch: <branch-name>`). Nếu không tìm thấy, báo lỗi và yêu cầu người dùng cung cấp tên nhánh hoặc cập nhật spec.md trước.
+- Checkout về nhánh được chỉ định: `git checkout <branch-name>` (command sẽ chỉ hướng dẫn hoặc thực hiện tuỳ implementer; command không nên push tự động).
+- Sau khi chuyển nhánh, gọi agent `product-manager` để review nội dung `spec.md`:
+  - Khi gọi agent qua `functions.task`, set `subagent_type: "product-manager"`.
+  - Truyền cho agent: product backlog item (số), nội dung đầy đủ của `spec.md`, tóm tắt mô tả (nếu có), và tên nhánh.
+  - Yêu cầu agent trả về hai phần rõ ràng trong tiếng Việt:
+    1. Một danh sách các câu hỏi cần làm rõ (mỗi câu hỏi ngắn gọn, có id/ordinal),
+    2. Một version gợi ý của `spec.md` đã được review/điều chỉnh (một bản draft hoàn chỉnh) — phần này có thể là spec đã được cập nhật dựa trên giả định trả lời các câu hỏi chưa được giải đáp.
 
-# Kiểm tra argument
+- Sau khi agent trả về danh sách câu hỏi, command sẽ lần lượt trình bày các câu hỏi này cho user (qua chat/CLI) để user trả lời. Mỗi câu trả lời của user cần được gửi lại cho agent để agent có thể cập nhật spec.md dần dần.
 
-if [ -z "$1" ]; then
-echo "❌ ERROR: Cần cung cấp mã PBI"
-echo "Ví dụ: /sora-clarify 003 Xác nhận yêu cầu bảo mật"
-exit 1
-fi
+- Quy trình lặp:
+  1. Agent gửi danh sách câu hỏi.
+  2. Assistant (hoặc command) hỏi user từng câu một và nhận câu trả lời.
+  3. Sau mỗi câu trả lời (hoặc sau tập câu trả lời), gọi lại agent `product-manager` để cập nhật draft spec.md (gọi `functions.task` với cùng `subagent_type`).
+  4. Lặp đến khi agent xác nhận rằng không còn câu hỏi mở hoặc user chọn kết thúc phiên làm rõ.
 
-# Lấy mã PBI và nội dung bổ sung
+- Cuối cùng, ghi (ghi đè) nội dung hoàn thiện vào `specs/<pbi>/spec.md` với nội dung do agent + user phối hợp tạo ra.
 
-PBI_ID="$1"
-shift
-ADDITIONAL_NOTES="$@"
+- Gợi ý commit (không tự động commit trừ khi user yêu cầu):
 
-echo "📝 Bắt đầu thực hiện CLARIFY..."
-echo " Mã PBI: $PBI_ID"
-if [ -n "$ADDITIONAL_NOTES" ]; then
-echo " Nội dung bổ sung: $ADDITIONAL_NOTES"
-fi
+```
+git add specs/<pbi>/spec.md
+git commit -m "spec: clarify and update PBI <pbi> spec"
+```
 
-# Xác định thư mục spec
+Lưu ý triển khai cho implementer command:
 
-SPEC_FOLDER="specs/${PBI_ID}"
-SPEC_FILE="${SPEC_FOLDER}/spec.md"
+- Kiểm tra tồn tại của `specs/<pbi>/spec.md` trước khi gọi agent; nếu file không tồn tại, báo lỗi rõ ràng cho user.
+- Khi đọc `spec.md`, parse metadata tìm dòng `Branch:` (case-insensitive) để lấy tên nhánh. Nếu metadata chứa nhiều dòng dạng `Branch:`, ưu tiên hàng đầu xuất hiện.
+- Việc checkout nhánh có thể được thực hiện tự động bởi command (gọi shell `git checkout`) hoặc hướng dẫn user thực hiện — tuỳ chính sách dự án. Nếu tự checkout, phải kiểm tra workspace sạch (không có thay đổi unstaged) hoặc cảnh báo user trước khi checkout.
+- Khi gọi `functions.task` để sử dụng agent `product-manager`, truyền prompt rõ ràng yêu cầu:
+  - Trả về 'questions' dưới dạng danh sách có id
+  - Trả về 'updated_spec' là nội dung spec.md đã chỉnh sửa
+  - Trả về ở định dạng Markdown tiếng Việt
 
-# Kiểm tra file spec.md có tồn tại không
+- Yêu cầu agent cũng phải liệt kê mức độ ưu tiên/loại câu hỏi (ví dụ: functional, UX, data, non-functional) để người thực hiện biết nên trả lời trước câu nào.
 
-if [ ! -f "$SPEC_FILE" ]; then
-echo "❌ ERROR: Không tìm thấy file spec.md tại $SPEC_FILE"
-echo "Vui lòng chạy /sora-specify trước hoặc kiểm tra lại mã PBI"
-exit 1
-fi
+Ví dụ nội dung metadata bắt buộc trong spec.md (mẫu):
 
-echo "📁 Tìm thấy spec.md tại: $SPEC_FILE"
+```
+PBI: 123
+Branch: feature/123-otp-login
+# Spec PBI 123 — Cho phép người dùng đăng nhập bằng OTP
+...
+```
 
-# Đọc branch từ file spec.md
+Kết quả mong muốn:
 
-BRANCH_FROM_SPEC=$(grep -E "Branch git:|branch:" "$SPEC_FILE" | head -1 | sed 's/._Branch git: _//' | sed 's/._branch: _//' | tr -d '\r')
-
-if [ -z "$BRANCH_FROM_SPEC" ]; then
-echo "⚠️ Không tìm thấy branch trong spec.md, sử dụng branch mặc định"
-BRANCH_FROM_SPEC="feature/${PBI_ID}"
-fi
-
-echo "🌿 Đọc branch từ spec.md: $BRANCH_FROM_SPEC"
-
-# Switch sang branch
-
-echo "🔄 Switch sang branch: $BRANCH_FROM_SPEC"
-git checkout "$BRANCH_FROM_SPEC" 2>/dev/null
-
-if [ $? -eq 0 ]; then
-echo "✅ Đã switch sang branch: $BRANCH_FROM_SPEC"
-else
-    echo "⚠️  Không thể switch sang branch, sử dụng branch hiện tại"
-    BRANCH_FROM_SPEC=$(git branch --show-current)
-echo " Branch hiện tại: $BRANCH_FROM_SPEC"
-fi
-
-# Chuẩn bị thông tin cho agent
-
-echo ""
-echo "🤖 Gọi agent product-manager để làm rõ spec.md"
-echo ""
-echo "Agent cần thực hiện:"
-echo "1. Review file spec.md: $SPEC_FILE"
-echo "2. Làm rõ các điểm mơ hồ trong yêu cầu"
-if [ -n "$ADDITIONAL_NOTES" ]; then
-echo "3. Lưu ý bổ sung: $ADDITIONAL_NOTES"
-fi
-echo "3. Cập nhật spec.md với clarifications"
-echo "4. Báo cáo các assumption đã thực hiện"
-echo ""
-echo "📂 Thông tin:"
-echo " - Mã PBI: $PBI_ID"
-echo " - Thư mục: $SPEC_FOLDER"
-echo " - Branch: $BRANCH_FROM_SPEC"
-echo " - File spec: $SPEC_FILE"
-
-# Mặc định exit code 0
-
-exit 0
+- Một workflow tương tác trong đó agent `product-manager` review spec, tạo danh sách câu hỏi cần làm rõ, user trả lời từng câu, và file `specs/<pbi>/spec.md` được cập nhật cuối cùng.

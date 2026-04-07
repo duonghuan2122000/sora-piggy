@@ -1,163 +1,161 @@
-#!/bin/bash
+---
+name: sora-implement
+description: 'Command để thực hiện bước IMPLEMENT cho các task trong tasks.md. Cú pháp: /sora-implement <<product backlog item hoặc task id (tuỳ chọn)>> <<Mô tả thêm nếu có>>'
+---
 
-# Bao gồm: đọc CLAUDE.md và constitution.md ở gốc repository trước
+# sora-implement
 
-# Luôn đọc file CLAUDE.md ở cấp repository và file constitution.md ở gốc repository trước khi thực hiện bất kỳ hành động nào.
+Task ID (nếu có): $ARGUMENTS
 
-# Agents (đại lý) nên sử dụng công cụ Read để mở các file này và tuân thủ mọi quy tắc hoặc thông tin được liệt kê trong đó.
+Mục đích: Tự động hoá bước IMPLEMENT cho một hoặc nhiều task được liệt kê trong `tasks.md`.
 
-# /sora-implement
+Cú pháp chạy:
 
-# Thực hiện bước IMPLEMENT
+```
+/sora-implement <<product backlog item hoặc task id (tuỳ chọn)>> <<Mô tả thêm nếu có>>
+```
 
-## Cú pháp
+Ví dụ:
 
-# /sora-implement <pbi_id> [task_id]
+```
+/sora-implement 123 "Triển khai API đăng nhập OTP"
+```
 
-# /sora-implement <pbi_id> [nội dung mô tả bổ sung]
+Hành vi của command (tóm tắt):
 
-## Ví dụ: /sora-implement 003
+- Đọc `tasks.md` và lọc các task có trạng thái `Todo` (chưa hoàn thành).
+- Nếu user chỉ định một task (Task ID hoặc PBI) qua argument, chỉ xử lý task đó — nếu không tồn tại hoặc không có trạng thái `Todo`, báo cho user và dừng hoặc hỏi xác nhận tiếp tục.
+- Với mỗi task cần thực hiện, thực hiện workflow lặp gồm các bước: gọi agent `dev` để generate code + unit tests; sau khi `dev` trả về, chạy song song `qc` (chạy test & verify test-case.md) và `solution-architect` (review code); nếu có vấn đề gửi feedback tổng hợp cho `dev` để sửa; lặp đến khi QC passed và Architect approved.
+- Cập nhật checkpoint (status / note / checkpoint) vào `tasks.md` và cập nhật `test-case.md` tương ứng trong repo.
+- Tổng hợp báo cáo hoàn tất sau khi xử lý xong tất cả task được chọn.
 
-## Ví dụ: /sora-implement 003 task-001
+Luồng chi tiết (Implementer guidance):
 
-# Kiểm tra argument
+1. Đọc và lọc tasks
+   - Mở file `tasks.md` ở repository root.
+   - Parse các mục task; mỗi task phải có ít nhất: id, title, description (tuỳ chọn), status (Todo/In Progress/Done), và optional: spec path hoặc liên kết tới spec/plan.
+   - Lọc các task có `status: Todo`. Nếu command được gọi với argument Task ID, chỉ chọn task đó (kiểm tra tồn tại và trạng thái). Nếu argument không hợp lệ, thông báo lỗi cho user.
 
-if [ -z "$1" ]; then
-echo "❌ ERROR: Cần cung cấp mã PBI"
-echo "Ví dụ: /sora-implement 003"
-echo "Ví dụ: /sora-implement 003 task-001"
-exit 1
-fi
+2. Chuẩn bị môi trường cho task
+   - Trích xuất metadata quan trọng cho mỗi task: id, title, branch (nếu có), spec path, liên quan tới file `specs/<pbi>/`.
+   - Nếu task có branch trong metadata, hướng dẫn hoặc kiểm tra branch đã checkout; nếu không, đề xuất name branch: `feature/<id>-<short-summary>`.
+   - Luôn cảnh báo user trước khi checkout nếu workspace không sạch (unstaged/uncommitted changes). Command có thể chỉ hướng dẫn lệnh git hoặc thực thi tuỳ cấu hình — mặc định không tự động commit/push.
 
-# Lấy mã PBI
+3. Gọi agent `dev` để generate code + unit tests
+   - Sử dụng `functions.task` với `subagent_type: "dev"`.
+   - Prompt nên bao gồm (tiếng Việt):
+     - Task ID và tiêu đề
+     - Nội dung liên quan từ `tasks.md` và `specs/<pbi>/spec.md` hoặc `plan.md` nếu có
+     - Yêu cầu output rõ ràng:
+       1. Các file code mới/đã sửa (đường dẫn và nội dung)
+       2. Unit tests (đường dẫn, framework expected, ví dụ test input/output)
+       3. Hướng dẫn chạy tests (câu lệnh) và dependencies nếu cần
+       4. Checklist các điểm cần review (performance, security, edge-cases)
+     - Yêu cầu agent trả về JSON/Markdown gồm: `code_changes` (list of {path, content}), `tests` (list), `run_commands` (list), `notes` (string).
 
-PBI_ID="$1"
-shift
-TASK_ID="$@"
+4. Áp dụng code do `dev` trả về
+   - Lưu file vào repository theo `code_changes` do agent trả về. (Implementer có thể tự động write file bằng tools phù hợp.)
+   - Không tự động commit trừ khi user yêu cầu rõ ràng. Gợi ý commit message: `feat(implement): <task-id> <short-title>` hoặc `test: add unit tests for <task-id>`.
 
-echo "📝 Bắt đầu thực hiện IMPLEMENT..."
-echo " Mã PBI: $PBI_ID"
-if [ -n "$TASK_ID" ]; then
-echo " Task ID: $TASK_ID"
-fi
+5. Chạy song song QC và Architecture review
+   - Sau khi mã nguồn và unit tests đã được lưu, gọi song song hai agents:
+     - `functions.task` với `subagent_type: "qc"` — nhiệm vụ: chạy test suite, verify `test-case.md`, produce test results and list of failing tests and flaky notes.
+     - `functions.task` với `subagent_type: "solution-architect"` — nhiệm vụ: review code changes for architectural/regression/risk issues and return approval status plus review notes.
+   - Khuyến nghị thực hiện hai tác vụ song song (Multi-tool parallel) để tiết kiệm thời gian.
 
-# Xác định thư mục spec
+6. Xử lý kết quả review
+   - `qc` trả về: `status` (passed/failed), `failing_tests` (list), `log` (string), và `test-case-updates` (nếu cần cập nhật `test-case.md`).
+   - `solution-architect` trả về: `approval` (approved / changes-requested), `notes` (list of issues), `severity` (per issue).
+   - Nếu QC passed AND Architect approved -> mark task complete.
+   - Nếu QC failed OR Architect requested changes:
+     1. Tổng hợp feedback: failure logs + architect notes + suggested fixes.
+     2. Gọi lại agent `dev` (subagent_type: "dev") kèm feedback để sửa code/tests. Yêu cầu `dev` trả về updated `code_changes` và `tests`.
+     3. Lặp về bước 4 (áp dụng), rồi bước 5.
 
-SPEC_FOLDER="specs/${PBI_ID}"
-SPEC_FILE="${SPEC_FOLDER}/spec.md"
-TASKS_FILE="${SPEC_FOLDER}/tasks.md"
-TEST_CASE_FILE="${SPEC_FOLDER}/test-case.md"
+7. Lặp tới khi QC passed và Architect approved
+   - Giới hạn vòng lặp: nên có một ngưỡng mặc định (ví dụ 8 iterations) để tránh vòng lặp vô hạn; nếu vượt ngưỡng, tạm dừng và thông báo cho user để can thiệp thủ công.
 
-# Kiểm tra file spec.md có tồn tại không
+8. Cập nhật checkpoints và files
+   - Khi task được chấp nhận:
+     - Cập nhật `tasks.md`: thay `status: Todo` -> `status: Done` (hoặc `In Review` nếu team dùng bước khác) và thêm checkpoint note: timestamp, commit hashes (nếu commit), test results summary, architect reviewer id.
+     - Cập nhật `test-case.md` theo `qc` feedback/updates (nếu `qc` trả về `test-case-updates`, áp dụng chúng hoặc ghi chúng vào file và tạo metadata `Updated-By: qc`).
+   - Nếu để lại TODOs / follow-ups, thêm mục con trong `tasks.md` hoặc tạo một mục mới với tag `requires-approval`.
 
-if [ ! -f "$SPEC_FILE" ]; then
-echo "❌ ERROR: Không tìm thấy file spec.md tại $SPEC_FILE"
-echo "Vui lòng chạy /sora-specify trước hoặc kiểm tra lại mã PBI"
-exit 1
-fi
+9. Báo cáo tổng kết
+   - Sau khi xử lý xong toàn bộ task được chỉ định, command in/hiển thị một báo cáo tóm tắt bằng tiếng Việt gồm:
+     - Danh sách task đã xử lý và trạng thái cuối cùng (Done / Failed / Needs Manual Review)
+     - Kết quả test tổng hợp (passed/failed count)
+     - Commit hashes hoặc file changes (nếu có)
+     - Vấn đề còn tồn (nếu có) và đề xuất bước tiếp theo
 
-# Kiểm tra file tasks.md có tồn tại không
+Yêu cầu khi gọi agents (implementer notes kỹ thuật):
 
-if [ ! -f "$TASKS_FILE" ]; then
-echo "❌ ERROR: Không tìm thấy file tasks.md tại $TASKS_FILE"
-echo "Vui lòng chạy /sora-tasks trước hoặc kiểm tra lại mã PBI"
-exit 1
-fi
+- Khi gọi agent `dev`: dùng `functions.task` với `subagent_type: "dev"`. Truyền prompt chi tiết (như phần 3). Yêu cầu agent trả về cấu trúc máy có thể parse (JSON hoặc Markdown có section rõ ràng) gồm `code_changes`, `tests`, `run_commands`, `notes`.
+- Khi gọi agent `qc`: dùng `functions.task` với `subagent_type: "qc"`. Truyền: repo state (file diffs hoặc path to changed files), test run commands. Yêu cầu trả về structured result gồm `status`, `failing_tests`, `logs`, `test-case-updates`.
+- Khi gọi agent `solution-architect`: dùng `functions.task` với `subagent_type: "solution-architect"`. Truyền: code changes, diff, and context (spec/plan). Yêu cầu trả về `approval` and `notes` and `suggested_changes`.
 
-echo "📁 Tìm thấy spec.md tại: $SPEC_FILE"
-echo "📁 Tìm thấy tasks.md tại: $TASKS_FILE"
+Quy tắc commit / git
 
-# Đọc branch từ file spec.md
+- Command KHÔNG tự động commit hoặc push trừ khi user yêu cầu. Nếu tự động commit được bật, cần hỏi user xác nhận trước khi tạo commit; commit message phải ngắn gọn và mô tả task id.
+- Khi cập nhật `tasks.md` hoặc `test-case.md`, commit những thay đổi này với message: `chore(tasks): update checkpoint for <task-id>`.
 
-BRANCH_FROM_SPEC=$(grep -E "Branch git:|branch:" "$SPEC_FILE" | head -1 | sed 's/._Branch git: _//' | sed 's/._branch: _//' | tr -d '\r')
+Handling errors và timeouts
 
-if [ -z "$BRANCH_FROM_SPEC" ]; then
-echo "⚠️ Không tìm thấy branch trong spec.md, sử dụng branch mặc định"
-BRANCH_FROM_SPEC="feature/${PBI_ID}"
-fi
+- Nếu một agent không phản hồi hoặc trả về lỗi, ghi log và thông báo cho user, tạm dừng quy trình cho task đó.
+- Nếu quá nhiều vòng lặp sửa (ví dụ >8), dừng và thông báo user cần can thiệp.
 
-echo "🌿 Đọc branch từ spec.md: $BRANCH_FROM_SPEC"
+Ví dụ prompt mẫu cho agent `dev` (tiếng Việt):
 
-# Switch sang branch
+```
+Bạn là agent dev. Task: <task-id> - <title>
+Input:
+- Nội dung task: <tóm tắt từ tasks.md>
+- Spec/Plan: <nội dung tóm tắt hoặc đường dẫn specs/...>
 
-echo "🔄 Switch sang branch: $BRANCH_FROM_SPEC"
-git checkout "$BRANCH_FROM_SPEC" 2>/dev/null
+Yêu cầu output (định dạng JSON):
+{
+  "code_changes": [{"path": "src/...", "content": "..."}],
+  "tests": [{"path": "tests/...", "content": "..."}],
+  "run_commands": ["npm run test -- <filter>"],
+  "notes": "Chuỗi mô tả bổ sung"
+}
+```
 
-if [ $? -eq 0 ]; then
-echo "✅ Đã switch sang branch: $BRANCH_FROM_SPEC"
-else
-    echo "⚠️  Không thể switch sang branch, sử dụng branch hiện tại"
-    BRANCH_FROM_SPEC=$(git branch --show-current)
-echo " Branch hiện tại: $BRANCH_FROM_SPEC"
-fi
+Ví dụ prompt mẫu cho agent `qc` (tiếng Việt):
 
-# Chuẩn bị thông tin cho agent
+```
+Bạn là agent qc. Hãy chạy test suite cho các thay đổi được cung cấp. Input:
+- Changed files diff or file list
+- Run commands: [...]
 
-echo ""
-echo "🤖 Gọi agent dev để implement tasks"
-echo ""
-echo "## Cấu hình"
-echo "max_review_iterations: 3"
-echo ""
-echo "## Chuẩn bị"
-echo "Đọc tasks.md ($TASKS_FILE):"
-if [ -n "$TASK_ID" ]; then
-echo "- Có Task ID cụ thể: $TASK_ID → chỉ xử lý task đó"
-else
-echo "- Không có Task ID → lấy tất cả task có Status 'Todo'"
-fi
-echo ""
-echo "## Với mỗi task — thực hiện tuần tự"
-echo "### Bước A — Generate"
-echo "Gọi agent dev với context:"
-echo "- Nội dung task từ tasks.md"
-echo "- Các test cases liên quan từ test-case.md"
-echo "- Codebase hiện tại (nếu có)"
-echo ""
-echo "Agent dev phải:"
-echo "1. Generate code implementation"
-echo "2. Generate unit tests tương ứng với test cases trong test-case.md"
-echo "3. Báo cáo danh sách file đã tạo/sửa"
-echo ""
-echo "### Bước B — Review song song (vòng lặp, tối đa 3 lần)"
-echo "Với mỗi review_iteration (đếm từ 1):"
-echo "Chạy đồng thời:"
-echo "- qc: chạy unit tests, đối chiếu test case trong test-case.md → PASSED hoặc danh sách failed"
-echo "- solution-architect: review code → APPROVED hoặc danh sách vấn đề"
-echo ""
-echo "Sau khi cả hai xong:"
-echo "- Nếu QC PASSED và Architect APPROVED → chuyển sang Bước C"
-echo "- Nếu có vấn đề và review_iteration < 3:"
-echo " + Tổng hợp feedback từ QC và Architect thành report"
-echo " + Gửi report cho dev để fix"
-echo " + Tăng review_iteration, quay lại review"
-echo "- Nếu đã đủ 3 iterations mà vẫn còn vấn đề:"
-echo " + Dừng loop, ghi vấn đề vào implement-issues.md"
-echo " + Đánh dấu task Status '⚠ Needs Manual Review'"
-echo ""
-echo "### Bước C — Checkpoint (ngay lập tức sau khi task passed)"
-echo "Ngay khi task được QC PASSED + Architect APPROVED:"
-echo "1. Cập nhật tasks.md: Đổi Status Todo → Done, thêm Checkpoint"
-echo "2. Cập nhật test-case.md: Đổi Status Pending → Passed, thêm Actual Result"
-echo ""
-echo "📂 Thông tin:"
-echo " - Mã PBI: $PBI_ID"
-echo " - Task ID: ${TASK_ID:-Tất cả task}"
-echo " - Thư mục: $SPEC_FOLDER"
-echo " - Branch: $BRANCH_FROM_SPEC"
-echo " - File tasks: $TASKS_FILE"
-echo " - File test-case: $TEST_CASE_FILE"
+Yêu cầu output (JSON): {"status": "passed|failed", "failing_tests": [...], "logs": "...", "test-case-updates": [{"path": "test-case.md", "patch": "..."}]}
+```
 
-# Mặc định exit code 0
+Ví dụ prompt mẫu cho agent `solution-architect` (tiếng Việt):
 
-## Ghi chú về commit
+```
+Bạn là solution-architect. Hãy review thay đổi code sau và trả về approval status.
+Input:
+- Changed files (diff or file list)
+- Spec/Plan content
 
-# Sau khi hoàn thành tất cả tasks:
+Yêu cầu output (JSON): {"approval": "approved|changes-requested", "notes": [{"file": "..", "line": 123, "issue": "...", "severity": "low|medium|high"}], "suggested_changes": "..."}
+```
 
-# - Bạn cần tự commit các file đã thay đổi
+Gợi ý implement chi tiết cho developer của command:
 
-# - Sử dụng: `git add .` và `git commit -m "PBI_ID: Mô tả commit"`
+- Dùng `functions.read` để đọc `tasks.md` và `test-case.md`.
+- Dùng `functions.task` để gọi các agents: `dev`, `qc`, `solution-architect`.
+- Khi chạy `qc` và `solution-architect`, dùng `multi_tool_use.parallel` để gọi song song hai `functions.task`.
+- Sử dụng `apply_patch` (hoặc tương đương) để lưu file code và cập nhật `tasks.md` / `test-case.md`.
+- Luôn giữ mọi giao tiếp bằng tiếng Việt.
 
-# - Hoặc dùng kèm với /sora-commit để tự động commit
+Limitations và cảnh báo:
 
-exit 0
+- Command giả định rằng agents `dev`, `qc`, `solution-architect` có khả năng hiểu prompt chi tiết và trả về cấu trúc có thể parse; nếu agent không tuân theo định dạng, implementer phải thêm bước xử lý lỗi/parse.
+- Không cố gắng tự động push lên remote trừ khi user yêu cầu rõ ràng.
+- Khi thay đổi có tác động lớn (migrations, schema changes), command nên tách phần đó thành task `requires-approval` và không tự động apply database migrations.
+
+Kết luận:
+
+File này mô tả hành vi command `sora-implement`. Implementer cần gọi `functions.task` với `subagent_type` tương ứng (`dev`, `qc`, `solution-architect`), dùng `multi_tool_use.parallel` để song song hoá các bước review, và cập nhật `tasks.md` + `test-case.md` khi hoàn tất. Sau khi chạy xong, command trả về báo cáo tổng kết bằng tiếng Việt.
