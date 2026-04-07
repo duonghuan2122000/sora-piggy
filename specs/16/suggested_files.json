@@ -1,0 +1,6 @@
+[
+  {"path":"specs/16/architecture/diagram.drawio","description":"Placeholder for architecture diagram (UI adapter + renderer components)."},
+  {"path":"specs/16/architecture/README.md","description":"Instructions for diagram creation and where to store visual assets."},
+  {"path":"src/renderer/src/plugins/ant-design.ts","description":"Plugin to register Ant Design components and import global styles."},
+  {"path":"src/renderer/src/components/ui-wrappers/README.md","description":"Placeholders and guidelines for wrapper components (Button, Table, Form, Icon)."}
+]
