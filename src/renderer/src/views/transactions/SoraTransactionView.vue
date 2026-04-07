@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  ElCard,
-  ElInput,
-  ElSelect,
-  ElOption,
-  ElTable,
-  ElTableColumn,
-  ElPagination,
-  ElMessage
-} from 'element-plus';
+import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
+import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue'
+import { notifyError } from '@renderer/utils/sora-notification'
 import {
   ITransaction,
   TransactionFilterParams,
@@ -124,7 +117,7 @@ const fetchTransactions = async (): Promise<void> => {
     totalExpense.value = paginatedResult.summary.totalExpense;
   } catch (error) {
     console.error('Failed to fetch transactions:', error);
-    ElMessage.error(t('transactions.error') || 'Lỗi khi tải danh sách giao dịch');
+    notifyError(t('transactions.error') || 'Lỗi khi tải danh sách giao dịch');
     transactions.value = [];
     total.value = 0;
     totalIncome.value = 0;
@@ -228,11 +221,10 @@ const sortSelectOptions = computed(() => [
     <ElCard class="sora-card">
       <header class="sora-header">
         <div class="sora-search-wrapper">
-          <ElInput
+          <SoraInput
             v-model="searchQuery"
             :placeholder="t('transactionForm.placeholders.name')"
             class="sora-search-input"
-            clearable
           />
         </div>
         <div class="sora-filters">
@@ -291,47 +283,35 @@ const sortSelectOptions = computed(() => [
     <!-- Detail Section with Pagination -->
     <ElCard class="sora-card sora-detail-card">
       <section class="sora-detail">
-        <ElTable
-          :data="transactions"
+        <SoraTable
+          :dataSource="transactions"
           v-loading="loading"
           class="sora-data-table"
-          height="100%"
           style="width: 100%"
+          :tableProps="{ columns: [] }"
         >
-          <ElTableColumn :label="t('sidebar.transaction')" width="250">
-            <template #default="scope">
-              <TransactionItem :transaction="scope.row" />
+          <template #default="{ record }">
+              <TransactionItem :transaction="record" />
             </template>
-          </ElTableColumn>
-          <ElTableColumn
-            prop="categoryName"
-            :label="t('transactions.columns.category')"
-            width="150"
-          />
-          <ElTableColumn prop="accountName" :label="t('transactionForm.accountName')" width="150" />
-          <ElTableColumn prop="time" width="120">
-            <template #header>
-              <span data-testid="transactions-column-date">{{
-                t('transactions.columns.date')
-              }}</span>
+            <!-- category -->
+            <template #column-category="{ record }">
+              {{ record.categoryName }}
             </template>
-            <template #default="scope">
-              {{ formatDate(scope.row.time) }}
+            <!-- account -->
+            <template #column-account="{ record }">
+              {{ record.accountName }}
             </template>
-          </ElTableColumn>
-          <ElTableColumn prop="amount" width="150">
-            <template #header>
-              <span data-testid="transactions-column-amount">{{
-                t('transactions.columns.amount')
-              }}</span>
+            <!-- time -->
+            <template #column-time="{ record }">
+              {{ formatDate(record.time) }}
             </template>
-            <template #default="scope">
-              <div :class="Number(scope.row.amount) >= 0 ? 'sora-income' : 'sora-expense'">
-                {{ formatCurrency(Math.abs(Number(scope.row.amount || 0))) }}
+            <!-- amount -->
+            <template #column-amount="{ record }">
+              <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
+                {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
               </div>
             </template>
-          </ElTableColumn>
-        </ElTable>
+        </SoraTable>
         <div
           v-if="transactions.length === 0 && !loading"
           data-testid="transactions-empty"
@@ -340,14 +320,13 @@ const sortSelectOptions = computed(() => [
           {{ t('transactions.empty') }}
         </div>
         <div class="sora-pagination-wrapper">
-          <ElPagination
-            v-model:current-page="page"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50]"
+          <a-pagination
+            :current="page"
+            :page-size="pageSize"
+            :page-size-options="[10,20,50]"
             :total="total"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handlePageSizeChange"
-            @current-change="handlePageChange"
+            @change="handlePageChange"
+            @showSizeChange="handlePageSizeChange"
           />
         </div>
       </section>

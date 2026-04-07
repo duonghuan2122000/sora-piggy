@@ -1,9 +1,15 @@
 import { App } from 'vue'
-import Antd from 'ant-design-vue'
-import 'ant-design-vue/dist/antd.css'
+import Antd, { ConfigProvider } from 'ant-design-vue'
+// Import commonly used components for better tree-shaking and explicit registration
+import { message, notification } from 'ant-design-vue'
 
 export function registerAntDesign(app: App) {
   app.use(Antd)
+  // Attach message/notification to globalProperties for easy usage
+  app.config.globalProperties.$message = message
+  app.config.globalProperties.$notification = notification
 }
+
+export const AntConfigProvider = ConfigProvider
 
 export default registerAntDesign

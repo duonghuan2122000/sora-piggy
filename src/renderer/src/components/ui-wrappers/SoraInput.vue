@@ -1,11 +1,20 @@
 <template>
-  <a-input v-bind="restProps" v-model:value="modelValue" @input="$emit('update:modelValue', $event)" />
+  <a-input v-bind="attrs" :value="modelValue" @input="onInput" />
 </template>
 
 <script setup lang="ts" name="SoraInput">
-import { defineProps, toRefs } from 'vue'
+import { useAttrs, defineEmits } from 'vue';
+
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' }
-})
-const { modelValue, ...restProps } = toRefs(props)
+});
+const emits = defineEmits(['update:modelValue']);
+const attrs = useAttrs();
+
+const modelValue = props.modelValue as string | number;
+function onInput(e: Event | string) {
+  // Ant input emits an event whose target.value contains the string
+  const value = (e && typeof e === 'object' && 'target' in e) ? (e as any).target.value : e;
+  emits('update:modelValue', value);
+}
 </script>

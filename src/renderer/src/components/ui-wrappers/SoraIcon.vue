@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts" name="SoraIcon">
-import { defineProps } from 'vue'
 const props = defineProps({
   icon: { type: Object, required: true },
 })

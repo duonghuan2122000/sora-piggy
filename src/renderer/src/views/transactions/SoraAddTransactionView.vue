@@ -1,20 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  ElCard,
-  ElForm,
-  ElFormItem,
-  ElInput,
-  ElDatePicker,
-  ElInputNumber,
-  ElAutocomplete,
-  ElDialog,
-  ElButton,
-  ElMessage
-} from 'element-plus';
-import type { FormInstance, FormRules } from 'element-plus';
+import { aCard, aForm, aFormItem, aDatePicker, aInputNumber, aSelect, aModal, aButton } from 'ant-design-vue';
+import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
+import type { FormInstance } from 'element-plus';
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
+import { notifySuccess, notifyError } from '@renderer/utils/sora-notification'
 
 const { t } = useI18n();
 
@@ -338,7 +329,7 @@ const handleSubmit = async (): Promise<void> => {
         });
 
         if (success) {
-          ElMessage.success(t('transactionForm.messages.success'));
+          notifySuccess(t('transactionForm.messages.success'));
           // Reset form after successful save
           formValue.value = {
             name: '',
@@ -353,7 +344,7 @@ const handleSubmit = async (): Promise<void> => {
           accountSearchValue.value = '';
         }
       } catch (error) {
-        ElMessage.error(t('transactionForm.messages.error'));
+        notifyError(t('transactionForm.messages.error'));
       } finally {
         transactionFormStore.setLoading(false);
       }
@@ -398,14 +389,14 @@ onUnmounted(() => {
       </template>
       <ElForm ref="formRef" :model="formValue" :rules="rules" label-position="top">
         <ElFormItem :label="$t('transactionForm.labels.name')" prop="name">
-          <ElInput
+          <SoraInput
             v-model="formValue.name"
             :placeholder="$t('transactionForm.placeholders.name')"
           />
         </ElFormItem>
 
         <ElFormItem :label="$t('transactionForm.labels.description')" prop="description">
-          <ElInput
+          <SoraInput
             v-model="formValue.description"
             type="textarea"
             :placeholder="$t('transactionForm.placeholders.description')"

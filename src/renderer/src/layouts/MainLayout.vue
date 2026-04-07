@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ElContainer, ElAside, ElHeader, ElMain } from 'element-plus';
 import { RouterView, useRoute, useRouter } from 'vue-router';
 import TopNav from './TopNav.vue';
 import Sidebar from './Sidebar.vue';
@@ -40,12 +39,12 @@ const handleSaveTransaction = (): void => {
 </script>
 
 <template>
-  <ElContainer class="sora-layout">
-    <ElAside :width="isSidebarCollapsed ? '64px' : '200px'" class="sora-sider">
+  <a-layout class="sora-layout">
+    <a-layout-sider :width="isSidebarCollapsed ? 64 : 200" class="sora-sider">
       <Sidebar :collapsed="isSidebarCollapsed" />
-    </ElAside>
-    <ElContainer>
-      <ElHeader class="sora-header">
+    </a-layout-sider>
+    <a-layout>
+      <a-layout-header class="sora-header">
         <TopNav
           :page-title="pageTitle"
           :mode="topNavMode"
@@ -53,12 +52,12 @@ const handleSaveTransaction = (): void => {
           @add-transaction="handleAddTransaction"
           @save-transaction="handleSaveTransaction"
         />
-      </ElHeader>
-      <ElMain class="sora-content">
+      </a-layout-header>
+      <a-layout-content class="sora-content">
         <RouterView />
-      </ElMain>
-    </ElContainer>
-  </ElContainer>
+      </a-layout-content>
+    </a-layout>
+  </a-layout>
 </template>
 
 <style scoped lang="scss">
