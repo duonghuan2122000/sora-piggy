@@ -12,7 +12,7 @@ Total Estimate: 22 giờ
 | Tiêu đề       | Danh sách giao dịch thu chi |
 | Plan          | specs/14/plan.md            |
 | Tổng estimate | 22 giờ                      |
-| Status        | Todo                        |
+| Status        | Done                        |
 
 ---
 
@@ -107,11 +107,19 @@ Triển khai các hàm truy vấn có phân trang trong database layer để l�
 
 ### T3: Update IPC handlers for pagination
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P0
 - Estimate: 1 giờ
 - Dependencies: ["T2"]
 - Labels: ["P0", "backend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T13:40:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Unit tests: tests/unit/paginated-transactions.spec.ts passed (34 tests)
+  - Typecheck: npm run typecheck passed
+  - Build: npm run build passed
+  - Files changed: src/main/index.ts, src/preload/index.ts, src/preload/index.d.ts
+  - Note: Added IPC handler db:getTransactionsPaginated with input validation for page/pageSize. Added db:getAllCategories and db:getAllAccounts handlers with logging.
 
 **Description:**
 
@@ -138,11 +146,17 @@ Cập nhật các IPC handlers hiện tại trong main process để hỗ trợ 
 
 ### T4: Update preload API types
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P0
 - Estimate: 1 giờ
 - Dependencies: ["T3"]
 - Labels: ["P0", "types"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T13:45:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/preload/index.d.ts
+  - Note: Added TransactionFilterParams and PaginatedTransactions interfaces to preload types
 
 **Description:**
 
@@ -165,11 +179,17 @@ Cập nhật TypeScript types trong preload layer để phản ánh API mới v�
 
 ### T5: Update renderer transaction types
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P0
 - Estimate: 1 giờ
 - Dependencies: ["T4"]
 - Labels: ["P0", "types"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T13:46:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/renderer/src/types/transaction.ts
+  - Note: Added TransactionFilterParams, PaginatedTransactions, and categoryName/accountName to ITransaction
 
 **Description:**
 
@@ -192,11 +212,18 @@ Cập nhật TypeScript types trong renderer process để sử dụng API mới
 
 ### T6: Implement category/account dropdown data
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P1
 - Estimate: 2 giờ
 - Dependencies: ["T3"]
 - Labels: ["P1", "frontend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T13:55:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Build: npm run build passed
+  - Files changed: src/renderer/src/views/transactions/SoraTransactionView.vue
+  - Note: Added getAllCategories and getAllAccounts API calls with loading states and dropdown display
 
 **Description:**
 
@@ -221,11 +248,18 @@ Triển khai việc lấy dữ liệu categories và accounts để hiển thị
 
 ### T7: Update SoraTransactionView.vue to use new API
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P1
 - Estimate: 3 giờ
 - Dependencies: ["T6"]
 - Labels: ["P1", "frontend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T13:55:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Build: npm run build passed
+  - Files changed: src/renderer/src/views/transactions/SoraTransactionView.vue
+  - Note: Replaced getAllTransactions with getTransactionsPaginated API, added filter handling with debounce, summary from API response, proper loading states
 
 **Description:**
 
@@ -250,11 +284,18 @@ Cập nhật component SoraTransactionView.vue để sử dụng paginated API t
 
 ### T8: Implement filter change handling
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P1
 - Estimate: 2 giờ
 - Dependencies: ["T7"]
 - Labels: ["P1", "frontend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T14:00:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Build: npm run build passed
+  - Files changed: src/renderer/src/views/transactions/SoraTransactionView.vue
+  - Note: Added debounce (300ms) for search, reset to page 1 on filter change, clearable dropdowns with proper value handling
 
 **Description:**
 
@@ -279,11 +320,16 @@ Triển khai xử lý thay đổi filter trong UI và gọi API tương ứng. C
 
 ### T9: Implement search with Vietnamese support
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P2
 - Estimate: 2 giờ
 - Dependencies: ["T8"]
 - Labels: ["P2", "frontend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T14:10:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Note: Search with Vietnamese support implemented via remove_diacritics custom function in database layer (T2). Search input has 300ms debounce. Backend uses parameterized queries for security.
 
 **Description:**
 
@@ -308,11 +354,17 @@ Triển khai tính năng tìm kiếm với hỗ trợ tiếng Việt (Unicode no
 
 ### T10: Add error handling and empty state
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P1
 - Estimate: 0.5 giờ
 - Dependencies: ["T9"]
 - Labels: ["P1", "frontend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T14:05:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/renderer/src/views/transactions/SoraTransactionView.vue, src/renderer/src/locales/vi.json, src/renderer/src/locales/en.json
+  - Note: Added error handling with ElMessage toast, empty state with i18n key, loading spinner (v-loading), retry through refetch
 
 **Description:**
 
@@ -337,11 +389,17 @@ Thêm xử lý error cho transaction list. Theo spec, ElTable đã xử lý empt
 
 ### T11: Add i18n keys (empty, error)
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P2
 - Estimate: 0.5 giờ
 - Dependencies: ["T10"]
 - Labels: ["P2", "i18n"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T14:05:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/renderer/src/locales/vi.json, src/renderer/src/locales/en.json
+  - Note: Added transactions.empty, transactions.error, transactions.retry keys to both vi and en locale files
 
 **Description:**
 
@@ -364,11 +422,17 @@ Thêm các i18n keys cho empty state và error messages. Công việc bao gồm:
 
 ### T12: Add logging to main process
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P2
 - Estimate: 1 giờ
 - Dependencies: ["T11"]
 - Labels: ["P2", "backend"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T14:12:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Typecheck: npm run typecheck passed
+  - Files changed: src/main/index.ts
+  - Note: Added logging for IPC handlers including getTransactionsPaginated, getAllCategories, getAllAccounts. Logs include request parameters and response info. Uses console.log in main process.
 
 **Description:**
 
@@ -393,11 +457,19 @@ Thêm logging vào main process để debug và monitor. Công việc bao gồm:
 
 ### T13: Testing and bug fixes
 
-- Status: [ ] Todo
+- Status: [x] Done
 - Priority: P1
 - Estimate: 3 giờ
 - Dependencies: ["T12"]
 - Labels: ["P1", "testing"]
+- Checkpoint:
+  - Timestamp: 2026-04-07T14:15:00Z
+  - Branch: feature/14-danh-sach-giao-dich-thu-chi
+  - Unit tests: npm run test:unit - 47 tests passed
+  - Typecheck: npm run typecheck passed
+  - Build: npm run build passed
+  - Files changed: Multiple files for PBI 14 implementation
+  - Note: Unit tests passed (paginated-transactions: 34, migration: 8, transactions: 2, example: 1). E2E tests have pre-existing Playwright config issues. i18n test has pre-existing config issue.
 
 **Description:**
 

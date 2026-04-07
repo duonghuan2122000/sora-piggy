@@ -34,16 +34,6 @@ function removeDiacritics(text: string): string {
     .replace(/[đĐ]/g, 'd'); // Replace đ with d
 }
 
-// Register custom functions with SQLite database
-// Using type assertion as better-sqlite3 types may not include create_function
-const registerCustomFunctions = (database: Database.Database): void => {
-  (
-    database as unknown as {
-      create_function: (name: string, argCount: number, func: (text: string) => string) => void;
-    }
-  ).create_function('remove_diacritics', 1, removeDiacritics);
-};
-
 // Get current migration version from database
 const getMigrationVersion = (database: Database.Database): number => {
   try {
@@ -309,7 +299,7 @@ const migrateToUuidV7 = (): void => {
         db.pragma('foreign_keys = ON');
 
         // Re-register custom functions and indexes after restore
-        registerCustomFunctions(db);
+
         createTransactionIndexes();
       } catch (restoreError) {
         console.error('[Migration] Error restoring database from backup:', restoreError);
@@ -408,7 +398,6 @@ export const initDb = (): Database.Database => {
   createTransactionIndexes();
 
   // Register custom functions for search
-  registerCustomFunctions(db);
 
   // Migration: Add 'order' column to languages table if it doesn't exist
   const tableInfo = db.prepare("PRAGMA table_info('languages')").all() as Array<{
@@ -688,7 +677,8 @@ export const getTransactionsPaginated = (
   if (!db) initDb();
 
   // Set defaults for undefined values
-  const name = filters.name ?? '';
+  const searchTerm = filters.name ?? '';
+  const searchTermNoDiacritics = searchTerm ? removeDiacritics(searchTerm) : '';
   const categoryId = filters.categoryId ?? null;
   const accountId = filters.accountId ?? null;
   const sortBy = filters.sortBy ?? 'newest';
@@ -699,6 +689,7 @@ export const getTransactionsPaginated = (
 
   try {
     // Main query with JOINs for category and account names
+    // Using JavaScript-preprocessed search term instead of SQL function
     const dataQuery = `
       SELECT
         t.id,
@@ -714,7 +705,7 @@ export const getTransactionsPaginated = (
       LEFT JOIN categories c ON t.categoryId = c.id
       LEFT JOIN accounts a ON t.accountId = a.id
       WHERE
-        (:name IS NULL OR :name = '' OR LOWER(remove_diacritics(t.name)) LIKE '%' || LOWER(remove_diacritics(:name)) || '%')
+        (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
       ORDER BY
@@ -725,7 +716,8 @@ export const getTransactionsPaginated = (
 
     const dataStmt = db!.prepare(dataQuery);
     const data = dataStmt.all({
-      name,
+      name: searchTerm,
+      nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
       accountId,
       sortBy,
@@ -738,14 +730,15 @@ export const getTransactionsPaginated = (
       SELECT COUNT(*) as total
       FROM transactions t
       WHERE
-        (:name IS NULL OR :name = '' OR LOWER(remove_diacritics(t.name)) LIKE '%' || LOWER(remove_diacritics(:name)) || '%')
+        (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
     `;
 
     const countStmt = db!.prepare(countQuery);
     const countResult = countStmt.get({
-      name,
+      name: searchTerm,
+      nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
       accountId
     }) as { total: number };
@@ -756,7 +749,7 @@ export const getTransactionsPaginated = (
       SELECT COALESCE(SUM(t.amount), 0) as totalIncome
       FROM transactions t
       WHERE
-        (:name IS NULL OR :name = '' OR LOWER(remove_diacritics(t.name)) LIKE '%' || LOWER(remove_diacritics(:name)) || '%')
+        (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
         AND t.amount > 0
@@ -764,7 +757,8 @@ export const getTransactionsPaginated = (
 
     const incomeStmt = db!.prepare(incomeQuery);
     const incomeResult = incomeStmt.get({
-      name,
+      name: searchTerm,
+      nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
       accountId
     }) as { totalIncome: number };
@@ -775,7 +769,7 @@ export const getTransactionsPaginated = (
       SELECT COALESCE(SUM(ABS(t.amount)), 0) as totalExpense
       FROM transactions t
       WHERE
-        (:name IS NULL OR :name = '' OR LOWER(remove_diacritics(t.name)) LIKE '%' || LOWER(remove_diacritics(:name)) || '%')
+        (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
         AND t.amount < 0
@@ -783,7 +777,8 @@ export const getTransactionsPaginated = (
 
     const expenseStmt = db!.prepare(expenseQuery);
     const expenseResult = expenseStmt.get({
-      name,
+      name: searchTerm,
+      nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
       accountId
     }) as { totalExpense: number };

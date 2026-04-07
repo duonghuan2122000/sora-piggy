@@ -1,6 +1,29 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
 import { ITransaction } from '@renderer/types/transaction';
 
+// Filter parameters for paginated transaction queries
+interface TransactionFilterParams {
+  name?: string;
+  categoryId?: number | null;
+  accountId?: number | null;
+  sortBy?: 'newest' | 'oldest';
+  page: number;
+  pageSize: number;
+}
+
+// Paginated transactions response
+interface PaginatedTransactions {
+  data: ITransaction[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  summary: {
+    totalIncome: number;
+    totalExpense: number;
+  };
+}
+
 // Category type definitions
 interface Category {
   id: number;
@@ -52,8 +75,12 @@ interface API {
   ) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
 
+  // Paginated transaction API
+  getTransactionsPaginated: (filters: TransactionFilterParams) => Promise<PaginatedTransactions>;
+
   // Category APIs
   getCategories: () => Promise<Category[]>;
+  getAllCategories: () => Promise<Category[]>;
   getCategoryById: (id: number) => Promise<Category | undefined>;
   createCategory: (category: {
     name: string;
@@ -74,6 +101,7 @@ interface API {
 
   // Account APIs
   getAccounts: () => Promise<Account[]>;
+  getAllAccounts: () => Promise<Account[]>;
   getAccountById: (id: number) => Promise<Account | undefined>;
   createAccount: (account: { name: string; type: string; balance?: number }) => Promise<number>;
   updateAccount: (

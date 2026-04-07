@@ -1,6 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
 
+// Filter parameters for paginated transaction queries
+interface TransactionFilterParams {
+  name?: string;
+  categoryId?: number | null;
+  accountId?: number | null;
+  sortBy?: 'newest' | 'oldest';
+  page: number;
+  pageSize: number;
+}
+
 // Custom APIs for renderer
 const api = {
   // Transaction APIs
@@ -27,8 +37,13 @@ const api = {
   ) => ipcRenderer.invoke('db:updateTransaction', id, transaction),
   deleteTransaction: (id: number) => ipcRenderer.invoke('db:deleteTransaction', id),
 
+  // Paginated transaction API
+  getTransactionsPaginated: (filters: TransactionFilterParams) =>
+    ipcRenderer.invoke('db:getTransactionsPaginated', filters),
+
   // Category APIs
   getCategories: () => ipcRenderer.invoke('db:getCategories'),
+  getAllCategories: () => ipcRenderer.invoke('db:getAllCategories'),
   getCategoryById: (id: number) => ipcRenderer.invoke('db:getCategoryById', id),
   createCategory: (category: { name: string; type: string; icon?: string; color?: string }) =>
     ipcRenderer.invoke('db:createCategory', category),
@@ -45,6 +60,7 @@ const api = {
 
   // Account APIs
   getAccounts: () => ipcRenderer.invoke('db:getAccounts'),
+  getAllAccounts: () => ipcRenderer.invoke('db:getAllAccounts'),
   getAccountById: (id: number) => ipcRenderer.invoke('db:getAccountById', id),
   createAccount: (account: { name: string; type: string; balance?: number }) =>
     ipcRenderer.invoke('db:createAccount', account),

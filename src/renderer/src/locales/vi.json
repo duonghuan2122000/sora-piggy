@@ -72,8 +72,10 @@
     }
   },
   "transactions": {
-    "latestBalance": "Số dư cuối",
+    "title: Danh sach giao dich latestBalance": "Số dư cuối",
     "empty": "Không có giao dịch",
+    "error": "Lỗi khi tải danh sách giao dịch",
+    "retry": "Thử lại",
     "columns": {
       "date": "Ngày",
       "amount": "Số tiền"

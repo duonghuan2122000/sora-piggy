@@ -23,8 +23,13 @@ import {
   getLanguageByCode,
   getUserPreference,
   setUserPreference,
-  closeDatabase
+  closeDatabase,
+  getTransactionsPaginated,
+  getAllCategories,
+  getAllAccounts
 } from './database';
+import { TransactionFilterParams, PaginatedTransactions } from './types/transaction';
+import { ICategory, IAccount } from './database';
 
 function createWindow(): void {
   // Create the browser window.
@@ -87,6 +92,64 @@ app.whenReady().then(() => {
   );
   ipcMain.handle('db:deleteTransaction', (_, id) => deleteTransaction(id));
 
+  // Paginated transactions handler
+  ipcMain.handle(
+    'db:getTransactionsPaginated',
+    (_, filters: TransactionFilterParams): PaginatedTransactions => {
+      // Validate pagination parameters
+      const page = filters.page ?? 1;
+      const pageSize = filters.pageSize ?? 10;
+
+      // Validate page must be positive integer
+      if (!Number.isInteger(page) || page < 1) {
+        console.error('[IPC] Invalid page parameter:', page);
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          pageSize: Math.max(1, pageSize),
+          totalPages: 0,
+          summary: { totalIncome: 0, totalExpense: 0 }
+        };
+      }
+
+      // Validate pageSize must be positive integer
+      if (!Number.isInteger(pageSize) || pageSize < 1) {
+        console.error('[IPC] Invalid pageSize parameter:', pageSize);
+        return {
+          data: [],
+          total: 0,
+          page,
+          pageSize: 10,
+          totalPages: 0,
+          summary: { totalIncome: 0, totalExpense: 0 }
+        };
+      }
+
+      console.log(
+        `[IPC] getTransactionsPaginated: page=${page}, pageSize=${pageSize}, categoryId=${filters.categoryId}, accountId=${filters.accountId}, sortBy=${filters.sortBy}, name="${filters.name}"`
+      );
+
+      try {
+        const result = getTransactionsPaginated(filters);
+        console.log(
+          `[IPC] getTransactionsPaginated: returned ${result.data.length} records, total=${result.total}`
+        );
+        return result;
+      } catch (error) {
+        console.error('[IPC] Error fetching paginated transactions:', error);
+        return {
+          data: [],
+          total: 0,
+          page,
+          pageSize,
+          totalPages: 0,
+          summary: { totalIncome: 0, totalExpense: 0 }
+        };
+      }
+    }
+  );
+
   // Category handlers
   ipcMain.handle('db:getCategories', () => getCategories());
   ipcMain.handle('db:getCategoryById', (_, id) => getCategoryById(id));
@@ -94,12 +157,38 @@ app.whenReady().then(() => {
   ipcMain.handle('db:updateCategory', (_, id, category) => updateCategory(id, category));
   ipcMain.handle('db:deleteCategory', (_, id) => deleteCategory(id));
 
+  // Get all categories for dropdown (with detailed info)
+  ipcMain.handle('db:getAllCategories', (): ICategory[] => {
+    console.log('[IPC] getAllCategories: fetching all categories');
+    try {
+      const categories = getAllCategories();
+      console.log(`[IPC] getAllCategories: returned ${categories.length} categories`);
+      return categories;
+    } catch (error) {
+      console.error('[IPC] Error fetching all categories:', error);
+      return [];
+    }
+  });
+
   // Account handlers
   ipcMain.handle('db:getAccounts', () => getAccounts());
   ipcMain.handle('db:getAccountById', (_, id) => getAccountById(id));
   ipcMain.handle('db:createAccount', (_, account) => createAccount(account));
   ipcMain.handle('db:updateAccount', (_, id, account) => updateAccount(id, account));
   ipcMain.handle('db:deleteAccount', (_, id) => deleteAccount(id));
+
+  // Get all accounts for dropdown (with detailed info)
+  ipcMain.handle('db:getAllAccounts', (): IAccount[] => {
+    console.log('[IPC] getAllAccounts: fetching all accounts');
+    try {
+      const accounts = getAllAccounts();
+      console.log(`[IPC] getAllAccounts: returned ${accounts.length} accounts`);
+      return accounts;
+    } catch (error) {
+      console.error('[IPC] Error fetching all accounts:', error);
+      return [];
+    }
+  });
 
   // Language handlers
   ipcMain.handle('db:getLanguages', () => getLanguages());
