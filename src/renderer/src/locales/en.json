@@ -64,5 +64,19 @@
       "success": "Transaction saved successfully",
       "error": "Failed to save transaction"
     }
+  },
+  "transactions": {
+    "empty": "No transactions",
+    "error": "Error loading transactions",
+    "retry": "Retry",
+    "columns": {
+      "date": "Date",
+      "amount": "Amount",
+      "category": "Category"
+    },
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest"
+    }
   }
 }

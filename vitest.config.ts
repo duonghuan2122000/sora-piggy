@@ -26,7 +26,12 @@ export default defineConfig(async () => {
     test: {
       globals: false,
       environment: 'jsdom',
-      include: ['test/**/*.spec.ts', 'test/**/*.test.ts']
+      include: [
+        'test/**/*.spec.ts',
+        'test/**/*.test.ts',
+        'tests/**/*.spec.ts',
+        'tests/**/*.test.ts'
+      ]
     }
   };
 });
