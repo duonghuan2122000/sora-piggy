@@ -45,7 +45,7 @@ const { t } = useI18n();
 const SORT_NEWEST = 'newest';
 const SORT_OLDEST = 'oldest';
 
-// Filter state - use number type for ElSelect compatibility
+// Filter state - use number type for SoraSelect compatibility
 // Use -1 to represent "all" option
 const searchQuery = ref('');
 const selectedCategoryId = ref<number>(-1);
@@ -241,7 +241,7 @@ const sortSelectOptions = computed(() => [
               :label="cat.label"
               :value="cat.value"
             />
-          </ElSelect>
+          </SoraSelect>
           <SoraSelect
             v-model="selectedAccountId"
             class="sora-select"
@@ -255,7 +255,7 @@ const sortSelectOptions = computed(() => [
               :label="acc.label"
               :value="acc.value"
             />
-          </ElSelect>
+          </SoraSelect>
           <SoraSelect v-model="selectedSort" class="sora-select">
             <SoraSelectOption
               v-for="sort in sortSelectOptions"
@@ -263,25 +263,25 @@ const sortSelectOptions = computed(() => [
               :label="sort.label"
               :value="sort.value"
             />
-          </ElSelect>
+          </SoraSelect>
         </div>
       </header>
-    </ElCard>
+    </SoraCard>
 
     <!-- Summary Section -->
     <section class="sora-summary">
       <SoraCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.income') }}</div>
         <div class="sora-card-amount sora-income">{{ formattedTotalIncome }}</div>
-      </ElCard>
+      </SoraCard>
       <SoraCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.expense') }}</div>
         <div class="sora-card-amount sora-expense">{{ formattedTotalExpense }}</div>
-      </ElCard>
+      </SoraCard>
     </section>
 
     <!-- Detail Section with Pagination -->
-    <ElCard class="sora-card sora-detail-card">
+    <SoraCard class="sora-card sora-detail-card">
       <section class="sora-detail">
         <SoraTable
           :dataSource="transactions"
@@ -330,7 +330,7 @@ const sortSelectOptions = computed(() => [
           />
         </div>
       </section>
-    </ElCard>
+    </SoraCard>
   </div>
 </template>
 
