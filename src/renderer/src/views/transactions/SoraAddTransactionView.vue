@@ -3,7 +3,7 @@ import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { aCard, aForm, aFormItem, aDatePicker, aInputNumber, aSelect, aModal, aButton } from 'ant-design-vue';
 import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
-import type { FormInstance } from 'element-plus';
+import type { FormInstance } from 'ant-design-vue';
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
 import { notifySuccess, notifyError } from '@renderer/utils/sora-notification'
 
