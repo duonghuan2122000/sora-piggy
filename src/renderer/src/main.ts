@@ -10,6 +10,8 @@ import router from '@renderer/router';
 // element-plus styles removed
 // import 'element-plus/dist/index.css';
 import registerAntDesign, { AntConfigProvider } from './plugins/ant-design'
+// Import custom Ant theme mapping (SCSS -> CSS variables)
+import './styles/ant-theme.scss'
 // Import Ant Design runtime CSS (reset). Use package reset CSS from ES build to ensure path exists.
 import 'ant-design-vue/dist/reset.css'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';

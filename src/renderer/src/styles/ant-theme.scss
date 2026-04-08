@@ -1,0 +1,19 @@
+@use '@scss/variables' as *;
+
+// Map key design tokens from our SCSS variables to CSS variables used in Ant theme overrides
+:root {
+  --sora-primary: #{$color-primary};
+  --sora-success: #{$color-success};
+  --sora-error: #{$color-error};
+  --sora-bg: #{$bg-primary-light};
+  --sora-text: #{$text-primary-light};
+}
+
+// Example: override Ant design variables via CSS variables where supported
+// Ant v4 supports less variables; at runtime we provide CSS overrides for colors used by components
+.a-btn-primary {
+  background-color: var(--sora-primary) !important;
+  border-color: var(--sora-primary) !important;
+}
+
+// More overrides can be added here as migration proceeds
