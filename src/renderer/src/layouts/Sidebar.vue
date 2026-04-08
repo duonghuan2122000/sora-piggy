@@ -112,7 +112,7 @@ defineProps<Props>();
                 <font-awesome-icon :icon="item.icon" class="sora-menu-item__icon" />
                 <span v-if="!collapsed" class="sora-menu-item__label">{{ item.label }}</span>
               </div>
-            </ElTooltip>
+            </AntTooltip>
           </RouterLink>
         </div>
       </div>
