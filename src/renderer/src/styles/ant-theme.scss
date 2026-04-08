@@ -13,46 +13,102 @@
   --sora-text-muted: #{$text-secondary-light};
 }
 
+// ANTD selectors (use .ant- classnames produced by antd components)
+
 // Buttons
-.a-btn-primary {
+.ant-btn-primary {
   background-color: var(--sora-primary) !important;
   border-color: var(--sora-primary) !important;
   color: #fff !important;
 }
+.ant-btn {
+  border-radius: 6px;
+}
 
 // Cards
-.a-card {
+.ant-card {
   background: var(--sora-card-bg) !important;
   border-radius: 8px;
 }
 
 // Modals
-.a-modal {
+.ant-modal-content {
   background: var(--sora-card-bg) !important;
+  border-radius: 8px;
 }
 
 // Table header
-.a-table-thead > tr > th {
+.ant-table-thead > tr > th {
   background: var(--sora-bg-2) !important;
   color: var(--sora-text-muted) !important;
+  font-weight: 600;
+}
+.ant-table-tbody > tr > td {
+  background: transparent;
 }
 
 // Form labels and inputs
-.a-form-item-label > label {
+.ant-form-item-label > label {
   color: var(--sora-text-muted) !important;
+  font-weight: 500;
 }
-.a-input, .a-select, .a-input-number {
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-input-number {
   border-radius: 6px !important;
 }
 
+// Select dropdown options for "add" actions (keep same visual cue as before)
+.ant-select-item-option.add-option {
+  color: var(--sora-primary) !important;
+  font-style: italic;
+}
+
 // Pagination active
-.a-pagination-item-active a {
+.ant-pagination-item-active a {
   background: var(--sora-primary) !important;
   border-color: var(--sora-primary) !important;
+  color: #fff !important;
+}
+
+// Tooltip
+.ant-tooltip-inner {
+  background: var(--sora-card-bg) !important;
+  color: var(--sora-text) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+// Layout: header / sider
+.ant-layout-header {
+  background: var(--sora-bg) !important;
+  color: var(--sora-text) !important;
+}
+.ant-layout-sider {
+  background: var(--sora-bg-2) !important;
+}
+
+// Menu / Nav
+.ant-menu {
+  background: transparent !important;
+  color: var(--sora-text) !important;
+}
+.ant-menu-item-selected,
+.ant-menu-item-active {
+  background: rgba(0,0,0,0.04) !important;
 }
 
 // Utility colors
 .sora-income { color: var(--sora-success) !important; }
 .sora-expense { color: var(--sora-error) !important; }
+
+// Accessibility: focus outlines
+.ant-btn:focus,
+.ant-input:focus,
+.ant-select-focused {
+  box-shadow: 0 0 0 3px rgba(66,211,146,0.12) !important; /* using --sora-primary */
+}
+
+// Small helpers
+.sora-card { background: var(--sora-card-bg) !important; }
 
 // Add more component-specific overrides as migration proceeds
