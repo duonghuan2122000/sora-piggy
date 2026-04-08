@@ -218,7 +218,7 @@ const sortSelectOptions = computed(() => [
 <template>
   <div class="sora-transaction-view">
     <!-- Header Section -->
-    <ElCard class="sora-card">
+    <SoraCard class="sora-card">
       <header class="sora-header">
         <div class="sora-search-wrapper">
           <SoraInput
@@ -228,36 +228,36 @@ const sortSelectOptions = computed(() => [
           />
         </div>
         <div class="sora-filters">
-          <ElSelect
+          <SoraSelect
             v-model="selectedCategoryId"
             class="sora-select"
             :loading="categoriesLoading"
             clearable
             placeholder=""
           >
-            <ElOption
+            <SoraSelectOption
               v-for="cat in categorySelectOptions"
               :key="cat.value"
               :label="cat.label"
               :value="cat.value"
             />
           </ElSelect>
-          <ElSelect
+          <SoraSelect
             v-model="selectedAccountId"
             class="sora-select"
             :loading="accountsLoading"
             clearable
             placeholder=""
           >
-            <ElOption
+            <SoraSelectOption
               v-for="acc in accountSelectOptions"
               :key="acc.value"
               :label="acc.label"
               :value="acc.value"
             />
           </ElSelect>
-          <ElSelect v-model="selectedSort" class="sora-select">
-            <ElOption
+          <SoraSelect v-model="selectedSort" class="sora-select">
+            <SoraSelectOption
               v-for="sort in sortSelectOptions"
               :key="sort.value"
               :label="sort.label"
@@ -270,11 +270,11 @@ const sortSelectOptions = computed(() => [
 
     <!-- Summary Section -->
     <section class="sora-summary">
-      <ElCard class="sora-card">
+      <SoraCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.income') }}</div>
         <div class="sora-card-amount sora-income">{{ formattedTotalIncome }}</div>
       </ElCard>
-      <ElCard class="sora-card">
+      <SoraCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.expense') }}</div>
         <div class="sora-card-amount sora-expense">{{ formattedTotalExpense }}</div>
       </ElCard>

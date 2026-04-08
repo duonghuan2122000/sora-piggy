@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { ElButton, ElCard } from 'element-plus';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import SoraCard from '@renderer/components/ui-wrappers/SoraCard.vue'
+import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
 
 const { t } = useI18n();
 </script>
 
 <template>
   <div class="home-view">
-    <ElCard>
+    <SoraCard>
       <template #header>
         <div>Home</div>
       </template>
       <p>{{ t('message.welcome') }}</p>
-      <ElButton type="primary">
+      <SoraButton type="primary">
         <font-awesome-icon :icon="['fas', 'home']" />
         {{ t('nav.home') }}
       </ElButton>

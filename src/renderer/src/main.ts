@@ -6,7 +6,8 @@ import i18n from './i18n';
 import pinia from '@renderer/stores';
 import router from '@renderer/router';
 import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css';
+// element-plus styles removed
+// import 'element-plus/dist/index.css';
 import registerAntDesign, { AntConfigProvider } from './plugins/ant-design'
 // Import Ant Design runtime CSS (reset). Use package reset CSS from ES build to ensure path exists.
 import 'ant-design-vue/dist/reset.css'
@@ -21,7 +22,8 @@ library.add(fas, far, fab);
 
 const app = createApp(App);
 
-app.use(ElementPlus);
+// ElementPlus removed: using Ant Design exclusively
+// app.use(ElementPlus);
 // register Ant Design plugin (Sora migration) — keep ElementPlus until migration completes
 registerAntDesign(app);
 app.use(AntConfigProvider);

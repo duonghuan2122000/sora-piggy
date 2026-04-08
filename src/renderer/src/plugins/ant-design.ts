@@ -5,6 +5,9 @@ import { message, notification } from 'ant-design-vue'
 
 export function registerAntDesign(app: App) {
   app.use(Antd)
+  // enable global message and notification aliases
+  app.config.globalProperties.$message = message
+  app.config.globalProperties.$notification = notification
   // Attach message/notification to globalProperties for easy usage
   app.config.globalProperties.$message = message
   app.config.globalProperties.$notification = notification

@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+I only speak Vietnamese so you must always respond in Vietnamese.
+
+Assume I know little to no english.
+
+<CRITICAL>
+  ALWAYS RESPOND IN VIETNAMESE
+</CRITICAL>
+
 ## Common Commands
 
 ```bash
