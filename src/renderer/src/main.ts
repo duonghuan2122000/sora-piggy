@@ -5,7 +5,8 @@ import App from './App.vue';
 import i18n from './i18n';
 import pinia from '@renderer/stores';
 import router from '@renderer/router';
-import ElementPlus from 'element-plus';
+// ElementPlus removed in migration
+// import ElementPlus from 'element-plus';
 // element-plus styles removed
 // import 'element-plus/dist/index.css';
 import registerAntDesign, { AntConfigProvider } from './plugins/ant-design'
