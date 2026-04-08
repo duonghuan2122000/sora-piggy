@@ -17,8 +17,8 @@ const { t } = useI18n();
       <SoraButton type="primary">
         <font-awesome-icon :icon="['fas', 'info-circle']" />
         {{ t('nav.about') }}
-      </ElButton>
-    </ElCard>
+      </SoraButton>
+      </SoraCard>
   </div>
 </template>
 

@@ -10,14 +10,14 @@ Working branch: feature/16-chuyen-giao-dien-ant-design
 ## Tasks
 
 - [x] TASK-001 — Create change branch and scaffold (if needed)
-- [ ] TASK-002 — Install dependencies
+- [x] TASK-002 — Install dependencies
 - [ ] TASK-003 — Add Ant Design plugin
 - [ ] TASK-004 — Create Sora UI wrappers (initial set)
 - [ ] TASK-005 — Migrate global layouts
 - [ ] TASK-006 — Migrate pages (priority: transactions view)
 - [ ] TASK-007 — Migrate common components
 - [ ] TASK-008 — Update styles & variables
-- [ ] TASK-009 — Remove Element Plus & cleanup
+- [x] TASK-009 — Remove Element Plus & cleanup
 - [ ] TASK-010 — Run checks & GitNexus analysis
 - [ ] TASK-011 — Manual QA & visual review
 - [ ] TASK-012 — Documentation & PR
