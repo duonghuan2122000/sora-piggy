@@ -5,15 +5,54 @@
   --sora-primary: #{$color-primary};
   --sora-success: #{$color-success};
   --sora-error: #{$color-error};
+  --sora-warning: #{$color-warning};
   --sora-bg: #{$bg-primary-light};
+  --sora-bg-2: #{$bg-secondary-light};
+  --sora-card-bg: #ffffff;
   --sora-text: #{$text-primary-light};
+  --sora-text-muted: #{$text-secondary-light};
 }
 
-// Example: override Ant design variables via CSS variables where supported
-// Ant v4 supports less variables; at runtime we provide CSS overrides for colors used by components
+// Buttons
 .a-btn-primary {
   background-color: var(--sora-primary) !important;
   border-color: var(--sora-primary) !important;
+  color: #fff !important;
 }
 
-// More overrides can be added here as migration proceeds
+// Cards
+.a-card {
+  background: var(--sora-card-bg) !important;
+  border-radius: 8px;
+}
+
+// Modals
+.a-modal {
+  background: var(--sora-card-bg) !important;
+}
+
+// Table header
+.a-table-thead > tr > th {
+  background: var(--sora-bg-2) !important;
+  color: var(--sora-text-muted) !important;
+}
+
+// Form labels and inputs
+.a-form-item-label > label {
+  color: var(--sora-text-muted) !important;
+}
+.a-input, .a-select, .a-input-number {
+  border-radius: 6px !important;
+}
+
+// Pagination active
+.a-pagination-item-active a {
+  background: var(--sora-primary) !important;
+  border-color: var(--sora-primary) !important;
+}
+
+// Utility colors
+.sora-income { color: var(--sora-success) !important; }
+.sora-expense { color: var(--sora-error) !important; }
+
+// Add more component-specific overrides as migration proceeds
