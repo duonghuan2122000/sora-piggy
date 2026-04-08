@@ -111,4 +111,72 @@
 // Small helpers
 .sora-card { background: var(--sora-card-bg) !important; }
 
+// Form: labels, validation messages, spacing
+.ant-form-item {
+  margin-bottom: 16px !important;
+}
+.ant-form-item-explain {
+  color: var(--sora-error) !important;
+  font-size: 12px !important;
+}
+.ant-form-item-label > label.required::after {
+  color: var(--sora-error) !important;
+  content: " *";
+}
+
+// Inputs focus / hover
+.ant-input-affix-wrapper:hover,
+.ant-select-selector:hover,
+.ant-input-number:hover {
+  border-color: darken(var(--sora-primary), 6%) !important; /* fallback to slightly darker */
+}
+
+// Table: header, empty state, striped rows
+.ant-table-thead > tr > th {
+  padding: 12px 16px !important;
+}
+.ant-table-row:nth-child(odd) {
+  background: rgba(0,0,0,0.02) !important;
+}
+.ant-empty {
+  color: var(--sora-text-muted) !important;
+}
+.ant-empty-description {
+  color: var(--sora-text-muted) !important;
+}
+
+// Modal: footer button spacing, primary button prominence
+.ant-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.ant-modal-footer .ant-btn-primary {
+  background: var(--sora-primary) !important;
+  border-color: var(--sora-primary) !important;
+}
+
+// Menu / TopNav: active, hover, branding
+.ant-layout-header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 56px;
+}
+.ant-layout-header .sora-app-name {
+  font-weight: 700;
+  color: var(--sora-text) !important;
+  margin-left: 12px;
+}
+.ant-menu-item:hover {
+  background: rgba(0,0,0,0.03) !important;
+}
+.ant-menu-item-selected,
+.ant-menu-item-active {
+  background: linear-gradient(90deg, rgba(#{map-get($color-primary, "r")},#{map-get($color-primary, "g")},#{map-get($color-primary, "b")},0.08), rgba(0,0,0,0)) !important;
+}
+
+// Ensure small utilities are preserved
+.sora-card { box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+
 // Add more component-specific overrides as migration proceeds
