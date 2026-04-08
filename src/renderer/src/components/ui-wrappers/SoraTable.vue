@@ -1,19 +1,20 @@
 <template>
   <a-table v-bind="tableProps" :data-source="dataSource" @change="onChange">
-    <template #bodyCell="{ column, record }">
+    <template #bodyCell="{ record }">
       <slot name="default" :record="record" />
     </template>
   </a-table>
 </template>
 
 <script setup lang="ts" name="SoraTable">
-import { defineEmits } from 'vue';
+import { getCurrentInstance } from 'vue';
+// emits handled via component events
 const props = defineProps({
   dataSource: { type: Array, default: () => [] },
   tableProps: { type: Object, default: () => ({}) }
 });
-const emits = defineEmits(['change']);
 function onChange(...args: any[]) {
-  emits('change', ...args);
+  const compEmit = (getCurrentInstance() as any)?.emit;
+  compEmit && compEmit('change', ...args);
 }
 </script>

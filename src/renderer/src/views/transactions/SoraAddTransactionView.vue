@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { aCard, aForm, aFormItem, aDatePicker, aInputNumber, aSelect, aModal, aButton } from 'ant-design-vue';
 import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
-import type { FormInstance } from 'ant-design-vue';
+// Ant components are registered globally via plugin; no local import required
+
+// Use a loose type for form rules during migration
+
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
 import { notifySuccess, notifyError } from '@renderer/utils/sora-notification'
 
@@ -23,7 +25,7 @@ interface AccountOption {
   isAdd?: boolean;
 }
 
-const formRef = ref<FormInstance | null>(null);
+const formRef = ref<any>(null);
 const formValue = ref({
   name: '',
   description: '',
@@ -33,7 +35,7 @@ const formValue = ref({
   account: null as string | null
 });
 
-const rules: FormRules = {
+const rules: any = {
   name: [
     {
       required: true,

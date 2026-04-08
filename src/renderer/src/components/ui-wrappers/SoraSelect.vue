@@ -6,16 +6,16 @@
 </template>
 
 <script setup lang="ts">
-import { useAttrs, defineEmits } from 'vue'
+import { useAttrs } from 'vue'
 
 const props = defineProps({
   modelValue: { type: [String, Number], default: null },
-  options: { type: Array, default: () => [] }
+  options: { type: Array as () => Array<{ value: string|number, label?: string }>, default: () => [] }
 })
-const emits = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
 const attrs = useAttrs()
 
 function onChange(val: any) {
-  emits('update:modelValue', val)
+  emit('update:modelValue', val)
 }
 </script>

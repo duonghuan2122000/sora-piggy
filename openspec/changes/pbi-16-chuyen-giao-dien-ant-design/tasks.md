@@ -11,16 +11,16 @@ Working branch: feature/16-chuyen-giao-dien-ant-design
 
 - [x] TASK-001 — Create change branch and scaffold (if needed)
 - [x] TASK-002 — Install dependencies
-- [ ] TASK-003 — Add Ant Design plugin
-- [ ] TASK-004 — Create Sora UI wrappers (initial set)
-- [ ] TASK-005 — Migrate global layouts
-- [ ] TASK-006 — Migrate pages (priority: transactions view)
-- [ ] TASK-007 — Migrate common components
-- [ ] TASK-008 — Update styles & variables
+- [x] TASK-003 — Add Ant Design plugin
+- [x] TASK-004 — Create Sora UI wrappers (initial set)
+- [x] TASK-005 — Migrate global layouts
+- [x] TASK-006 — Migrate pages (priority: transactions view)
+- [x] TASK-007 — Migrate common components
+- [x] TASK-008 — Update styles & variables
 - [x] TASK-009 — Remove Element Plus & cleanup
-- [ ] TASK-010 — Run checks & GitNexus analysis
+- [x] TASK-010 — Run checks & GitNexus analysis
 - [ ] TASK-011 — Manual QA & visual review
-- [ ] TASK-012 — Documentation & PR
+- [x] TASK-012 — Documentation & PR
 
 TASK-001 — Create change branch and scaffold (if needed)
 - Subject: Ensure branch exists and is up-to-date

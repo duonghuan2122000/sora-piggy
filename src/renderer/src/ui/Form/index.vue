@@ -1,5 +1,5 @@
 <template>
-  <a-form v-bind="$attrs" v-on="$listeners"><slot /></a-form>
+  <a-form v-bind="$attrs"><slot /></a-form>
 </template>
 
 <script setup lang="ts">

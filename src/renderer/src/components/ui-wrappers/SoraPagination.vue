@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAttrs, defineEmits } from 'vue'
+import { useAttrs } from 'vue'
 
 const props = defineProps({
   current: { type: Number, default: 1 },
@@ -20,16 +20,16 @@ const props = defineProps({
   pageSizeOptions: { type: Array, default: () => [10, 20, 50] }
 })
 
-const emits = defineEmits(['update:current', 'update:pageSize', 'change', 'showSizeChange'])
+const emit = defineEmits(['update:current', 'update:pageSize', 'change', 'showSizeChange'])
 const attrs = useAttrs()
 
 function onChange(page: number) {
-  emits('update:current', page)
-  emits('change', page)
+  emit('update:current', page)
+  emit('change', page)
 }
 
 function onShowSizeChange(current: number, size: number) {
-  emits('update:pageSize', size)
-  emits('showSizeChange', current, size)
+  emit('update:pageSize', size)
+  emit('showSizeChange', current, size)
 }
 </script>

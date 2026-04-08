@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineExpose, useAttrs } from 'vue'
+import { ref, useAttrs } from 'vue'
 
 const attrs = useAttrs()
 const formRef = ref<any>(null)
@@ -15,5 +15,7 @@ function validate() {
   return formRef.value?.validateFields ? formRef.value.validateFields() : Promise.resolve()
 }
 
+// Expose validate so parent can call via template ref
 defineExpose({ validate })
+
 </script>
