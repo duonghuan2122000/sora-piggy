@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-I only speak Vietnamese so you must always respond in Vietnamese.
+Tệp này hướng dẫn Claude Code khi làm việc trong repository Sora Piggy. Luôn trả lời bằng tiếng Việt.
 
-Assume I know little to no english.
+I only speak Vietnamese so you must always respond in Vietnamese.
 
 <CRITICAL>
   ALWAYS RESPOND IN VIETNAMESE
@@ -31,21 +31,27 @@ npm run typecheck              # Run TypeScript checks (node + web)
 npm run typecheck:node         # Type check main process
 npm run typecheck:web          # Type check renderer
 npm run rebuild                # Rebuild native dependencies (better-sqlite3)
+
+# Testing
+npm run test                   # Run all tests with Vitest
+npm run test:unit              # Alias for unit tests
+npm run test:watch             # Run Vitest in watch mode
+# Run a single test: npm run test -- -t "<pattern>" or npx vitest -t "<pattern>"
 ```
 
-## Architecture Overview
+## Kiến trúc tổng quan
 
-**Sora Piggy** is a local-first desktop expense tracking app built with:
+**Sora Piggy** là ứng dụng desktop local-first để quản lý chi tiêu được xây dựng với:
 
-- **Electron** for desktop shell (main process + preload)
-- **Vue 3 + Composition API** for the renderer (UI)
-- **TypeScript** for type safety
-- **SQLite** via `better-sqlite3` for local data storage
-- **Pinia** for state management
-- **Element Plus** for UI components
-- **SCSS** with CSS variables for theming
+- **Electron** cho shell desktop (main process + preload)
+- **Vue 3 + Composition API** cho phần renderer (UI)
+- **TypeScript** cho type safety
+- **SQLite** qua `better-sqlite3` cho lưu trữ local
+- **Pinia** cho quản lý state
+- **Ant Design Vue** cho UI components (xem package.json)
+- **SCSS** với CSS variables cho theming
 
-### Project Structure
+### Project Structure (high-level)
 
 ```
 src/
@@ -75,18 +81,18 @@ src/
 ## Data Flow
 
 1. **Main Process** (`src/main/index.ts`):
-   - Initializes SQLite database on app startup
-   - Registers IPC handlers for database operations
-   - Example: `ipcMain.handle('db:getAllTransactions', () => getAllTransactions())`
+   - Khởi tạo SQLite database khi app start
+   - Đăng ký IPC handlers cho các thao tác database
+   - Ví dụ: `ipcMain.handle('db:getAllTransactions', () => getAllTransactions())`
 
 2. **Preload Script** (`src/preload/index.ts`):
-   - Uses `contextBridge` to safely expose IPC APIs to renderer
-   - Example: `getTransactions: () => ipcRenderer.invoke('db:getAllTransactions')`
+   - Dùng `contextBridge` để expose API an toàn cho renderer
+   - Ví dụ: `getTransactions: () => ipcRenderer.invoke('db:getAllTransactions')`
 
 3. **Renderer (Vue)** (`src/renderer/src/`):
-   - Calls `window.api.getTransactions()` from components
-   - Stores returned data in Pinia stores or component refs
-   - UI components render the data
+   - Gọi `window.api.getTransactions()` từ component
+   - Lưu data vào Pinia stores hoặc refs
+   - UI components render dữ liệu
 
 ## Key Files
 
@@ -102,41 +108,39 @@ src/
 
 ## Styling
 
-- **SCSS** with CSS variables defined in `src/renderer/src/assets/scss/_variables.scss`
-- **CSS Modules not used** - scoped styles in Vue components
-- **Element Plus** for base UI components with custom styling
-- Variables are auto-imported via `electron.vite.config.ts`:
-  ```scss
-  @use '@scss/variables' as *;
-  ```
+- **SCSS** với CSS variables ở `src/renderer/src/assets/scss/_variables.scss`
+- Scoped styles trong Vue components (không dùng CSS Modules)
+- Ant Design Vue/Ant theme overrides được sử dụng — check các file SCSS trong assets để biết biến và mixins
 
 ## TypeScript Configuration
 
-- **Two tsconfig files**: `tsconfig.node.json` (main) and `tsconfig.web.json` (renderer)
-- **Type aliases** configured:
+- Hai tsconfig: `tsconfig.node.json` (main) và `tsconfig.web.json` (renderer)
+- Type aliases:
   - `@renderer` → `src/renderer/src`
   - `@assets` → `src/renderer/src/assets`
   - `@scss` → `src/renderer/src/assets/scss`
 
 ## Database Schema
 
-SQLite database at `~/.config/Sora Piggy/sora-piggy.db` (userData directory):
+SQLite database ở `~/.config/Sora Piggy/sora-piggy.db` (userData directory):
 
-- **transactions**: id, name, description, category, account, amount, time
-- **categories**: id, name, type, icon, color
-- **accounts**: id, name, type, balance
+- `transactions`: id, name, description, category, account, amount, time
+- `categories`: id, name, type, icon, color
+- `accounts`: id, name, type, balance
 
 ## Testing
 
-No test files currently exist in the repository. Consider using Vitest for future tests.
+- Test runner: Vitest (xem package.json scripts)
+- Không có test files lớn hiện tại — thêm test cạnh file tương ứng
+- Chạy một test cụ thể: `npm run test -- -t "<pattern>"` hoặc `npx vitest -t "<pattern>"`
 
 ## Development Tips
 
-- Always run `npm run typecheck` before building to catch TypeScript errors
-- Database operations use synchronous better-sqlite3 - keep queries efficient
-- IPC calls are async in renderer, synchronous in main
-- Use `@renderer/` alias for cleaner imports in Vue files
-- For styling issues, check `_variables.scss` for available CSS variables
+- Luôn chạy `npm run typecheck` trước khi build để bắt TypeScript errors
+- Database operations dùng better-sqlite3 (synchronous) — giữ queries hiệu quả
+- IPC calls: async ở renderer, handlers sync hoặc async ở main
+- Dùng alias `@renderer/` cho imports trong Vue để code sạch hơn
+- Kiểm tra `_variables.scss` khi gặp vấn đề styling
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
@@ -226,17 +230,6 @@ npx gitnexus analyze --embeddings
 To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.embeddings` field shows the count (0 means no embeddings). **Running analyze without `--embeddings` will delete any previously generated embeddings.**
 
 > Claude Code users: A PostToolUse hook handles this automatically after `git commit` and `git merge`.
-
-## CLI
-
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
 
