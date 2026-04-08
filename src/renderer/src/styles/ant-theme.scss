@@ -3,6 +3,7 @@
 // Map key design tokens from our SCSS variables to CSS variables used in Ant theme overrides
 :root {
   --sora-primary: #{$color-primary};
+  --sora-primary-dark: #{darken($color-primary, 6%)};
   --sora-success: #{$color-success};
   --sora-error: #{$color-error};
   --sora-warning: #{$color-warning};
@@ -128,7 +129,7 @@
 .ant-input-affix-wrapper:hover,
 .ant-select-selector:hover,
 .ant-input-number:hover {
-  border-color: darken(var(--sora-primary), 6%) !important; /* fallback to slightly darker */
+  border-color: var(--sora-primary-dark) !important; /* fallback to slightly darker */
 }
 
 // Table: header, empty state, striped rows
