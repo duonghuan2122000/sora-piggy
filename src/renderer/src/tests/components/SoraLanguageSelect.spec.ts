@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils';
-import SoraLanguageSelect from '@renderer/components/ui/SoraLanguageSelect.vue';
+import SoraLanguageSelect from '@renderer/components/ui/index';
 import { createTestingPinia } from '@pinia/testing';
+
+import { describe, test, expect } from 'vitest';
 
 describe('SoraLanguageSelect', () => {
   test('renders and emits on change', async () => {
