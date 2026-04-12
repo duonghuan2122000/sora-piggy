@@ -12,6 +12,10 @@
     "cancel": "Cancel",
     "delete": "Delete"
   },
+  "language": {
+    "select": "Select language"
+  },
+
   "message": {
     "welcome": "Welcome to the application!",
     "success": "Success!",
