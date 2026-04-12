@@ -24,7 +24,7 @@ export default defineConfig(async () => {
       }
     },
     test: {
-      globals: false,
+      globals: true,
       environment: 'jsdom',
       // Exclude E2E / Playwright tests so Vitest only runs unit/integration tests
       exclude: [
