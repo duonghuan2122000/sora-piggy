@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
 import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue';
 import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue';
+import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue';
+import { ROUTE_NAMES } from '@renderer/constants';
 import { notifyError } from '@renderer/utils/sora-notification';
 import {
   ITransaction,
@@ -40,6 +43,11 @@ const accountsLoading = ref(false);
 
 // i18n
 const { t } = useI18n();
+
+const router = useRouter();
+const goToAddTransaction = (): void => {
+  router.push({ name: ROUTE_NAMES.TRANSACTIONS_ADD });
+};
 
 // Default filter values
 const SORT_NEWEST = 'newest';
@@ -235,6 +243,15 @@ const sortSelectOptions = computed(() => [
 <template>
   <div class="sora-transaction-view">
     <!-- Header Section -->
+    <SoraCard class="sora-card sora-screen-header sora-card-padded">
+      <div class="sora-screen-header-inner">
+        <div class="sora-screen-title">{{ t('transactions.title') }}</div>
+        <SoraButton type="primary" @click="goToAddTransaction">{{
+          t('transactionForm.title')
+        }}</SoraButton>
+      </div>
+    </SoraCard>
+
     <SoraCard class="sora-card sora-card-padded">
       <header class="sora-header">
         <div class="sora-search-wrapper">
@@ -425,6 +442,18 @@ const sortSelectOptions = computed(() => [
 /* Padded variant for SoraCard used in filter and summary */
 .sora-card.sora-card-padded {
   padding: $spacing-md;
+}
+
+/* Screen header styles */
+.sora-screen-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sora-screen-title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $text-primary-light;
 }
 
 /* Summary card specific styles */
