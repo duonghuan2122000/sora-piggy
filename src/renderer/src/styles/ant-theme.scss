@@ -18,8 +18,8 @@
 
 // Buttons
 .ant-btn-primary {
-  background-color: var(--sora-primary) !important;
-  border-color: var(--sora-primary) !important;
+  background-color: $color-primary !important;
+  border-color: $color-primary !important;
   color: #fff !important;
 }
 .ant-btn {
@@ -61,14 +61,14 @@
 
 // Select dropdown options for "add" actions (keep same visual cue as before)
 .ant-select-item-option.add-option {
-  color: var(--sora-primary) !important;
+  color: $color-primary !important;
   font-style: italic;
 }
 
 // Pagination active
 .ant-pagination-item-active a {
-  background: var(--sora-primary) !important;
-  border-color: var(--sora-primary) !important;
+  background: $color-primary !important;
+  border-color: $color-primary !important;
   color: #fff !important;
 }
 
@@ -153,8 +153,8 @@
   gap: 8px;
 }
 .ant-modal-footer .ant-btn-primary {
-  background: var(--sora-primary) !important;
-  border-color: var(--sora-primary) !important;
+  background: $color-primary !important;
+  border-color: $color-primary !important;
 }
 
 // Menu / TopNav: active, hover, branding
