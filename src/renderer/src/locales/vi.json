@@ -67,6 +67,7 @@
       "amountRequired": "Vui lòng nhập số tiền",
       "categoryRequired": "Vui lòng chọn danh mục",
       "accountRequired": "Vui lòng chọn tài khoản",
+      "timeRequired": "Vui lòng chọn thời gian",
       "amountGreaterThanZero": "Số tiền phải lớn hơn 0"
     },
     "messages": {

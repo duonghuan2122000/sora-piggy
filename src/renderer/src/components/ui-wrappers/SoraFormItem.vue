@@ -1,10 +1,10 @@
 <template>
-  <a-card v-bind="attrs">
-    <template #title>
-      <slot name="header" />
+  <a-form-item v-bind="attrs">
+    <template #label>
+      <slot name="label" />
     </template>
     <slot />
-  </a-card>
+  </a-form-item>
 </template>
 
 <script setup lang="ts">

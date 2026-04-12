@@ -62,6 +62,7 @@
       "amountRequired": "Please enter amount",
       "categoryRequired": "Please select category",
       "accountRequired": "Please select account",
+      "timeRequired": "Please select date & time",
       "amountGreaterThanZero": "Amount must be greater than 0"
     },
     "messages": {
