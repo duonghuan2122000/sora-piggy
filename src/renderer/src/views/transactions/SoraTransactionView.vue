@@ -235,7 +235,7 @@ const sortSelectOptions = computed(() => [
 <template>
   <div class="sora-transaction-view">
     <!-- Header Section -->
-    <SoraCard class="sora-card">
+    <SoraCard class="sora-card sora-card-padded">
       <header class="sora-header">
         <div class="sora-search-wrapper">
           <SoraInput
@@ -287,11 +287,11 @@ const sortSelectOptions = computed(() => [
 
     <!-- Summary Section -->
     <section class="sora-summary">
-      <SoraCard class="sora-card">
+      <SoraCard class="sora-card sora-card-padded">
         <div class="sora-card-title">{{ t('transactionForm.labels.income') }}</div>
         <div class="sora-card-amount sora-income">{{ formattedTotalIncome }}</div>
       </SoraCard>
-      <SoraCard class="sora-card">
+      <SoraCard class="sora-card sora-card-padded">
         <div class="sora-card-title">{{ t('transactionForm.labels.expense') }}</div>
         <div class="sora-card-amount sora-expense">{{ formattedTotalExpense }}</div>
       </SoraCard>
@@ -420,6 +420,11 @@ const sortSelectOptions = computed(() => [
 .sora-card {
   background-color: #fff;
   border-radius: $radius-md;
+}
+
+/* Padded variant for SoraCard used in filter and summary */
+.sora-card.sora-card-padded {
+  padding: $spacing-md;
 }
 
 /* Summary card specific styles */
