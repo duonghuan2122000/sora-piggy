@@ -25,7 +25,7 @@ Danh sách các bước cần làm để implement thay đổi màu primary tậ
 - Review từng thay đổi thủ công trước khi commit
 
 ### task-005 — Kiểm tra và sửa lỗi
-- [~] In progress
+- [x] Completed
 - Chạy `npm run typecheck`: OK
 - Chạy `npm run lint`: Bị chặn bởi môi trường (ESLint/Prettier báo thiếu plugin `prettier-plugin-tailwindcss`). Cần cài thêm dependency hoặc điều chỉnh config để chạy lint thành công.
 - Chạy `npm run dev` và kiểm tra visual ở màn hình chính: TopNav, Buttons, Forms, Badges (khuyến nghị thực hiện thủ công)
