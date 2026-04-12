@@ -17,6 +17,10 @@ export default defineConfig({
       preprocessorOptions: {
         scss: {
           additionalData: `@use "@scss/variables" as *;`
+        },
+        // Enable less preprocessing for Ant Design theming (javascriptEnabled required)
+        less: {
+          javascriptEnabled: true
         }
       }
     },

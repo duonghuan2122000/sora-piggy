@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ElSelect, ElOption } from 'element-plus';
 import { useLanguageStore } from '@renderer/stores/language';
 
 const languageStore = useLanguageStore();
@@ -22,20 +21,20 @@ const languages = computed(() => languageStore.languages);
 
 <template>
   <div class="language-selector">
-    <ElSelect
-      v-model="currentLanguage"
+    <a-select
+      v-model:value="currentLanguage"
       placeholder="Select language"
       size="small"
       class="language-select"
       :disabled="languageStore.isLoading"
     >
-      <ElOption v-for="lang in languages" :key="lang.code" :label="lang.name" :value="lang.code">
+      <a-select-option v-for="lang in languages" :key="lang.code" :value="lang.code">
         <span class="language-option">
           <span class="language-name">{{ lang.name }}</span>
           <span class="language-code">({{ lang.code }})</span>
         </span>
-      </ElOption>
-    </ElSelect>
+      </a-select-option>
+    </a-select>
   </div>
 </template>
 

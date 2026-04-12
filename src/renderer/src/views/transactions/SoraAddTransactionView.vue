@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  ElCard,
-  ElForm,
-  ElFormItem,
-  ElInput,
-  ElDatePicker,
-  ElInputNumber,
-  ElAutocomplete,
-  ElDialog,
-  ElButton,
-  ElMessage
-} from 'element-plus';
-import type { FormInstance, FormRules } from 'element-plus';
+import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
+// Ant components are registered globally via plugin; no local import required
+
+// Use a loose type for form rules during migration
+
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
+import { notifySuccess, notifyError } from '@renderer/utils/sora-notification'
 
 const { t } = useI18n();
 
@@ -32,7 +25,7 @@ interface AccountOption {
   isAdd?: boolean;
 }
 
-const formRef = ref<FormInstance | null>(null);
+const formRef = ref<any>(null);
 const formValue = ref({
   name: '',
   description: '',
@@ -42,7 +35,7 @@ const formValue = ref({
   account: null as string | null
 });
 
-const rules: FormRules = {
+const rules: any = {
   name: [
     {
       required: true,
@@ -142,7 +135,7 @@ const isAccountNew = computed(() => {
   return !accountOptions.value.some((option) => option.value?.toString().toLowerCase() === search);
 });
 
-// Fetch account suggestions for ElAutocomplete
+// Fetch account suggestions for a-select
 const queryAccountSearch = (queryString: string, cb: (options: AccountOption[]) => void): void => {
   let results = accountOptions.value;
 
@@ -234,7 +227,7 @@ const isNewCategory = computed(() => {
   return !categoryOptions.value.some((option) => option.value?.toString().toLowerCase() === search);
 });
 
-// Fetch suggestions for ElAutocomplete
+// Fetch suggestions for a-select
 const querySearch = (queryString: string, cb: (options: CategoryOption[]) => void): void => {
   let results = categoryOptions.value;
 
@@ -338,7 +331,7 @@ const handleSubmit = async (): Promise<void> => {
         });
 
         if (success) {
-          ElMessage.success(t('transactionForm.messages.success'));
+          notifySuccess(t('transactionForm.messages.success'));
           // Reset form after successful save
           formValue.value = {
             name: '',
@@ -353,7 +346,7 @@ const handleSubmit = async (): Promise<void> => {
           accountSearchValue.value = '';
         }
       } catch (error) {
-        ElMessage.error(t('transactionForm.messages.error'));
+        notifyError(t('transactionForm.messages.error'));
       } finally {
         transactionFormStore.setLoading(false);
       }
@@ -392,37 +385,37 @@ onUnmounted(() => {
 
 <template>
   <div class="sora-add-transaction-view">
-    <ElCard class="sora-card">
+    <a-card class="sora-card">
       <template #header>
         <div>{{ $t('transactionForm.title') }}</div>
       </template>
-      <ElForm ref="formRef" :model="formValue" :rules="rules" label-position="top">
-        <ElFormItem :label="$t('transactionForm.labels.name')" prop="name">
-          <ElInput
+      <a-form ref="formRef" :model="formValue" :rules="rules" label-position="top">
+        <a-formItem :label="$t('transactionForm.labels.name')" prop="name">
+          <SoraInput
             v-model="formValue.name"
             :placeholder="$t('transactionForm.placeholders.name')"
           />
-        </ElFormItem>
+        </a-formItem>
 
-        <ElFormItem :label="$t('transactionForm.labels.description')" prop="description">
-          <ElInput
+        <a-formItem :label="$t('transactionForm.labels.description')" prop="description">
+          <SoraInput
             v-model="formValue.description"
             type="textarea"
             :placeholder="$t('transactionForm.placeholders.description')"
             :rows="3"
           />
-        </ElFormItem>
+        </a-formItem>
 
-        <ElFormItem :label="$t('transactionForm.labels.time')" prop="time">
-          <ElDatePicker v-model="formValue.time" type="datetime" clearable />
-        </ElFormItem>
+        <a-formItem :label="$t('transactionForm.labels.time')" prop="time">
+          <a-date-picker v-model="formValue.time" type="datetime" clearable />
+        </a-formItem>
 
-        <ElFormItem :label="$t('transactionForm.labels.amount')" prop="amount">
-          <ElInputNumber v-model="formValue.amount" :min="1" />
-        </ElFormItem>
+        <a-formItem :label="$t('transactionForm.labels.amount')" prop="amount">
+          <a-input-number v-model="formValue.amount" :min="1" />
+        </a-formItem>
 
-        <ElFormItem :label="$t('transactionForm.labels.category')" prop="category">
-          <ElAutocomplete
+        <a-formItem :label="$t('transactionForm.labels.category')" prop="category">
+          <a-select
             v-model="categorySearchValue"
             :fetch-suggestions="querySearch"
             :placeholder="$t('transactionForm.placeholders.category')"
@@ -435,11 +428,11 @@ onUnmounted(() => {
                 {{ item.value }}
               </div>
             </template>
-          </ElAutocomplete>
-        </ElFormItem>
+          </a-select>
+        </a-formItem>
 
-        <ElFormItem :label="$t('transactionForm.labels.account')" prop="account">
-          <ElAutocomplete
+        <a-formItem :label="$t('transactionForm.labels.account')" prop="account">
+          <a-select
             v-model="accountSearchValue"
             :fetch-suggestions="queryAccountSearch"
             :placeholder="$t('transactionForm.placeholders.account')"
@@ -451,58 +444,58 @@ onUnmounted(() => {
                 {{ item.value }}
               </div>
             </template>
-          </ElAutocomplete>
-        </ElFormItem>
-      </ElForm>
-    </ElCard>
+          </a-select>
+        </a-formItem>
+      </a-form>
+    </a-card>
 
     <!-- Add Category Modal -->
-    <ElDialog
+    <a-modal
       v-model="showCategoryModal"
       :title="$t('transactionForm.dialogs.addCategory')"
       width="400px"
     >
-      <ElForm>
-        <ElFormItem :label="$t('transactionForm.categoryName')">
-          <ElInput
+      <a-form>
+        <a-formItem :label="$t('transactionForm.categoryName')">
+          <a-input
             v-model="newCategoryName"
             :placeholder="$t('transactionForm.placeholders.categoryName')"
             @keyup.enter="saveCategoryFromModal"
             @keydown.enter.prevent
           />
-        </ElFormItem>
-      </ElForm>
+        </a-formItem>
+      </a-form>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
-          <ElButton @click="showCategoryModal = false">Cancel</ElButton>
-          <ElButton type="primary" @click="saveCategoryFromModal">Save</ElButton>
+          <a-button @click="showCategoryModal = false">Cancel</a-button>
+          <a-button type="primary" @click="saveCategoryFromModal">Save</a-button>
         </div>
       </template>
-    </ElDialog>
+    </a-modal>
 
     <!-- Add Account Modal -->
-    <ElDialog
+    <a-modal
       v-model="showAccountModal"
       :title="$t('transactionForm.dialogs.addAccount')"
       width="400px"
     >
-      <ElForm>
-        <ElFormItem :label="$t('transactionForm.accountName')">
-          <ElInput
+      <a-form>
+        <a-formItem :label="$t('transactionForm.accountName')">
+          <a-input
             v-model="newAccountName"
             :placeholder="$t('transactionForm.placeholders.accountName')"
             @keyup.enter="saveAccountFromModal"
             @keydown.enter.prevent
           />
-        </ElFormItem>
-      </ElForm>
+        </a-formItem>
+      </a-form>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
-          <ElButton @click="showAccountModal = false">Cancel</ElButton>
-          <ElButton type="primary" @click="saveAccountFromModal">Save</ElButton>
+          <a-button @click="showAccountModal = false">Cancel</a-button>
+          <a-button type="primary" @click="saveAccountFromModal">Save</a-button>
         </div>
       </template>
-    </ElDialog>
+    </a-modal>
   </div>
 </template>
 

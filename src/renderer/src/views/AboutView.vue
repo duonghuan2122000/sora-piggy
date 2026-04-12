@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { ElButton, ElCard } from 'element-plus';
+import SoraCard from '@renderer/components/ui-wrappers/SoraCard.vue'
+import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const { t } = useI18n();
 </script>
 
 <template>
   <div class="about-view">
-    <ElCard>
+    <SoraCard>
       <template #header>
         <div>About</div>
       </template>
       <p>{{ t('app.description') }}</p>
-      <ElButton type="primary">
+      <SoraButton type="primary">
         <font-awesome-icon :icon="['fas', 'info-circle']" />
         {{ t('nav.about') }}
-      </ElButton>
-    </ElCard>
+      </SoraButton>
+      </SoraCard>
   </div>
 </template>
 

@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  ElCard,
-  ElInput,
-  ElSelect,
-  ElOption,
-  ElTable,
-  ElTableColumn,
-  ElPagination,
-  ElMessage
-} from 'element-plus';
+import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
+import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue'
+import { notifyError } from '@renderer/utils/sora-notification'
 import {
   ITransaction,
   TransactionFilterParams,
@@ -52,7 +45,7 @@ const { t } = useI18n();
 const SORT_NEWEST = 'newest';
 const SORT_OLDEST = 'oldest';
 
-// Filter state - use number type for ElSelect compatibility
+// Filter state - use number type for SoraSelect compatibility
 // Use -1 to represent "all" option
 const searchQuery = ref('');
 const selectedCategoryId = ref<number>(-1);
@@ -124,7 +117,7 @@ const fetchTransactions = async (): Promise<void> => {
     totalExpense.value = paginatedResult.summary.totalExpense;
   } catch (error) {
     console.error('Failed to fetch transactions:', error);
-    ElMessage.error(t('transactions.error') || 'Lỗi khi tải danh sách giao dịch');
+    notifyError(t('transactions.error') || 'Lỗi khi tải danh sách giao dịch');
     transactions.value = [];
     total.value = 0;
     totalIncome.value = 0;
@@ -225,113 +218,100 @@ const sortSelectOptions = computed(() => [
 <template>
   <div class="sora-transaction-view">
     <!-- Header Section -->
-    <ElCard class="sora-card">
+    <SoraCard class="sora-card">
       <header class="sora-header">
         <div class="sora-search-wrapper">
-          <ElInput
+          <SoraInput
             v-model="searchQuery"
             :placeholder="t('transactionForm.placeholders.name')"
             class="sora-search-input"
-            clearable
           />
         </div>
         <div class="sora-filters">
-          <ElSelect
+          <SoraSelect
             v-model="selectedCategoryId"
             class="sora-select"
             :loading="categoriesLoading"
             clearable
             placeholder=""
           >
-            <ElOption
+            <SoraSelectOption
               v-for="cat in categorySelectOptions"
               :key="cat.value"
               :label="cat.label"
               :value="cat.value"
             />
-          </ElSelect>
-          <ElSelect
+          </SoraSelect>
+          <SoraSelect
             v-model="selectedAccountId"
             class="sora-select"
             :loading="accountsLoading"
             clearable
             placeholder=""
           >
-            <ElOption
+            <SoraSelectOption
               v-for="acc in accountSelectOptions"
               :key="acc.value"
               :label="acc.label"
               :value="acc.value"
             />
-          </ElSelect>
-          <ElSelect v-model="selectedSort" class="sora-select">
-            <ElOption
+          </SoraSelect>
+          <SoraSelect v-model="selectedSort" class="sora-select">
+            <SoraSelectOption
               v-for="sort in sortSelectOptions"
               :key="sort.value"
               :label="sort.label"
               :value="sort.value"
             />
-          </ElSelect>
+          </SoraSelect>
         </div>
       </header>
-    </ElCard>
+    </SoraCard>
 
     <!-- Summary Section -->
     <section class="sora-summary">
-      <ElCard class="sora-card">
+      <SoraCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.income') }}</div>
         <div class="sora-card-amount sora-income">{{ formattedTotalIncome }}</div>
-      </ElCard>
-      <ElCard class="sora-card">
+      </SoraCard>
+      <SoraCard class="sora-card">
         <div class="sora-card-title">{{ t('transactionForm.labels.expense') }}</div>
         <div class="sora-card-amount sora-expense">{{ formattedTotalExpense }}</div>
-      </ElCard>
+      </SoraCard>
     </section>
 
     <!-- Detail Section with Pagination -->
-    <ElCard class="sora-card sora-detail-card">
+    <SoraCard class="sora-card sora-detail-card">
       <section class="sora-detail">
-        <ElTable
-          :data="transactions"
+        <SoraTable
+          :dataSource="transactions"
           v-loading="loading"
           class="sora-data-table"
-          height="100%"
           style="width: 100%"
+          :tableProps="{ columns: [] }"
         >
-          <ElTableColumn :label="t('sidebar.transaction')" width="250">
-            <template #default="scope">
-              <TransactionItem :transaction="scope.row" />
+          <template #default="{ record }">
+              <TransactionItem :transaction="record" />
             </template>
-          </ElTableColumn>
-          <ElTableColumn
-            prop="categoryName"
-            :label="t('transactions.columns.category')"
-            width="150"
-          />
-          <ElTableColumn prop="accountName" :label="t('transactionForm.accountName')" width="150" />
-          <ElTableColumn prop="time" width="120">
-            <template #header>
-              <span data-testid="transactions-column-date">{{
-                t('transactions.columns.date')
-              }}</span>
+            <!-- category -->
+            <template #column-category="{ record }">
+              {{ record.categoryName }}
             </template>
-            <template #default="scope">
-              {{ formatDate(scope.row.time) }}
+            <!-- account -->
+            <template #column-account="{ record }">
+              {{ record.accountName }}
             </template>
-          </ElTableColumn>
-          <ElTableColumn prop="amount" width="150">
-            <template #header>
-              <span data-testid="transactions-column-amount">{{
-                t('transactions.columns.amount')
-              }}</span>
+            <!-- time -->
+            <template #column-time="{ record }">
+              {{ formatDate(record.time) }}
             </template>
-            <template #default="scope">
-              <div :class="Number(scope.row.amount) >= 0 ? 'sora-income' : 'sora-expense'">
-                {{ formatCurrency(Math.abs(Number(scope.row.amount || 0))) }}
+            <!-- amount -->
+            <template #column-amount="{ record }">
+              <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
+                {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
               </div>
             </template>
-          </ElTableColumn>
-        </ElTable>
+        </SoraTable>
         <div
           v-if="transactions.length === 0 && !loading"
           data-testid="transactions-empty"
@@ -340,18 +320,17 @@ const sortSelectOptions = computed(() => [
           {{ t('transactions.empty') }}
         </div>
         <div class="sora-pagination-wrapper">
-          <ElPagination
-            v-model:current-page="page"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50]"
+          <a-pagination
+            :current="page"
+            :page-size="pageSize"
+            :page-size-options="[10,20,50]"
             :total="total"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handlePageSizeChange"
-            @current-change="handlePageChange"
+            @change="handlePageChange"
+            @showSizeChange="handlePageSizeChange"
           />
         </div>
       </section>
-    </ElCard>
+    </SoraCard>
   </div>
 </template>
 

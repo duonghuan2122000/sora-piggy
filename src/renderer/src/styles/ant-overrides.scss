@@ -1,0 +1,21 @@
+/* Minimal Ant overrides using Sora CSS variables mapped in _ant_tokens.scss */
+@use '../assets/scss/_variables' as *;
+@import '../assets/scss/_ant_tokens.scss';
+
+.ant-btn-primary {
+  background-color: var(--sora-color-primary) !important;
+  border-color: var(--sora-color-primary) !important;
+}
+
+.ant-btn {
+  border-radius: var(--sora-radius-md);
+}
+
+.ant-card {
+  background-color: var(--sora-bg-primary-light);
+  border-radius: var(--sora-radius-md);
+}
+
+.ant-pagination {
+  margin-top: var(--sora-spacing-sm);
+}
