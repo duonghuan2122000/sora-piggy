@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import TransactionItem from '../../src/renderer/src/components/TransactionItem.vue';

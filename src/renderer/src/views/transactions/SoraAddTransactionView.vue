@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
+import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue';
 // Ant components are registered globally via plugin; no local import required
 
 // Use a loose type for form rules during migration
 
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
-import { notifySuccess, notifyError } from '@renderer/utils/sora-notification'
+import { notifySuccess, notifyError } from '@renderer/utils/sora-notification';
 
 const { t } = useI18n();
 
@@ -25,7 +25,7 @@ interface AccountOption {
   isAdd?: boolean;
 }
 
-const formRef = ref<any>(null);
+const formRef = ref<unknown>(null);
 const formValue = ref({
   name: '',
   description: '',
@@ -35,7 +35,7 @@ const formValue = ref({
   account: null as string | null
 });
 
-const rules: any = {
+const rules: Record<string, unknown> = {
   name: [
     {
       required: true,
@@ -345,7 +345,7 @@ const handleSubmit = async (): Promise<void> => {
           categorySearchValue.value = '';
           accountSearchValue.value = '';
         }
-      } catch (error) {
+      } catch {
         notifyError(t('transactionForm.messages.error'));
       } finally {
         transactionFormStore.setLoading(false);

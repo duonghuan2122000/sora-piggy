@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { spawn, ChildProcess } from 'child_process';
 // Use global fetch (Node 18+). If not available, please install node-fetch as devDependency.
-const fetchFn = (globalThis as any).fetch || undefined;
+const fetchFn = (globalThis as unknown as { fetch?: typeof fetch }).fetch || undefined;
 
 const DEFAULT_URL = process.env.E2E_BASE_URL || 'http://localhost:5173';
 
@@ -12,7 +12,7 @@ async function waitForUrl(url: string, timeoutMs = 60000): Promise<void> {
       if (!fetchFn) throw new Error('fetch not available in this node runtime');
       const res = await fetchFn(url, { method: 'GET' });
       if (res.ok) return;
-    } catch (e) {
+    } catch {
       // ignore
     }
     await new Promise((r) => setTimeout(r, 500));
@@ -40,7 +40,7 @@ test('Dev server + Browser: transactions view localized headers', async ({ page 
     if (!devProc.killed) {
       try {
         devProc.kill();
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

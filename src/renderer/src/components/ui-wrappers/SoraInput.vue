@@ -12,9 +12,12 @@ const emit = defineEmits(['update:modelValue']);
 const attrs = useAttrs();
 
 const modelValue = props.modelValue as string | number;
-function onInput(e: Event | string) {
+function onInput(e: Event | string): void {
   // Ant input emits an event whose target.value contains the string
-  const value = (e && typeof e === 'object' && 'target' in e) ? (e as any).target.value : e;
-  emit('update:modelValue', value);
+  const value =
+    typeof e === 'string'
+      ? e
+      : ((e as Event & { target?: { value?: unknown } }).target?.value ?? '');
+  emit('update:modelValue', value as string | number);
 }
 </script>

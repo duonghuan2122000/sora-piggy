@@ -21,7 +21,7 @@ export const useLanguageStore = defineStore('language', {
   },
 
   actions: {
-    async loadLanguages() {
+    async loadLanguages(): Promise<void> {
       this.isLoading = true;
       this.error = null;
       try {
@@ -40,7 +40,7 @@ export const useLanguageStore = defineStore('language', {
       }
     },
 
-    async loadPreference() {
+    async loadPreference(): Promise<void> {
       this.isLoading = true;
       this.error = null;
       try {
@@ -58,8 +58,8 @@ export const useLanguageStore = defineStore('language', {
         // Ensure i18n global locale is in sync with preference
         try {
           // `i18n` is imported at module top and refers to the app i18n instance
-          // @ts-ignore
-          i18n.global.locale.value = this.currentLanguage as any;
+          // @ts-ignore: sync-i18n
+          i18n.global.locale.value = this.currentLanguage as string;
         } catch (e) {
           // ignore if i18n not available
           console.warn('Could not sync i18n locale after loading preference', e);
@@ -71,9 +71,9 @@ export const useLanguageStore = defineStore('language', {
         this.currentLanguage = 'vi';
 
         try {
-          // @ts-ignore
-          i18n.global.locale.value = this.currentLanguage as any;
-        } catch (e) {
+          // @ts-ignore: sync-i18n
+          i18n.global.locale.value = this.currentLanguage as string;
+        } catch {
           // ignore
         }
       } finally {
@@ -81,7 +81,7 @@ export const useLanguageStore = defineStore('language', {
       }
     },
 
-    async setLanguage(code: string) {
+    async setLanguage(code: string): Promise<void> {
       this.isLoading = true;
       this.error = null;
       try {
@@ -91,14 +91,14 @@ export const useLanguageStore = defineStore('language', {
         this.currentLanguage = code;
 
         // Update i18n locale using the imported instance
-        i18n.global.locale.value = code as any;
+        i18n.global.locale.value = code as string;
       } catch (err) {
         console.error('Failed to set language preference:', err);
         this.error = 'Failed to save language preference';
         // Still update local state
         this.currentLanguage = code;
         // Attempt to update locale even on error to keep UI in sync
-        i18n.global.locale.value = code as any;
+        i18n.global.locale.value = code as string;
       } finally {
         this.isLoading = false;
       }

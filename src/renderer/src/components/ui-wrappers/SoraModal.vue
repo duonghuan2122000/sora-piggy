@@ -5,13 +5,13 @@
 </template>
 
 <script setup lang="ts">
-import { useAttrs } from 'vue'
+import { useAttrs } from 'vue';
 
-const props = defineProps({ modelValue: { type: Boolean, default: false } })
-const emit = defineEmits(['update:modelValue'])
-const attrs = useAttrs()
+defineProps({ modelValue: { type: Boolean, default: false } });
+const emit = defineEmits(['update:modelValue']);
+const attrs = useAttrs();
 
-function onUpdate(open: boolean) {
-  emit('update:modelValue', open)
+function onUpdate(open: boolean): void {
+  emit('update:modelValue', open);
 }
 </script>

@@ -5,17 +5,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, useAttrs } from 'vue'
+import { ref, useAttrs } from 'vue';
 
-const attrs = useAttrs()
-const formRef = ref<any>(null)
+const attrs = useAttrs();
+const formRef = ref<unknown>(null);
 
-function validate() {
+function validate(): Promise<unknown> {
   // Ant form exposes validateFields which returns a Promise
-  return formRef.value?.validateFields ? formRef.value.validateFields() : Promise.resolve()
+  return formRef.value?.validateFields ? formRef.value.validateFields() : Promise.resolve();
 }
 
 // Expose validate so parent can call via template ref
-defineExpose({ validate })
-
+defineExpose({ validate });
 </script>

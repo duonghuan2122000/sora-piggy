@@ -34,7 +34,9 @@ export const useTransactionFormStore = defineStore('transactionForm', () => {
       const apiTransaction = {
         name: transaction.name,
         description: transaction.description || '',
-        time: transaction.time ? new Date(transaction.time).toISOString() : new Date().toISOString(),
+        time: transaction.time
+          ? new Date(transaction.time).toISOString()
+          : new Date().toISOString(),
         amount: transaction.amount,
         category: transaction.category || '',
         account: transaction.account || ''

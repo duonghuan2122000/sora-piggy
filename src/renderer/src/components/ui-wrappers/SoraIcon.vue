@@ -4,6 +4,6 @@
 
 <script setup lang="ts" name="SoraIcon">
 const props = defineProps({
-  icon: { type: Object, required: true },
-})
+  icon: { type: Object, required: true }
+});
 </script>

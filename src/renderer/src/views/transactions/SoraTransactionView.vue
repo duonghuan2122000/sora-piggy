@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
-import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue'
-import { notifyError } from '@renderer/utils/sora-notification'
+import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue';
+import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue';
+import { notifyError } from '@renderer/utils/sora-notification';
 import {
   ITransaction,
   TransactionFilterParams,
@@ -284,33 +284,33 @@ const sortSelectOptions = computed(() => [
     <SoraCard class="sora-card sora-detail-card">
       <section class="sora-detail">
         <SoraTable
-          :dataSource="transactions"
           v-loading="loading"
+          :data-source="transactions"
           class="sora-data-table"
           style="width: 100%"
-          :tableProps="{ columns: [] }"
+          :table-props="{ columns: [] }"
         >
           <template #default="{ record }">
-              <TransactionItem :transaction="record" />
-            </template>
-            <!-- category -->
-            <template #column-category="{ record }">
-              {{ record.categoryName }}
-            </template>
-            <!-- account -->
-            <template #column-account="{ record }">
-              {{ record.accountName }}
-            </template>
-            <!-- time -->
-            <template #column-time="{ record }">
-              {{ formatDate(record.time) }}
-            </template>
-            <!-- amount -->
-            <template #column-amount="{ record }">
-              <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
-                {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
-              </div>
-            </template>
+            <TransactionItem :transaction="record" />
+          </template>
+          <!-- category -->
+          <template #column-category="{ record }">
+            {{ record.categoryName }}
+          </template>
+          <!-- account -->
+          <template #column-account="{ record }">
+            {{ record.accountName }}
+          </template>
+          <!-- time -->
+          <template #column-time="{ record }">
+            {{ formatDate(record.time) }}
+          </template>
+          <!-- amount -->
+          <template #column-amount="{ record }">
+            <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
+              {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
+            </div>
+          </template>
         </SoraTable>
         <div
           v-if="transactions.length === 0 && !loading"
@@ -323,10 +323,10 @@ const sortSelectOptions = computed(() => [
           <a-pagination
             :current="page"
             :page-size="pageSize"
-            :page-size-options="[10,20,50]"
+            :page-size-options="[10, 20, 50]"
             :total="total"
             @change="handlePageChange"
-            @showSizeChange="handlePageSizeChange"
+            @show-size-change="handlePageSizeChange"
           />
         </div>
       </section>

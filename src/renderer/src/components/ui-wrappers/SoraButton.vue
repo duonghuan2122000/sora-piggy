@@ -3,8 +3,9 @@
 </template>
 
 <script setup lang="ts" name="SoraButton">
-const props = defineProps({
+defineProps({
   type: { type: String, default: 'default' },
   disabled: { type: Boolean, default: false }
-})
+});
+defineEmits(['click']);
 </script>

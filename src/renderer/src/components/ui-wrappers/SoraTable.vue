@@ -9,12 +9,13 @@
 <script setup lang="ts" name="SoraTable">
 import { getCurrentInstance } from 'vue';
 // emits handled via component events
-const props = defineProps({
+defineProps({
   dataSource: { type: Array, default: () => [] },
   tableProps: { type: Object, default: () => ({}) }
 });
-function onChange(...args: any[]) {
-  const compEmit = (getCurrentInstance() as any)?.emit;
+function onChange(...args: unknown[]): void {
+  const inst = getCurrentInstance() as unknown as { emit?: (...args: unknown[]) => void } | null;
+  const compEmit = inst?.emit;
   compEmit && compEmit('change', ...args);
 }
 </script>
