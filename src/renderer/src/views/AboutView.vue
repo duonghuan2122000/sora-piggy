@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import SoraCard from '@renderer/components/ui-wrappers/SoraCard.vue'
-import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
+import { SoraButton } from '@renderer/components/ui'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const { t } = useI18n();
