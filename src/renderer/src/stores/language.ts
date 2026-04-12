@@ -54,11 +54,28 @@ export const useLanguageStore = defineStore('language', {
           // Default to Vietnamese
           this.currentLanguage = 'vi';
         }
+
+        // Ensure i18n global locale is in sync with preference
+        try {
+          // `i18n` is imported at module top and refers to the app i18n instance
+          // @ts-ignore
+          i18n.global.locale.value = this.currentLanguage as any;
+        } catch (e) {
+          // ignore if i18n not available
+          console.warn('Could not sync i18n locale after loading preference', e);
+        }
       } catch (err) {
         console.error('Failed to load language preference:', err);
         this.error = 'Failed to load language preference';
         // Default to Vietnamese on error
         this.currentLanguage = 'vi';
+
+        try {
+          // @ts-ignore
+          i18n.global.locale.value = this.currentLanguage as any;
+        } catch (e) {
+          // ignore
+        }
       } finally {
         this.isLoading = false;
       }
