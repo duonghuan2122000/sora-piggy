@@ -522,7 +522,7 @@ onUnmounted(() => {
 
 :deep(.el-autocomplete-suggestion__list) {
   li.category-add-option {
-    color: #1890ff;
+    color: $color-primary;
     font-style: italic;
     border-top: 1px solid #e0e0e0;
 
@@ -532,7 +532,7 @@ onUnmounted(() => {
   }
 
   li.account-add-option {
-    color: #1890ff;
+    color: $color-primary;
     font-style: italic;
     border-top: 1px solid #e0e0e0;
 

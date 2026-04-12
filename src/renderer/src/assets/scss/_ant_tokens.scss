@@ -1,5 +1,5 @@
 // Ant Design token bridge (mapping from existing SCSS variables)
-$primary-color: #1890ff; // map from $primary
+$primary-color: $color-primary; // map from $color-primary
 $success-color: #52c41a;
 $warning-color: #faad14;
 $error-color: #ff4d4f;
