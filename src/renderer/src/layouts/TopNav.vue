@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
 import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import LanguageSelector from '@renderer/components/LanguageSelector.vue';
+import SoraLanguageSelect from '@renderer/components/ui-wrappers/SoraLanguageSelect.vue';
 import { useLanguageStore } from '@renderer/stores/language';
 
 const emit = defineEmits<{
@@ -47,7 +47,7 @@ onMounted(async () => {
       <h1 class="sora-page-title">{{ pageTitle }}</h1>
     </div>
     <div class="sora-right-section">
-      <LanguageSelector />
+      <SoraLanguageSelect />
       <SoraButton type="primary" :disabled="isLoading" @click="handlePrimaryAction">
           <template #default>
             <FontAwesomeIcon :icon="buttonIcon" /> {{ buttonLabel }}
