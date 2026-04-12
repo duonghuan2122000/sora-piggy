@@ -320,3 +320,45 @@ specs/
 - Hành vi cho luồng openspec (`/opsx:apply`): Khi người dùng gọi skill `/opsx:apply`, trợ lý được phép thực thi toàn bộ các task trong spec hiện tại một cách tuần tự mà không yêu cầu xác nhận bổ sung từ người dùng. (Chỉ áp dụng cho thao tác cụ thể này; các thao tác khác vẫn phải hỏi xác nhận nếu cần hành động phá hủy hoặc ảnh hưởng bên ngoài.)
 
 - Các quy tắc an toàn gitnexus: Tiếp tục tuân thủ các yêu cầu GitNexus (ví dụ: chạy `gitnexus_impact` trước khi sửa symbol và `gitnexus_detect_changes()` trước khi commit). Nếu impact report là HIGH/CRITICAL, trợ lý phải cảnh báo và chờ chỉ thị của người dùng trước khi tiếp tục.
+
+## Bổ sung (thêm, không ghi đè)
+
+Các mục dưới đây được thêm vào CLAUDE.md để hỗ trợ tác vụ hàng ngày và điều hướng nhanh. Lưu ý: tôi sẽ không ghi đè phần trước — đây là phần bổ sung.
+
+- Ngôn ngữ: LUÔN TRẢ LỜI BẰNG TIẾNG VIỆT. Khi tham chiếu đoạn mã hoặc file, luôn dùng định dạng file_path:line_number (ví dụ: src/main/index.ts:1) để người đọc dễ điều hướng.
+
+- Tham chiếu nhanh tới file quan trọng (dùng khi cần chỉ rõ code):
+  - src/main/index.ts:1 — entry Electron chính, đăng ký IPC handlers
+  - src/main/database.ts:1 — helpers CRUD với SQLite
+  - src/preload/index.ts:1 — contextBridge / API cho renderer
+  - src/renderer/src/main.ts:1 — entrypoint Vue renderer (plugins, i18n, router, Pinia)
+  - src/renderer/src/stores/transactionForm.ts:1 — store mẫu cho transaction form
+  - src/renderer/src/assets/scss/_variables.scss:1 — biến SCSS chính cho theme
+
+- Lệnh Git an toàn (tóm tắt):
+  - Trợ lý có thể soạn thay đổi và đề xuất commit message, nhưng KHÔNG thực hiện git commit / push / force-push / rebase --interactive mà không có xác nhận rõ ràng từ người dùng.
+  - Trước khi commit, chạy `gitnexus_detect_changes()` (hoặc tương đương) để xác nhận phạm vi thay đổi.
+  - Nếu cần chạy lệnh git từ môi trường, dùng tiền tố rtk nếu có hướng dẫn toàn cục cho RTK (ví dụ: rtk git status).
+
+- Hướng dẫn ngắn cho PR / review:
+  - Khi chuẩn bị PR, cung cấp: tiêu đề ngắn, tóm tắt 1–3 bullet points, checklist test plan.
+  - Đối với thay đổi ảnh hưởng tới nhiều file/symbol, kèm kết quả `gitnexus_impact` trong mô tả PR.
+
+- Test & DB:
+  - Nếu test tương tác với DB thật, tạo DB test riêng hoặc mock rõ ràng để tránh ghi đè data người dùng.
+  - Chạy test đơn lẻ: `npm run test -- -t "<pattern>"`.
+
+- Các nguyên tắc an toàn bổ sung:
+  - Mặc định, không thực hiện hành động phá hủy (xóa file/branch remote, force push) trừ khi người dùng yêu cầu rõ ràng.
+  - Khi một thay đổi đòi hỏi xóa hoặc overwrite state quan trọng, thông báo rõ rủi ro và chờ xác nhận.
+
+- Yêu cầu tương tác với người dùng:
+  - Nếu assistent cần thực hiện git commit / push / tạo PR, hãy hỏi người dùng một câu hỏi lựa chọn (ví dụ: "Tôi đã soạn commit. Có muốn tôi chạy git commit và push không? [Có/Không]").
+  - Nếu impact analysis là HIGH/CRITICAL, dừng và trình bày báo cáo tóm tắt trước khi thực hiện bất kỳ chỉnh sửa nào.
+
+- Khi context của conversation đạt ngưỡng 90000 trở lên, trợ lý phải thực hiện compact conversation trước khi tiếp tục các công việc tiếp theo. Compact conversation có nghĩa là:
+  - Tóm tắt các nội dung chính của hội thoại (mục tiêu, quyết định đã đưa ra, thay đổi mã đề xuất, file liên quan).
+  - Loại bỏ hoặc gộp các đoạn hội thoại lặp/không cần thiết để giảm kích thước context.
+  - Trình bày tóm tắt ngắn (1–3 bullets) và hỏi người dùng xem có tiếp tục không.
+
+Nếu bạn muốn tôi chuyển phần bổ sung này vào file CLAUDE.md trong repo, xác nhận bằng từ "Áp dụng" — tôi sẽ cập nhật file (không ghi đè phần trước, chỉ append phần bổ sung).
