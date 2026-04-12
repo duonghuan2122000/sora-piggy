@@ -35,7 +35,15 @@ describe('SoraLanguageSelect', () => {
     store.setLanguage = vi.fn();
 
     // Programmatically change the v-model value on the component
-    (wrapper.vm as any).currentLanguage = 'vi';
+    // Use the component's exposed API to change the value instead of accessing vm as any
+    const select = wrapper.findComponent({ name: 'ASelect' });
+    if (select.exists()) {
+      await select.vm.$emit('update:value', 'vi');
+    } else {
+      // fallback: set vm directly for non-Ant select implementations
+      (wrapper.vm as unknown as { currentLanguage?: string }).currentLanguage = 'vi';
+    }
+    await nextTick();
     await nextTick();
 
     expect(store.setLanguage).toHaveBeenCalledWith('vi');
