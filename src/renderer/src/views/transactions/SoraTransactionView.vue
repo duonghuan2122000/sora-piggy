@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import dayjs from 'dayjs';
 import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue';
 import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue';
 import { notifyError } from '@renderer/utils/sora-notification';
@@ -9,7 +10,6 @@ import {
   TransactionFilterParams,
   PaginatedTransactions
 } from '@renderer/types/transaction';
-import TransactionItem from '@renderer/components/TransactionItem.vue';
 
 interface CategoryOption {
   id: number;
@@ -177,12 +177,10 @@ const formattedTotalIncome = computed(() => formatCurrency(totalIncome.value));
 const formattedTotalExpense = computed(() => formatCurrency(totalExpense.value));
 
 const formatDate = (date: string | number | Date): string => {
-  const d = new Date(date as never);
-  if (isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  if (!date) return '—';
+  const d = dayjs(date);
+  if (!d.isValid()) return '—';
+  return d.format('YYYY-MM-DD HH:mm:ss');
 };
 
 // Category dropdown options
@@ -288,27 +286,46 @@ const sortSelectOptions = computed(() => [
           :data-source="transactions"
           class="sora-data-table"
           style="width: 100%"
-          :table-props="{ columns: [] }"
+          :table-props="{
+            columns: [
+              {
+                title: t('transactions.columns.name') || 'Tên giao dịch',
+                dataIndex: 'name',
+                key: 'name'
+              },
+              {
+                title: t('transactions.columns.time') || 'Thời gian',
+                dataIndex: 'time',
+                key: 'time'
+              },
+              {
+                title: t('transactions.columns.amount') || 'Số tiền',
+                dataIndex: 'amount',
+                key: 'amount',
+                align: 'right'
+              }
+            ]
+          }"
         >
-          <template #default="{ record }">
-            <TransactionItem :transaction="record" />
+          <!-- Name -->
+          <template #column-name="{ record }">
+            <div class="sora-transaction-name">
+              <div class="sora-text-wrapper">
+                <div class="sora-name">{{ record.name }}</div>
+                <div v-if="record.description" class="sora-desc">{{ record.description }}</div>
+              </div>
+            </div>
           </template>
-          <!-- category -->
-          <template #column-category="{ record }">
-            {{ record.categoryName }}
-          </template>
-          <!-- account -->
-          <template #column-account="{ record }">
-            {{ record.accountName }}
-          </template>
-          <!-- time -->
+          <!-- Time -->
           <template #column-time="{ record }">
             {{ formatDate(record.time) }}
           </template>
-          <!-- amount -->
+          <!-- Amount -->
           <template #column-amount="{ record }">
-            <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
-              {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
+            <div class="sora-amount-cell">
+              <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
+                {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
+              </div>
             </div>
           </template>
         </SoraTable>
@@ -432,12 +449,19 @@ const sortSelectOptions = computed(() => [
   flex: 1;
 }
 
-:deep(.el-table__cell) {
+:deep(.el-table__cell),
+:deep(.ant-table-cell) {
   padding: 8px 16px;
 }
 
-:deep(.el-table th.el-table__cell) {
+:deep(.el-table th.el-table__cell),
+:deep(.ant-table thead > tr > th) {
   padding: 12px 16px;
+}
+
+.sora-amount-cell {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .sora-pagination-wrapper {

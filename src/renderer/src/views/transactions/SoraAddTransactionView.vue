@@ -317,7 +317,10 @@ watch(showCategoryModal, (isOpen) => {
 const transactionFormStore = useTransactionFormStore();
 
 const handleSubmit = async (): Promise<void> => {
-  formRef.value?.validate(async (valid) => {
+  const formInstance = formRef.value as
+    | { validate?: (cb: (valid: boolean) => void) => void }
+    | undefined;
+  formInstance?.validate?.(async (valid: boolean) => {
     if (valid) {
       transactionFormStore.setLoading(true);
       try {

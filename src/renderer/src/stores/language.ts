@@ -59,7 +59,7 @@ export const useLanguageStore = defineStore('language', {
         try {
           // `i18n` is imported at module top and refers to the app i18n instance
           // @ts-ignore: sync-i18n
-          i18n.global.locale.value = this.currentLanguage as string;
+          i18n.global.locale.value = this.currentLanguage as unknown as 'vi' | 'en';
         } catch (e) {
           // ignore if i18n not available
           console.warn('Could not sync i18n locale after loading preference', e);
@@ -72,7 +72,7 @@ export const useLanguageStore = defineStore('language', {
 
         try {
           // @ts-ignore: sync-i18n
-          i18n.global.locale.value = this.currentLanguage as string;
+          i18n.global.locale.value = this.currentLanguage as unknown as 'vi' | 'en';
         } catch {
           // ignore
         }
@@ -91,14 +91,14 @@ export const useLanguageStore = defineStore('language', {
         this.currentLanguage = code;
 
         // Update i18n locale using the imported instance
-        i18n.global.locale.value = code as string;
+        i18n.global.locale.value = code as unknown as 'vi' | 'en';
       } catch (err) {
         console.error('Failed to set language preference:', err);
         this.error = 'Failed to save language preference';
         // Still update local state
         this.currentLanguage = code;
         // Attempt to update locale even on error to keep UI in sync
-        i18n.global.locale.value = code as string;
+        i18n.global.locale.value = code as unknown as 'vi' | 'en';
       } finally {
         this.isLoading = false;
       }

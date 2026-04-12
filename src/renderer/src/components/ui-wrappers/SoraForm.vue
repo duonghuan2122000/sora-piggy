@@ -10,9 +10,11 @@ import { ref, useAttrs } from 'vue';
 const attrs = useAttrs();
 const formRef = ref<unknown>(null);
 
+type FormFieldsInstance = { validateFields?: () => Promise<unknown> };
 function validate(): Promise<unknown> {
   // Ant form exposes validateFields which returns a Promise
-  return formRef.value?.validateFields ? formRef.value.validateFields() : Promise.resolve();
+  const frm = formRef.value as FormFieldsInstance | undefined;
+  return frm?.validateFields ? frm.validateFields() : Promise.resolve();
 }
 
 // Expose validate so parent can call via template ref
