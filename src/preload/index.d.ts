@@ -6,6 +6,8 @@ interface TransactionFilterParams {
   name?: string;
   categoryId?: number | null;
   accountId?: number | null;
+  startTime?: number | null;
+  endTime?: number | null;
   sortBy?: 'newest' | 'oldest';
   page: number;
   pageSize: number;

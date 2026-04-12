@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
-import { SoraInput, SoraTable, SoraButton, SoraSelect } from '@renderer/components/ui';
+import { SoraInput, SoraTable, SoraButton, SoraSelect, SoraDateRange } from '@renderer/components/ui';
 import { ROUTE_NAMES } from '@renderer/constants';
 import { notifyError } from '@renderer/utils/sora-notification';
 import {
@@ -39,6 +39,9 @@ const categoriesLoaded = ref(false);
 const accountsLoaded = ref(false);
 const categorySearchText = ref('');
 const accountSearchText = ref('');
+
+// Date range filter (default: current month)
+const dateRange = ref<[number | null, number | null]>([dayjs().startOf('month').valueOf(), dayjs().endOf('month').valueOf()]);
 
 // Loading states
 const loading = ref(false);
@@ -115,6 +118,8 @@ const fetchTransactions = async (): Promise<void> => {
       name: searchQuery.value || undefined,
       categoryId: toApiFilterId(selectedCategoryId.value),
       accountId: toApiFilterId(selectedAccountId.value),
+      startTime: dateRange.value && dateRange.value[0] ? dateRange.value[0] : undefined,
+      endTime: dateRange.value && dateRange.value[1] ? dateRange.value[1] : undefined,
       sortBy: selectedSort.value,
       page: page.value,
       pageSize: pageSize.value
@@ -169,7 +174,7 @@ onMounted(async () => {
 });
 
 // Watch for filter changes and refetch
-watch([searchQuery, selectedCategoryId, selectedAccountId, selectedSort], () => {
+watch([searchQuery, selectedCategoryId, selectedAccountId, selectedSort, dateRange], () => {
   // Handle clear - convert undefined/null back to -1 (all option)
   if (selectedCategoryId.value === undefined || selectedCategoryId.value === null) {
     selectedCategoryId.value = -1;
@@ -297,6 +302,12 @@ const sortSelectOptions = computed(() => [
           />
         </div>
         <div class="sora-filters">
+          <SoraDateRange
+            v-model="dateRange"
+            class="sora-date-range"
+            :format="'YYYY-MM-DD'"
+          />
+
           <SoraSelect
             v-model="selectedCategoryId"
             class="sora-select"

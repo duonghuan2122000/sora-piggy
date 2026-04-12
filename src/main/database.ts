@@ -681,6 +681,8 @@ export const getTransactionsPaginated = (
   const searchTermNoDiacritics = searchTerm ? removeDiacritics(searchTerm) : '';
   const categoryId = filters.categoryId ?? null;
   const accountId = filters.accountId ?? null;
+  const startTime = filters.startTime ?? null;
+  const endTime = filters.endTime ?? null;
   const sortBy = filters.sortBy ?? 'newest';
   const page = Math.max(1, filters.page ?? 1);
   const pageSize = Math.max(1, Math.min(100, filters.pageSize ?? 10));
@@ -708,6 +710,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
       ORDER BY
         CASE WHEN :sortBy = 'newest' THEN t.time END DESC,
         CASE WHEN :sortBy = 'oldest' THEN t.time END ASC
@@ -720,6 +724,8 @@ export const getTransactionsPaginated = (
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
       accountId,
+      startTime,
+      endTime,
       sortBy,
       pageSize,
       offset
@@ -733,6 +739,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
     `;
 
     const countStmt = db!.prepare(countQuery);
@@ -740,7 +748,9 @@ export const getTransactionsPaginated = (
       name: searchTerm,
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
-      accountId
+      accountId,
+      startTime,
+      endTime
     }) as { total: number };
     const total = countResult.total;
 
@@ -752,6 +762,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
         AND t.amount > 0
     `;
 
@@ -760,7 +772,9 @@ export const getTransactionsPaginated = (
       name: searchTerm,
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
-      accountId
+      accountId,
+      startTime,
+      endTime
     }) as { totalIncome: number };
     const totalIncome = incomeResult.totalIncome;
 
@@ -772,6 +786,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
         AND t.amount < 0
     `;
 
@@ -780,7 +796,9 @@ export const getTransactionsPaginated = (
       name: searchTerm,
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
-      accountId
+      accountId,
+      startTime,
+      endTime
     }) as { totalExpense: number };
     const totalExpense = expenseResult.totalExpense;
 
