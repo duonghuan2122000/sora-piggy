@@ -30,6 +30,14 @@ Lưu ý ngôn ngữ: repository này yêu cầu trả lời bằng tiếng Việ
 - Database: local SQLite DB (better-sqlite3). Default DB path referenced in docs: ~/.config/Sora Piggy/sora-piggy.db. DB helpers live under src/main (see database.ts).
 - Build toolchain: Vite + electron-vite + electron-builder; separate tsconfigs: tsconfig.node.json (main) and tsconfig.web.json (renderer). Path aliases (eg. @renderer/*) configured in tsconfig.web.json / electron.vite.config.ts.
 
+2.1) E2E / Playwright (quick)
+
+- Playwright is available as a dev dependency. Example commands:
+  - Run all E2E tests: npx playwright test
+  - Run a specific test file: npx playwright test tests/e2e/example.spec.ts
+  - Run with headed mode: npx playwright test --headed
+- E2E tests typically live under tests/e2e/ (if present). Ensure app is built or dev server is running depending on test setup.
+
 3) Key repository-specific conventions and rules
 
 - Language rule for AI: always respond in Vietnamese (CLAUDE.md / AGENTS.md state this as required).
@@ -53,6 +61,18 @@ Lưu ý ngôn ngữ: repository này yêu cầu trả lời bằng tiếng Việ
 - Preload API: src/preload/index.ts
 - Renderer entry: src/renderer/src/main.ts
 - Run single test: npx vitest run path/to/file.spec.ts or npm run test -- -t "pattern"
+
+5.1) Pre-commit checklist (recommended for agents)
+
+- npm run typecheck && npm run lint && npx vitest --run --reporter=dot || npx vitest -t "pattern" (run relevant test subset)
+- Ensure no native rebuild omitted: npm run rebuild if native deps changed
+
+5.2) Commit message templates (agent should suggest)
+
+- feat: short description — for new features
+- fix: short description — for bug fixes
+- perf: short description — performance improvements
+- chore: short description — non-functional changes (deps, docs)
 
 6) When editing code
 
