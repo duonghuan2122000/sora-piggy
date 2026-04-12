@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
-import { SoraInput, SoraTable, SoraButton } from '@renderer/components/ui';
+import { SoraInput, SoraTable, SoraButton, SoraSelect } from '@renderer/components/ui';
 import { ROUTE_NAMES } from '@renderer/constants';
 import { notifyError } from '@renderer/utils/sora-notification';
 import {
@@ -33,6 +33,12 @@ const transactions = ref<ITransaction[]>([]);
 // Category and Account options from database
 const categoryOptions = ref<CategoryOption[]>([]);
 const accountOptions = ref<AccountOption[]>([]);
+
+// Lazy-load flags and search text for autocomplete
+const categoriesLoaded = ref(false);
+const accountsLoaded = ref(false);
+const categorySearchText = ref('');
+const accountSearchText = ref('');
 
 // Loading states
 const loading = ref(false);
@@ -133,9 +139,32 @@ const fetchTransactions = async (): Promise<void> => {
   }
 };
 
+// Handlers for lazy-loading and search for category/account selects
+const onCategoryFocus = async (): Promise<void> => {
+  if (!categoriesLoaded.value) {
+    await fetchCategories();
+    categoriesLoaded.value = true;
+  }
+};
+
+const onCategorySearch = (val: string): void => {
+  categorySearchText.value = String(val || '');
+};
+
+const onAccountFocus = async (): Promise<void> => {
+  if (!accountsLoaded.value) {
+    await fetchAccounts();
+    accountsLoaded.value = true;
+  }
+};
+
+const onAccountSearch = (val: string): void => {
+  accountSearchText.value = String(val || '');
+};
+
 // Initialize data on mount
 onMounted(async () => {
-  await Promise.all([fetchCategories(), fetchAccounts()]);
+  // Load transactions initially; categories/accounts are lazy-loaded on demand
   await fetchTransactions();
 });
 
@@ -216,19 +245,27 @@ interface SelectOption {
 
 const categorySelectOptions = computed<SelectOption[]>(() => {
   const allOption = { value: -1, label: t('common.all') || 'Tất cả' };
-  const categoryOpts = categoryOptions.value.map((c) => ({
+  let categoryOpts = categoryOptions.value.map((c) => ({
     value: c.id,
     label: c.name
   }));
+  const q = categorySearchText.value.trim().toLowerCase();
+  if (q) {
+    categoryOpts = categoryOpts.filter((opt) => (opt.label || '').toLowerCase().includes(q));
+  }
   return [allOption, ...categoryOpts];
 });
 
 const accountSelectOptions = computed<SelectOption[]>(() => {
   const allOption = { value: -1, label: t('common.all') || 'Tất cả' };
-  const accountOpts = accountOptions.value.map((a) => ({
+  let accountOpts = accountOptions.value.map((a) => ({
     value: a.id,
     label: a.name
   }));
+  const q = accountSearchText.value.trim().toLowerCase();
+  if (q) {
+    accountOpts = accountOpts.filter((opt) => (opt.label || '').toLowerCase().includes(q));
+  }
   return [allOption, ...accountOpts];
 });
 
@@ -264,38 +301,33 @@ const sortSelectOptions = computed(() => [
             v-model="selectedCategoryId"
             class="sora-select"
             :loading="categoriesLoading"
+            :options="categorySelectOptions"
             clearable
+            show-search
+            :filter-option="false"
             placeholder=""
-          >
-            <SoraSelectOption
-              v-for="cat in categorySelectOptions"
-              :key="cat.value"
-              :label="cat.label"
-              :value="cat.value"
-            />
-          </SoraSelect>
+            @focus="onCategoryFocus"
+            @search="onCategorySearch"
+          ></SoraSelect>
+
           <SoraSelect
             v-model="selectedAccountId"
             class="sora-select"
             :loading="accountsLoading"
+            :options="accountSelectOptions"
             clearable
+            show-search
+            :filter-option="false"
             placeholder=""
-          >
-            <SoraSelectOption
-              v-for="acc in accountSelectOptions"
-              :key="acc.value"
-              :label="acc.label"
-              :value="acc.value"
-            />
-          </SoraSelect>
-          <SoraSelect v-model="selectedSort" class="sora-select">
-            <SoraSelectOption
-              v-for="sort in sortSelectOptions"
-              :key="sort.value"
-              :label="sort.label"
-              :value="sort.value"
-            />
-          </SoraSelect>
+            @focus="onAccountFocus"
+            @search="onAccountSearch"
+          ></SoraSelect>
+
+          <SoraSelect
+            v-model="selectedSort"
+            class="sora-select"
+            :options="sortSelectOptions"
+          ></SoraSelect>
         </div>
       </header>
     </SoraCard>
@@ -403,7 +435,8 @@ const sortSelectOptions = computed(() => [
   justify-content: space-between;
   align-items: center;
   gap: $spacing-md;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .sora-search-wrapper {
@@ -417,7 +450,8 @@ const sortSelectOptions = computed(() => [
 
 .sora-filters {
   display: flex;
-  gap: $spacing-sm;
+  gap: $spacing-md;
+  align-items: center;
 }
 
 .sora-select {
