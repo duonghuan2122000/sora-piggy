@@ -3,9 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
-import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue';
-import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue';
-import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue';
+import { SoraInput, SoraTable, SoraButton } from '@renderer/components/ui';
 import { ROUTE_NAMES } from '@renderer/constants';
 import { notifyError } from '@renderer/utils/sora-notification';
 import {

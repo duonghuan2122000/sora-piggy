@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue';
+import { SoraInput } from '@renderer/components/ui';
 // Ant components are registered globally via plugin; no local import required
 
 // Use a loose type for form rules during migration
