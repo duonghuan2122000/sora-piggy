@@ -1,0 +1,8 @@
+fix(topnav): khôi phục combobox chọn ngôn ngữ trên TopNav
+
+- Hiển thị luôn SoraLanguageSelect (combobox) trên TopNav
+- Loại bỏ popover/fallback không cần thiết
+- Đồng bộ loadLanguages/loadPreference ở mounted
+- Chạy lint & typecheck để đảm bảo không lỗi
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

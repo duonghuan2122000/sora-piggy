@@ -61,4 +61,15 @@ onMounted(async () => {
   align-items: center;
   gap: $spacing-sm;
 }
+
+.sora-language-fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: $text-primary-light;
+  background: transparent;
+  border: none;
+}
 </style>
