@@ -246,9 +246,9 @@ const sortSelectOptions = computed(() => [
     <SoraCard class="sora-card sora-screen-header sora-card-padded">
       <div class="sora-screen-header-inner">
         <div class="sora-screen-title">{{ t('transactions.title') }}</div>
-        <SoraButton type="primary" @click="goToAddTransaction">{{
-          t('transactionForm.title')
-        }}</SoraButton>
+        <SoraButton type="primary" @click="goToAddTransaction">
+          <FontAwesomeIcon :icon="['fas', 'plus']" /> {{ t('button.add') }}
+        </SoraButton>
       </div>
     </SoraCard>
 
