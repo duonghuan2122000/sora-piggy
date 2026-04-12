@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
+import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue';
 import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import SoraLanguageSelect from '@renderer/components/ui-wrappers/SoraLanguageSelect.vue';
@@ -49,10 +49,8 @@ onMounted(async () => {
     <div class="sora-right-section">
       <SoraLanguageSelect />
       <SoraButton type="primary" :disabled="isLoading" @click="handlePrimaryAction">
-          <template #default>
-            <FontAwesomeIcon :icon="buttonIcon" /> {{ buttonLabel }}
-          </template>
-        </SoraButton>
+        <template #default> <FontAwesomeIcon :icon="buttonIcon" /> {{ buttonLabel }} </template>
+      </SoraButton>
     </div>
   </div>
 </template>

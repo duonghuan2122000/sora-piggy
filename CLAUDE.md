@@ -312,3 +312,11 @@ specs/
 - Đọc branch từ spec.md để đảm bảo làm việc trên đúng nhánh
 - Không skip bước review (tối đa 3 iterations cho mỗi task)
 - Cập nhật checkpoint ngay sau khi task hoàn thành
+
+## Repository rules
+
+- Không tự động git commit / git push / tạo PR: Trợ lý KHÔNG được thực hiện các lệnh git commit, git push hoặc tự động mở Pull Request. Khi cần commit hoặc tạo PR, trợ lý sẽ soạn thay đổi, đề xuất commit message và chờ xác nhận rõ ràng từ người dùng trước khi chạy các lệnh đó.
+
+- Hành vi cho luồng openspec (`/opsx:apply`): Khi người dùng gọi skill `/opsx:apply`, trợ lý được phép thực thi toàn bộ các task trong spec hiện tại một cách tuần tự mà không yêu cầu xác nhận bổ sung từ người dùng. (Chỉ áp dụng cho thao tác cụ thể này; các thao tác khác vẫn phải hỏi xác nhận nếu cần hành động phá hủy hoặc ảnh hưởng bên ngoài.)
+
+- Các quy tắc an toàn gitnexus: Tiếp tục tuân thủ các yêu cầu GitNexus (ví dụ: chạy `gitnexus_impact` trước khi sửa symbol và `gitnexus_detect_changes()` trước khi commit). Nếu impact report là HIGH/CRITICAL, trợ lý phải cảnh báo và chờ chỉ thị của người dùng trước khi tiếp tục.
