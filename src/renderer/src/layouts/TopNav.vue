@@ -62,7 +62,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 $spacing-md;
+  padding: 0 $spacing-md; @include flex-between;
   height: 100%;
   background-color: $bg-primary-light;
   border-bottom: 1px solid #e5e7eb;
