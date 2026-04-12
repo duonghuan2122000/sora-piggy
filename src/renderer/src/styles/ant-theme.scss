@@ -28,19 +28,19 @@
 
 // Cards
 .ant-card {
-  background: var(--sora-card-bg) !important;
+  background: $bg-primary-light !important;
   border-radius: 8px;
 }
 
 // Modals
 .ant-modal-content {
-  background: var(--sora-card-bg) !important;
+  background: $bg-primary-light !important;
   border-radius: 8px;
 }
 
 // Table header
 .ant-table-thead > tr > th {
-  background: var(--sora-bg-2) !important;
+  background: $bg-secondary-light !important;
   color: var(--sora-text-muted) !important;
   font-weight: 600;
 }
@@ -74,7 +74,7 @@
 
 // Tooltip
 .ant-tooltip-inner {
-  background: var(--sora-card-bg) !important;
+  background: $bg-primary-light !important;
   color: var(--sora-text) !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
@@ -85,7 +85,7 @@
   color: var(--sora-text) !important;
 }
 .ant-layout-sider {
-  background: var(--sora-bg-2) !important;
+  background: $bg-secondary-light !important;
 }
 
 // Menu / Nav
@@ -110,7 +110,7 @@
 }
 
 // Small helpers
-.sora-card { background: var(--sora-card-bg) !important; }
+.sora-card { background: $bg-primary-light !important; }
 
 // Form: labels, validation messages, spacing
 .ant-form-item {
