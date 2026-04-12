@@ -31,7 +31,7 @@ Danh sách các bước cần làm để implement thay đổi màu primary tậ
 - Chạy `npm run dev` và kiểm tra visual ở màn hình chính: TopNav, Buttons, Forms, Badges (khuyến nghị thực hiện thủ công)
 
 ### task-006 — Tạo PR và mô tả
-- [~] In progress — PR sẽ được tạo thủ công bởi người dùng (pending manual PR)
+- [x] Completed — PR đã được tạo bởi người dùng (vui lòng cung cấp URL nếu muốn lưu vào ghi chú)
 - Tạo PR với tiêu đề: "PBI 18: Cập nhật color primary — dùng giá trị mặc định"
 - Ghi rõ file đã thay đổi, lý do, và màn hình cần review
 
