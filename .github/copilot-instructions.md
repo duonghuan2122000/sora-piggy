@@ -45,6 +45,7 @@ Lưu ý ngôn ngữ: repository này yêu cầu trả lời bằng tiếng Việ
 - Styling: SCSS only; central variables in src/renderer/src/assets/scss/\_variables.scss. CSS classes prefixed with sora- (BEM-like).
 - Formatting & lint: Prettier is source of truth (single quotes, no semicolons, ~100ch). Run npm run format and npm run lint.
 - Imports: ES modules; order external → absolute aliases → relative. Prefer path aliases over deep relative paths.
+- UI components: Khi sử dụng component dùng chung nằm tại src/renderer/src/components/ui-wrappers, luôn import qua barrel tại src/renderer/src/components/ui (ví dụ: import { SoraButton } from '@renderer/components/ui') thay vì import trực tiếp từ ui-wrappers.
 - Naming: camelCase for variables/functions; PascalCase for components (shared components often prefixed with Sora, e.g., SoraButton); constants UPPER_SNAKE_CASE; types/interfaces PascalCase.
 - Tests: use Vitest. Place unit tests next to implementation files where practical. Use npx vitest -t to run by test name.
 - Commenting: Luôn comment code cho các biến, hàm và file. Dùng JSDoc/TSDoc cho các hàm/đối tượng xuất khẩu (public) và chú thích ngắn cho biến/hàm nội bộ để giải thích ý định; thêm header comment ở đầu file khi cần để tóm tắt mục đích module.
