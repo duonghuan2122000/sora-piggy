@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import SoraLanguageSelect from '@renderer/components/ui/index';
+import { SoraLanguageSelect } from '@renderer/components/ui';
 import { createTestingPinia } from '@pinia/testing';
 
 import { describe, test, expect } from 'vitest';
