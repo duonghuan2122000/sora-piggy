@@ -47,6 +47,7 @@ Lưu ý ngôn ngữ: repository này yêu cầu trả lời bằng tiếng Việ
 - Imports: ES modules; order external → absolute aliases → relative. Prefer path aliases over deep relative paths.
 - Naming: camelCase for variables/functions; PascalCase for components (shared components often prefixed with Sora, e.g., SoraButton); constants UPPER_SNAKE_CASE; types/interfaces PascalCase.
 - Tests: use Vitest. Place unit tests next to implementation files where practical. Use npx vitest -t to run by test name.
+- Commenting: Luôn comment code cho các biến, hàm và file. Dùng JSDoc/TSDoc cho các hàm/đối tượng xuất khẩu (public) và chú thích ngắn cho biến/hàm nội bộ để giải thích ý định; thêm header comment ở đầu file khi cần để tóm tắt mục đích module.
 
 4. Agent & commit safety rules (important for automated agents)
 
@@ -82,3 +83,13 @@ Lưu ý ngôn ngữ: repository này yêu cầu trả lời bằng tiếng Việ
 --
 
 File created from repository docs (README.md, AGENTS.md, CLAUDE.md) and package.json (scripts). If muốn, có thể mở rộng phần này để bao gồm checklist pre-commit hoặc mẫu commit message dành cho agents.
+
+---
+
+Gợi ý cải tiến đã được áp dụng (nội dung bổ sung):
+
+- Prerequisites: thêm "Node.js 18+" (lấy từ README) để Copilot biết yêu cầu môi trường.
+- Ghi chú đường dẫn DB trên Windows: Electron lưu DB trong app.getPath('userData') — trên Windows thường sẽ là %APPDATA%\Sora Piggy\sora-piggy.db (kiểm tra bằng app.getPath('userData')).
+- MCP servers (Playwright): thêm hướng dẫn nhanh chạy E2E và gợi ý tạo cấu hình MCP nếu cần. Ví dụ: `npx playwright test` để chạy E2E; test file cụ thể: `npx playwright test tests/e2e/example.spec.ts`.
+
+Nếu muốn, có thể mở rộng thêm: checklist pre-commit, mẫu commit message, hoặc tạo file cấu hình MCP ví dụ (.github/mcp-playwright.yml).

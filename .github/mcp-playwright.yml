@@ -1,0 +1,22 @@
+# MCP Playwright config (mẫu)
+# Mục đích: hướng dẫn và cấu hình nhẹ để MCP/agent biết cách cài đặt và chạy E2E với Playwright
+
+name: sora-piggy-playwright
+description: "Playwright E2E runner config for Sora Piggy"
+
+# Lệnh cài đặt môi trường
+install:
+  - npm ci
+  - npx playwright install --with-deps
+
+# Lệnh chạy (E2E)
+run:
+  - "npm run dev"    # chạy dev server (headed) => mở trình duyệt và chạy test tương tác
+  - "npx playwright test"    # chạy tất cả E2E
+  - "npx playwright test tests/e2e/example.spec.ts"  # chạy file test cụ thể
+  - "npx playwright test --headed"  # chạy có giao diện
+
+# Ghi chú:
+# - Đảm bảo dev server (npm run dev) hoặc preview (npm run start) đang chạy nếu test cần UI.
+# - Nếu muốn, có thể chuyển phần này thành workflow GitHub Actions hoặc script CI tuỳ theo môi trường MCP.
+# - File này là mẫu thông tin; nếu muốn tự động hoá với MCP server, xin cho biết để tạo workflow mẫu.
