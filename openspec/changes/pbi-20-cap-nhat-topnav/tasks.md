@@ -7,11 +7,13 @@ Các bước triển khai theo thứ tự ưu tiên. Hoàn thành mỗi bước 
 - File: src/renderer/src/layouts/TopNav.vue
 - Hành động: Đảm bảo container sử dụng flexbox và justify-content: space-between giữa title và toolbar. Không thay đổi location file.
 - Test: Snapshot hoặc DOM assertion kiểm tra 2 phần
+- Status: done
 
 ### task-002: Add SoraLanguageSelect component
 - File: src/renderer/src/components/ui-wrappers/SoraLanguageSelect.vue
 - Hành động: Implement combobox dùng Ant Design Vue `a-select`, options từ locales, aria-label và emit event khi thay đổi.
 - Test: kiểm tra emit sự kiện khi thay đổi giá trị
+- Status: done
 
 ### task-003: SCSS variables
 - File: src/renderer/src/assets/scss/_variables.scss

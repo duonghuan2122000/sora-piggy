@@ -59,7 +59,10 @@ onMounted(async () => {
 @use '@scss/variables' as *;
 @use '@scss/mixins' as *;
 .sora-top-nav {
+  width: 100%;
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   height: $topnav-height;
   padding: 0 $topnav-padding;
