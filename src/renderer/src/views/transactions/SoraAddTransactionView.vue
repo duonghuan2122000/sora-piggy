@@ -426,9 +426,9 @@ onUnmounted(() => {
             @select="handleCategorySelect"
             @focus="handleCategoryFocus"
           >
-            <template #default="{ item }">
-              <div :class="{ 'category-add-option': item.isAdd }">
-                {{ item.value }}
+            <template #default="slotProps">
+              <div :class="{ 'category-add-option': slotProps?.item?.isAdd || slotProps?.isAdd }">
+                {{ slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '' }}
               </div>
             </template>
           </a-select>
@@ -442,9 +442,9 @@ onUnmounted(() => {
             clearable
             @select="handleAccountSelect"
           >
-            <template #default="{ item }">
-              <div :class="{ 'account-add-option': item.isAdd }">
-                {{ item.value }}
+            <template #default="slotProps">
+              <div :class="{ 'account-add-option': slotProps?.item?.isAdd || slotProps?.isAdd }">
+                {{ slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '' }}
               </div>
             </template>
           </a-select>
