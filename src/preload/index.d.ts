@@ -6,8 +6,9 @@ interface TransactionFilterParams {
   name?: string;
   categoryId?: number | null;
   accountId?: number | null;
-  startTime?: number | null;
-  endTime?: number | null;
+  // Accept either Unix timestamp (ms) or ISO 8601 UTC string
+  startTime?: number | string | null;
+  endTime?: number | string | null;
   sortBy?: 'newest' | 'oldest';
   page: number;
   pageSize: number;
