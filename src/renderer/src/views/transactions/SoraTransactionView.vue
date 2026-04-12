@@ -289,17 +289,18 @@ const sortSelectOptions = computed(() => [
           :table-props="{
             columns: [
               {
-                title: t('transactions.columns.name') || 'Tên giao dịch',
+                title: t('transactionForm.labels.name') || 'Tên giao dịch',
                 dataIndex: 'name',
                 key: 'name'
               },
               {
-                title: t('transactions.columns.time') || 'Thời gian',
+                title:
+                  t('transactionForm.labels.time') || t('transactions.columns.date') || 'Thời gian',
                 dataIndex: 'time',
                 key: 'time'
               },
               {
-                title: t('transactions.columns.amount') || 'Số tiền',
+                title: t('transactionForm.labels.amount') || 'Số tiền',
                 dataIndex: 'amount',
                 key: 'amount',
                 align: 'right'
