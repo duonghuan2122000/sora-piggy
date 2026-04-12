@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
+import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue';
 import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import LanguageSelector from '@renderer/components/LanguageSelector.vue';
+import SoraLanguageSelect from '@renderer/components/ui-wrappers/SoraLanguageSelect.vue';
 import { useLanguageStore } from '@renderer/stores/language';
 
 const emit = defineEmits<{
@@ -47,25 +47,37 @@ onMounted(async () => {
       <h1 class="sora-page-title">{{ pageTitle }}</h1>
     </div>
     <div class="sora-right-section">
-      <LanguageSelector />
+      <SoraLanguageSelect />
       <SoraButton type="primary" :disabled="isLoading" @click="handlePrimaryAction">
-          <template #default>
-            <FontAwesomeIcon :icon="buttonIcon" /> {{ buttonLabel }}
-          </template>
-        </SoraButton>
+        <template #default> <FontAwesomeIcon :icon="buttonIcon" /> {{ buttonLabel }} </template>
+      </SoraButton>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+@use '@scss/variables' as *;
+@use '@scss/mixins' as *;
 .sora-top-nav {
+  width: 100%;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0 $spacing-md;
-  height: 100%;
-  background-color: $bg-primary-light;
+  height: $topnav-height;
+  padding: 0 $topnav-padding;
+  background-color: $topnav-bg;
   border-bottom: 1px solid #e5e7eb;
+
+  .sora-left-section {
+    flex: 1;
+  }
+
+  .sora-right-section {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
 }
 
 .sora-left-section {

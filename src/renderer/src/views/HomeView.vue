@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import SoraCard from '@renderer/components/ui-wrappers/SoraCard.vue'
-import SoraButton from '@renderer/components/ui-wrappers/SoraButton.vue'
+import SoraCard from '@renderer/components/ui-wrappers/SoraCard.vue';
+import { SoraButton } from '@renderer/components/ui';
 
 const { t } = useI18n();
 </script>
@@ -18,7 +18,7 @@ const { t } = useI18n();
         <font-awesome-icon :icon="['fas', 'home']" />
         {{ t('nav.home') }}
       </SoraButton>
-      </SoraCard>
+    </SoraCard>
   </div>
 </template>
 

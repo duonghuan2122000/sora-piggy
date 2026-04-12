@@ -13,6 +13,9 @@
     "cancel": "Hủy",
     "delete": "Xóa"
   },
+  "language": {
+    "select": "Chọn ngôn ngữ"
+  },
   "message": {
     "welcome": "Chào mừng bạn đến với ứng dụng!",
     "success": "Thành công!",

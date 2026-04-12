@@ -18,8 +18,8 @@
 
 // Buttons
 .ant-btn-primary {
-  background-color: var(--sora-primary) !important;
-  border-color: var(--sora-primary) !important;
+  background-color: $color-primary !important;
+  border-color: $color-primary !important;
   color: #fff !important;
 }
 .ant-btn {
@@ -28,20 +28,20 @@
 
 // Cards
 .ant-card {
-  background: var(--sora-card-bg) !important;
+  background: $bg-primary-light !important;
   border-radius: 8px;
 }
 
 // Modals
 .ant-modal-content {
-  background: var(--sora-card-bg) !important;
+  background: $bg-primary-light !important;
   border-radius: 8px;
 }
 
 // Table header
 .ant-table-thead > tr > th {
-  background: var(--sora-bg-2) !important;
-  color: var(--sora-text-muted) !important;
+  background: $bg-secondary-light !important;
+  color: $text-secondary-light !important;
   font-weight: 600;
 }
 .ant-table-tbody > tr > td {
@@ -50,7 +50,7 @@
 
 // Form labels and inputs
 .ant-form-item-label > label {
-  color: var(--sora-text-muted) !important;
+  color: $text-secondary-light !important;
   font-weight: 500;
 }
 .ant-input-affix-wrapper,
@@ -61,37 +61,37 @@
 
 // Select dropdown options for "add" actions (keep same visual cue as before)
 .ant-select-item-option.add-option {
-  color: var(--sora-primary) !important;
+  color: $color-primary !important;
   font-style: italic;
 }
 
 // Pagination active
 .ant-pagination-item-active a {
-  background: var(--sora-primary) !important;
-  border-color: var(--sora-primary) !important;
+  background: $color-primary !important;
+  border-color: $color-primary !important;
   color: #fff !important;
 }
 
 // Tooltip
 .ant-tooltip-inner {
-  background: var(--sora-card-bg) !important;
-  color: var(--sora-text) !important;
+  background: $bg-primary-light !important;
+  color: $text-primary-light !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 // Layout: header / sider
 .ant-layout-header {
-  background: var(--sora-bg) !important;
-  color: var(--sora-text) !important;
+  background: $bg-primary-light !important;
+  color: $text-primary-light !important;
 }
 .ant-layout-sider {
-  background: var(--sora-bg-2) !important;
+  background: $bg-secondary-light !important;
 }
 
 // Menu / Nav
 .ant-menu {
   background: transparent !important;
-  color: var(--sora-text) !important;
+  color: $text-primary-light !important;
 }
 .ant-menu-item-selected,
 .ant-menu-item-active {
@@ -99,8 +99,8 @@
 }
 
 // Utility colors
-.sora-income { color: var(--sora-success) !important; }
-.sora-expense { color: var(--sora-error) !important; }
+.sora-income { color: $color-success !important; }
+.sora-expense { color: $color-error !important; }
 
 // Accessibility: focus outlines
 .ant-btn:focus,
@@ -110,18 +110,18 @@
 }
 
 // Small helpers
-.sora-card { background: var(--sora-card-bg) !important; }
+.sora-card { background: $bg-primary-light !important; }
 
 // Form: labels, validation messages, spacing
 .ant-form-item {
   margin-bottom: 16px !important;
 }
 .ant-form-item-explain {
-  color: var(--sora-error) !important;
+  color: $color-error !important;
   font-size: 12px !important;
 }
 .ant-form-item-label > label.required::after {
-  color: var(--sora-error) !important;
+  color: $color-error !important;
   content: " *";
 }
 
@@ -129,7 +129,7 @@
 .ant-input-affix-wrapper:hover,
 .ant-select-selector:hover,
 .ant-input-number:hover {
-  border-color: var(--sora-primary-dark) !important; /* fallback to slightly darker */
+  border-color: #{darken($color-primary, 6%)} !important; /* fallback to slightly darker */
 }
 
 // Table: header, empty state, striped rows
@@ -140,10 +140,10 @@
   background: rgba(0,0,0,0.02) !important;
 }
 .ant-empty {
-  color: var(--sora-text-muted) !important;
+  color: $text-secondary-light !important;
 }
 .ant-empty-description {
-  color: var(--sora-text-muted) !important;
+  color: $text-secondary-light !important;
 }
 
 // Modal: footer button spacing, primary button prominence
@@ -153,8 +153,8 @@
   gap: 8px;
 }
 .ant-modal-footer .ant-btn-primary {
-  background: var(--sora-primary) !important;
-  border-color: var(--sora-primary) !important;
+  background: $color-primary !important;
+  border-color: $color-primary !important;
 }
 
 // Menu / TopNav: active, hover, branding
@@ -166,7 +166,7 @@
 }
 .ant-layout-header .sora-app-name {
   font-weight: 700;
-  color: var(--sora-text) !important;
+  color: $text-primary-light !important;
   margin-left: 12px;
 }
 .ant-menu-item:hover {

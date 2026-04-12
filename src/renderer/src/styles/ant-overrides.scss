@@ -2,20 +2,23 @@
 @use '../assets/scss/_variables' as *;
 @import '../assets/scss/_ant_tokens.scss';
 
+// Map remaining CSS variable usages to SCSS variables where possible
+
+
 .ant-btn-primary {
-  background-color: var(--sora-color-primary) !important;
-  border-color: var(--sora-color-primary) !important;
+  background-color: $color-primary !important;
+  border-color: $color-primary !important;
 }
 
 .ant-btn {
-  border-radius: var(--sora-radius-md);
+  border-radius: $radius-md;
 }
 
 .ant-card {
-  background-color: var(--sora-bg-primary-light);
-  border-radius: var(--sora-radius-md);
+  background-color: $bg-primary-light;
+  border-radius: $radius-md;
 }
 
 .ant-pagination {
-  margin-top: var(--sora-spacing-sm);
+  margin-top: $spacing-sm;
 }
