@@ -157,13 +157,14 @@ watch([page, pageSize], () => {
   fetchTransactions();
 });
 
-const handlePageChange = (newPage: number): void => {
-  page.value = newPage;
-};
-
-const handlePageSizeChange = (newPageSize: number): void => {
-  pageSize.value = newPageSize;
-  page.value = 1;
+const onTableChange = (pagination: { current?: number; pageSize?: number } | null): void => {
+  if (!pagination) return;
+  if (pagination.current !== undefined && pagination.current !== page.value) {
+    page.value = pagination.current;
+  }
+  if (pagination.pageSize !== undefined && pagination.pageSize !== pageSize.value) {
+    pageSize.value = pagination.pageSize;
+  }
 };
 
 const formatCurrency = (amount: number): string => {
@@ -305,8 +306,17 @@ const sortSelectOptions = computed(() => [
                 key: 'amount',
                 align: 'right'
               }
-            ]
+            ],
+            pagination: {
+              current: page,
+              pageSize: pageSize,
+              total: total,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50'],
+              position: ['bottomRight']
+            }
           }"
+          @change="onTableChange"
         >
           <!-- Name -->
           <template #column-name="{ record }">
@@ -336,16 +346,6 @@ const sortSelectOptions = computed(() => [
           class="sora-empty"
         >
           {{ t('transactions.empty') }}
-        </div>
-        <div class="sora-pagination-wrapper">
-          <a-pagination
-            :current="page"
-            :page-size="pageSize"
-            :page-size-options="[10, 20, 50]"
-            :total="total"
-            @change="handlePageChange"
-            @show-size-change="handlePageSizeChange"
-          />
         </div>
       </section>
     </SoraCard>
@@ -443,6 +443,7 @@ const sortSelectOptions = computed(() => [
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: $spacing-md;
 }
 
 .sora-data-table {
