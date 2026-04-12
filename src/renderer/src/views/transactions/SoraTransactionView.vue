@@ -114,12 +114,16 @@ const fetchAccounts = async (): Promise<void> => {
 const fetchTransactions = async (): Promise<void> => {
   loading.value = true;
   try {
+    // Normalize date range to local startOf day / endOf day to make date selections inclusive
+    const startTimeMs = dateRange.value && dateRange.value[0] ? dayjs(dateRange.value[0]).startOf('day').valueOf() : undefined;
+    const endTimeMs = dateRange.value && dateRange.value[1] ? dayjs(dateRange.value[1]).endOf('day').valueOf() : undefined;
+
     const filters: TransactionFilterParams = {
       name: searchQuery.value || undefined,
       categoryId: toApiFilterId(selectedCategoryId.value),
       accountId: toApiFilterId(selectedAccountId.value),
-      startTime: dateRange.value && dateRange.value[0] ? dateRange.value[0] : undefined,
-      endTime: dateRange.value && dateRange.value[1] ? dateRange.value[1] : undefined,
+      startTime: startTimeMs,
+      endTime: endTimeMs,
       sortBy: selectedSort.value,
       page: page.value,
       pageSize: pageSize.value
