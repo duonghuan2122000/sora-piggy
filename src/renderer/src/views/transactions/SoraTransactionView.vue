@@ -177,9 +177,27 @@ const formatCurrency = (amount: number): string => {
 const formattedTotalIncome = computed(() => formatCurrency(totalIncome.value));
 const formattedTotalExpense = computed(() => formatCurrency(totalExpense.value));
 
-const formatDate = (date: string | number | Date): string => {
-  if (!date) return '—';
-  const d = dayjs(date);
+const formatDate = (date: string | number | Date | null | undefined): string => {
+  if (date === null || date === undefined || date === '') return '—';
+  let d: dayjs.Dayjs;
+
+  if (typeof date === 'number') {
+    // Handle timestamps in seconds (10-digit) by converting to milliseconds
+    d = date < 1e12 ? dayjs(date * 1000) : dayjs(date);
+  } else if (typeof date === 'string') {
+    // If string contains only digits, treat as timestamp (seconds or ms)
+    if (/^\d+$/.test(date)) {
+      const num = Number(date);
+      d = num < 1e12 ? dayjs(num * 1000) : dayjs(num);
+    } else {
+      // ISO string or other parsable formats
+      d = dayjs(date);
+    }
+  } else {
+    // Date object
+    d = dayjs(date as Date);
+  }
+
   if (!d.isValid()) return '—';
   return d.format('YYYY-MM-DD HH:mm:ss');
 };
