@@ -14,7 +14,7 @@ test('Danh sách giao dịch hiển thị (E2E snippet)', async ({ page }) => {
   await expect(page.locator('[data-testid="transactions-empty"]')).toBeVisible();
 
   // If no transactions exist, the empty state should be visible
-  const empty = page.locator('[data-testid="transactions-empty"]');
+
   // empty may or may not be visible depending on test data; we assert it exists in DOM when length is 0
   // (This test prefers inspecting column headers; the empty check is best-effort)
 

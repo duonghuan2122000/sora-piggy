@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
@@ -10,8 +11,8 @@ const fs = require('fs');
   for (const r of routes) {
     const url = base + r;
     try {
-      await page.goto(url, { waitUntil: 'networkidle' , timeout: 30000});
-      const safeName = (r === '/') ? 'home' : r.replace(/\//g, '_').replace(/^_/, '');
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+      const safeName = r === '/' ? 'home' : r.replace(/\//g, '_').replace(/^_/, '');
       const path = `${outDir}/${safeName}.png`;
       await page.screenshot({ path, fullPage: true });
       console.log('Saved', path);

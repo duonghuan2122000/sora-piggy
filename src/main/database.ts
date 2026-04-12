@@ -8,7 +8,7 @@ import { ITransaction, TransactionFilterParams, PaginatedTransactions } from './
 let db: Database.Database | null = null;
 
 // Migration version constants
-const MIGRATION_VERSION = 1;
+const MIGRATION_VERSION = 2;
 
 // Flexible interface to handle both old and new schema
 interface DbRow {
@@ -170,7 +170,7 @@ const migrateToUuidV7 = (): void => {
         categoryId INTEGER NOT NULL,
         accountId INTEGER NOT NULL,
         amount REAL NOT NULL,
-        time INTEGER NOT NULL
+        time TEXT NOT NULL
       )
     `);
     console.log('[Migration] Step 2: Temporary table created');
@@ -235,8 +235,9 @@ const migrateToUuidV7 = (): void => {
         // Convert amount from INTEGER to REAL
         const amount = (t.amount as number) / 100; // Convert from cents to actual amount
 
-        // Convert time from TEXT (ISO string) to Unix timestamp (milliseconds)
-        const time = validateAndConvertTime(t.time);
+        // Convert time to ISO 8601 UTC string
+        const timeMs = validateAndConvertTime(t.time);
+        const time = new Date(timeMs).toISOString();
 
         // Generate UUID v7
         const id = uuidv7();
@@ -310,6 +311,24 @@ const migrateToUuidV7 = (): void => {
   }
 };
 
+// Migrate time columns to ISO 8601 UTC strings
+const migrateTimeToIsoUtc = (): void => {
+  if (!db) return;
+  try {
+    console.log('[Migration] Converting transaction times to ISO 8601 UTC strings...');
+    // Convert numeric timestamps (ms) to ISO strings in UTC
+    db.exec(`
+      UPDATE transactions
+      SET time = strftime('%Y-%m-%dT%H:%M:%fZ', time / 1000.0, 'unixepoch')
+      WHERE typeof(time) = 'integer' OR typeof(time) = 'real'
+    `);
+    console.log('[Migration] Time conversion completed');
+  } catch (error) {
+    console.error('[Migration] Error converting times to ISO UTC:', error);
+    throw error;
+  }
+};
+
 // Create indexes for transactions table for query performance
 const createTransactionIndexes = (): void => {
   if (!db) return;
@@ -346,7 +365,7 @@ export const initDb = (): Database.Database => {
       categoryId INTEGER NOT NULL,
       accountId INTEGER NOT NULL,
       amount REAL NOT NULL,
-      time INTEGER NOT NULL
+      time TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS categories (
@@ -387,10 +406,21 @@ export const initDb = (): Database.Database => {
   const currentVersion = getMigrationVersion(db);
   console.log(`[Database] Current migration version: ${currentVersion}`);
 
-  // Check if migration to UUID v7 is needed (only if not already migrated)
-  if (currentVersion < MIGRATION_VERSION && needsUuidMigration(db)) {
-    migrateToUuidV7();
-  } else if (currentVersion >= MIGRATION_VERSION) {
+  if (currentVersion < MIGRATION_VERSION) {
+    console.log('[Migration] Applying pending migrations...');
+
+    // If UUID migration is needed, run it first
+    if (needsUuidMigration(db)) {
+      migrateToUuidV7();
+    }
+
+    // Ensure times are stored as ISO 8601 UTC strings
+    migrateTimeToIsoUtc();
+
+    // Mark migration as completed
+    setMigrationVersion(db, MIGRATION_VERSION);
+    console.log('[Migration] All migrations applied, version set to', MIGRATION_VERSION);
+  } else {
     console.log('[Database] Migration already completed, skipping');
   }
 
@@ -455,6 +485,10 @@ export const addTransaction = (transaction: Omit<ITransaction, 'id'>): string =>
   const stmt = db!.prepare(
     'INSERT INTO transactions (id, name, description, categoryId, accountId, amount, time) VALUES (@id, @name, @description, @categoryId, @accountId, @amount, @time)'
   );
+  const timeValue =
+    typeof transaction.time === 'number'
+      ? new Date(transaction.time).toISOString()
+      : transaction.time ?? new Date().toISOString();
   stmt.run({
     id,
     name: transaction.name,
@@ -462,7 +496,7 @@ export const addTransaction = (transaction: Omit<ITransaction, 'id'>): string =>
     categoryId: transaction.categoryId,
     accountId: transaction.accountId,
     amount: transaction.amount,
-    time: transaction.time
+    time: timeValue
   });
   return id;
 };
@@ -472,6 +506,12 @@ export const updateTransaction = (id: string, transaction: Partial<ITransaction>
   const stmt = db!.prepare(
     'UPDATE transactions SET name = @name, description = @description, categoryId = @categoryId, accountId = @accountId, amount = @amount, time = @time WHERE id = @id'
   );
+  const timeValue =
+    transaction.time === undefined || transaction.time === null
+      ? undefined
+      : typeof transaction.time === 'number'
+      ? new Date(transaction.time).toISOString()
+      : transaction.time;
   stmt.run({
     id,
     name: transaction.name,
@@ -479,7 +519,7 @@ export const updateTransaction = (id: string, transaction: Partial<ITransaction>
     categoryId: transaction.categoryId,
     accountId: transaction.accountId,
     amount: transaction.amount,
-    time: transaction.time
+    time: timeValue
   });
 };
 
@@ -681,6 +721,11 @@ export const getTransactionsPaginated = (
   const searchTermNoDiacritics = searchTerm ? removeDiacritics(searchTerm) : '';
   const categoryId = filters.categoryId ?? null;
   const accountId = filters.accountId ?? null;
+  let startTime = filters.startTime ?? null;
+  let endTime = filters.endTime ?? null;
+  // Accept numeric timestamps (ms) or ISO strings — normalize numeric to ISO UTC strings
+  if (typeof startTime === 'number') startTime = new Date(startTime).toISOString();
+  if (typeof endTime === 'number') endTime = new Date(endTime).toISOString();
   const sortBy = filters.sortBy ?? 'newest';
   const page = Math.max(1, filters.page ?? 1);
   const pageSize = Math.max(1, Math.min(100, filters.pageSize ?? 10));
@@ -708,6 +753,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
       ORDER BY
         CASE WHEN :sortBy = 'newest' THEN t.time END DESC,
         CASE WHEN :sortBy = 'oldest' THEN t.time END ASC
@@ -720,6 +767,8 @@ export const getTransactionsPaginated = (
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
       accountId,
+      startTime,
+      endTime,
       sortBy,
       pageSize,
       offset
@@ -733,6 +782,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
     `;
 
     const countStmt = db!.prepare(countQuery);
@@ -740,7 +791,9 @@ export const getTransactionsPaginated = (
       name: searchTerm,
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
-      accountId
+      accountId,
+      startTime,
+      endTime
     }) as { total: number };
     const total = countResult.total;
 
@@ -752,6 +805,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
         AND t.amount > 0
     `;
 
@@ -760,7 +815,9 @@ export const getTransactionsPaginated = (
       name: searchTerm,
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
-      accountId
+      accountId,
+      startTime,
+      endTime
     }) as { totalIncome: number };
     const totalIncome = incomeResult.totalIncome;
 
@@ -772,6 +829,8 @@ export const getTransactionsPaginated = (
         (:name IS NULL OR :name = '' OR LOWER(t.name) LIKE '%' || LOWER(:name) || '%' OR LOWER(t.name) LIKE '%' || LOWER(:nameNoDiacritics) || '%')
         AND (:categoryId IS NULL OR t.categoryId = :categoryId)
         AND (:accountId IS NULL OR t.accountId = :accountId)
+        AND (:startTime IS NULL OR t.time >= :startTime)
+        AND (:endTime IS NULL OR t.time <= :endTime)
         AND t.amount < 0
     `;
 
@@ -780,7 +839,9 @@ export const getTransactionsPaginated = (
       name: searchTerm,
       nameNoDiacritics: searchTermNoDiacritics,
       categoryId,
-      accountId
+      accountId,
+      startTime,
+      endTime
     }) as { totalExpense: number };
     const totalExpense = expenseResult.totalExpense;
 

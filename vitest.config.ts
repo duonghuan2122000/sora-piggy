@@ -3,13 +3,12 @@ import { resolve } from 'path';
 
 export default defineConfig(async () => {
   // Dynamically import plugin-vue (ESM) to avoid CJS/ESM interop issues
-  let plugins = [] as any[];
+  let plugins: unknown[] = [];
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const mod = await import('@vitejs/plugin-vue');
-    const vue = (mod && (mod as any).default) || mod;
+    const vue = (mod && (mod as unknown as { default?: unknown }).default) || mod;
     plugins = [vue()];
-  } catch (e) {
+  } catch {
     // If plugin cannot be loaded, continue without it; tests may fail with helpful error
     // We keep alias and jsdom environment to attempt running tests
     // The error will be surfaced when running vitest if plugin is required
@@ -27,12 +26,7 @@ export default defineConfig(async () => {
       globals: true,
       environment: 'jsdom',
       // Exclude E2E / Playwright tests so Vitest only runs unit/integration tests
-      exclude: [
-        'tests/e2e/**',
-        'test/e2e/**',
-        'tests/**/e2e/**',
-        '**/*.pw.ts'
-      ],
+      exclude: ['tests/e2e/**', 'test/e2e/**', 'tests/**/e2e/**', '**/*.pw.ts'],
       include: [
         'test/**/*.spec.ts',
         'test/**/*.test.ts',

@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
-import SoraTable from '@renderer/components/ui-wrappers/SoraTable.vue'
-import { notifyError } from '@renderer/utils/sora-notification'
+import dayjs from 'dayjs';
+import { SoraInput, SoraTable, SoraButton, SoraSelect, SoraDateRange } from '@renderer/components/ui';
+import { ROUTE_NAMES } from '@renderer/constants';
+import { notifyError } from '@renderer/utils/sora-notification';
 import {
   ITransaction,
   TransactionFilterParams,
   PaginatedTransactions
 } from '@renderer/types/transaction';
-import TransactionItem from '@renderer/components/TransactionItem.vue';
 
 interface CategoryOption {
   id: number;
@@ -33,6 +34,15 @@ const transactions = ref<ITransaction[]>([]);
 const categoryOptions = ref<CategoryOption[]>([]);
 const accountOptions = ref<AccountOption[]>([]);
 
+// Lazy-load flags and search text for autocomplete
+const categoriesLoaded = ref(false);
+const accountsLoaded = ref(false);
+const categorySearchText = ref('');
+const accountSearchText = ref('');
+
+// Date range filter (default: current month)
+const dateRange = ref<[number | null, number | null]>([dayjs().startOf('month').valueOf(), dayjs().endOf('month').valueOf()]);
+
 // Loading states
 const loading = ref(false);
 const categoriesLoading = ref(false);
@@ -40,6 +50,11 @@ const accountsLoading = ref(false);
 
 // i18n
 const { t } = useI18n();
+
+const router = useRouter();
+const goToAddTransaction = (): void => {
+  router.push({ name: ROUTE_NAMES.TRANSACTIONS_ADD });
+};
 
 // Default filter values
 const SORT_NEWEST = 'newest';
@@ -99,10 +114,16 @@ const fetchAccounts = async (): Promise<void> => {
 const fetchTransactions = async (): Promise<void> => {
   loading.value = true;
   try {
+    // Normalize date range to local startOf day / endOf day to make date selections inclusive
+    const startTimeMs = dateRange.value && dateRange.value[0] ? dayjs(dateRange.value[0]).startOf('day').valueOf() : undefined;
+    const endTimeMs = dateRange.value && dateRange.value[1] ? dayjs(dateRange.value[1]).endOf('day').valueOf() : undefined;
+
     const filters: TransactionFilterParams = {
       name: searchQuery.value || undefined,
       categoryId: toApiFilterId(selectedCategoryId.value),
       accountId: toApiFilterId(selectedAccountId.value),
+      startTime: startTimeMs,
+      endTime: endTimeMs,
       sortBy: selectedSort.value,
       page: page.value,
       pageSize: pageSize.value
@@ -127,14 +148,37 @@ const fetchTransactions = async (): Promise<void> => {
   }
 };
 
+// Handlers for lazy-loading and search for category/account selects
+const onCategoryFocus = async (): Promise<void> => {
+  if (!categoriesLoaded.value) {
+    await fetchCategories();
+    categoriesLoaded.value = true;
+  }
+};
+
+const onCategorySearch = (val: string): void => {
+  categorySearchText.value = String(val || '');
+};
+
+const onAccountFocus = async (): Promise<void> => {
+  if (!accountsLoaded.value) {
+    await fetchAccounts();
+    accountsLoaded.value = true;
+  }
+};
+
+const onAccountSearch = (val: string): void => {
+  accountSearchText.value = String(val || '');
+};
+
 // Initialize data on mount
 onMounted(async () => {
-  await Promise.all([fetchCategories(), fetchAccounts()]);
+  // Load transactions initially; categories/accounts are lazy-loaded on demand
   await fetchTransactions();
 });
 
 // Watch for filter changes and refetch
-watch([searchQuery, selectedCategoryId, selectedAccountId, selectedSort], () => {
+watch([searchQuery, selectedCategoryId, selectedAccountId, selectedSort, dateRange], () => {
   // Handle clear - convert undefined/null back to -1 (all option)
   if (selectedCategoryId.value === undefined || selectedCategoryId.value === null) {
     selectedCategoryId.value = -1;
@@ -157,13 +201,14 @@ watch([page, pageSize], () => {
   fetchTransactions();
 });
 
-const handlePageChange = (newPage: number): void => {
-  page.value = newPage;
-};
-
-const handlePageSizeChange = (newPageSize: number): void => {
-  pageSize.value = newPageSize;
-  page.value = 1;
+const onTableChange = (pagination: { current?: number; pageSize?: number } | null): void => {
+  if (!pagination) return;
+  if (pagination.current !== undefined && pagination.current !== page.value) {
+    page.value = pagination.current;
+  }
+  if (pagination.pageSize !== undefined && pagination.pageSize !== pageSize.value) {
+    pageSize.value = pagination.pageSize;
+  }
 };
 
 const formatCurrency = (amount: number): string => {
@@ -176,13 +221,29 @@ const formatCurrency = (amount: number): string => {
 const formattedTotalIncome = computed(() => formatCurrency(totalIncome.value));
 const formattedTotalExpense = computed(() => formatCurrency(totalExpense.value));
 
-const formatDate = (date: string | number | Date): string => {
-  const d = new Date(date as never);
-  if (isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+const formatDate = (date: string | number | Date | null | undefined): string => {
+  if (date === null || date === undefined || date === '') return '—';
+  let d: dayjs.Dayjs;
+
+  if (typeof date === 'number') {
+    // Handle timestamps in seconds (10-digit) by converting to milliseconds
+    d = date < 1e12 ? dayjs(date * 1000) : dayjs(date);
+  } else if (typeof date === 'string') {
+    // If string contains only digits, treat as timestamp (seconds or ms)
+    if (/^\d+$/.test(date)) {
+      const num = Number(date);
+      d = num < 1e12 ? dayjs(num * 1000) : dayjs(num);
+    } else {
+      // ISO string or other parsable formats
+      d = dayjs(date);
+    }
+  } else {
+    // Date object
+    d = dayjs(date as Date);
+  }
+
+  if (!d.isValid()) return '—';
+  return d.format('YYYY-MM-DD HH:mm:ss');
 };
 
 // Category dropdown options
@@ -193,19 +254,27 @@ interface SelectOption {
 
 const categorySelectOptions = computed<SelectOption[]>(() => {
   const allOption = { value: -1, label: t('common.all') || 'Tất cả' };
-  const categoryOpts = categoryOptions.value.map((c) => ({
+  let categoryOpts = categoryOptions.value.map((c) => ({
     value: c.id,
     label: c.name
   }));
+  const q = categorySearchText.value.trim().toLowerCase();
+  if (q) {
+    categoryOpts = categoryOpts.filter((opt) => (opt.label || '').toLowerCase().includes(q));
+  }
   return [allOption, ...categoryOpts];
 });
 
 const accountSelectOptions = computed<SelectOption[]>(() => {
   const allOption = { value: -1, label: t('common.all') || 'Tất cả' };
-  const accountOpts = accountOptions.value.map((a) => ({
+  let accountOpts = accountOptions.value.map((a) => ({
     value: a.id,
     label: a.name
   }));
+  const q = accountSearchText.value.trim().toLowerCase();
+  if (q) {
+    accountOpts = accountOpts.filter((opt) => (opt.label || '').toLowerCase().includes(q));
+  }
   return [allOption, ...accountOpts];
 });
 
@@ -218,7 +287,16 @@ const sortSelectOptions = computed(() => [
 <template>
   <div class="sora-transaction-view">
     <!-- Header Section -->
-    <SoraCard class="sora-card">
+    <SoraCard class="sora-card sora-screen-header sora-card-padded">
+      <div class="sora-screen-header-inner">
+        <div class="sora-screen-title">{{ t('transactions.title') }}</div>
+        <SoraButton type="primary" @click="goToAddTransaction">
+          <FontAwesomeIcon :icon="['fas', 'plus']" /> {{ t('button.add') }}
+        </SoraButton>
+      </div>
+    </SoraCard>
+
+    <SoraCard class="sora-card sora-card-padded">
       <header class="sora-header">
         <div class="sora-search-wrapper">
           <SoraInput
@@ -228,53 +306,54 @@ const sortSelectOptions = computed(() => [
           />
         </div>
         <div class="sora-filters">
+          <SoraDateRange
+            v-model="dateRange"
+            class="sora-date-range"
+            :format="'YYYY-MM-DD'"
+          />
+
           <SoraSelect
             v-model="selectedCategoryId"
             class="sora-select"
             :loading="categoriesLoading"
+            :options="categorySelectOptions"
             clearable
+            show-search
+            :filter-option="false"
             placeholder=""
-          >
-            <SoraSelectOption
-              v-for="cat in categorySelectOptions"
-              :key="cat.value"
-              :label="cat.label"
-              :value="cat.value"
-            />
-          </SoraSelect>
+            @focus="onCategoryFocus"
+            @search="onCategorySearch"
+          ></SoraSelect>
+
           <SoraSelect
             v-model="selectedAccountId"
             class="sora-select"
             :loading="accountsLoading"
+            :options="accountSelectOptions"
             clearable
+            show-search
+            :filter-option="false"
             placeholder=""
-          >
-            <SoraSelectOption
-              v-for="acc in accountSelectOptions"
-              :key="acc.value"
-              :label="acc.label"
-              :value="acc.value"
-            />
-          </SoraSelect>
-          <SoraSelect v-model="selectedSort" class="sora-select">
-            <SoraSelectOption
-              v-for="sort in sortSelectOptions"
-              :key="sort.value"
-              :label="sort.label"
-              :value="sort.value"
-            />
-          </SoraSelect>
+            @focus="onAccountFocus"
+            @search="onAccountSearch"
+          ></SoraSelect>
+
+          <SoraSelect
+            v-model="selectedSort"
+            class="sora-select"
+            :options="sortSelectOptions"
+          ></SoraSelect>
         </div>
       </header>
     </SoraCard>
 
     <!-- Summary Section -->
     <section class="sora-summary">
-      <SoraCard class="sora-card">
+      <SoraCard class="sora-card sora-card-padded">
         <div class="sora-card-title">{{ t('transactionForm.labels.income') }}</div>
         <div class="sora-card-amount sora-income">{{ formattedTotalIncome }}</div>
       </SoraCard>
-      <SoraCard class="sora-card">
+      <SoraCard class="sora-card sora-card-padded">
         <div class="sora-card-title">{{ t('transactionForm.labels.expense') }}</div>
         <div class="sora-card-amount sora-expense">{{ formattedTotalExpense }}</div>
       </SoraCard>
@@ -284,51 +363,63 @@ const sortSelectOptions = computed(() => [
     <SoraCard class="sora-card sora-detail-card">
       <section class="sora-detail">
         <SoraTable
-          :dataSource="transactions"
           v-loading="loading"
+          :data-source="transactions"
           class="sora-data-table"
           style="width: 100%"
-          :tableProps="{ columns: [] }"
+          :table-props="{
+            columns: [
+              {
+                title: t('transactionForm.labels.name') || 'Tên giao dịch',
+                dataIndex: 'name',
+                key: 'name'
+              },
+              {
+                title:
+                  t('transactionForm.labels.time') || t('transactions.columns.date') || 'Thời gian',
+                dataIndex: 'time',
+                key: 'time'
+              },
+              {
+                title: t('transactionForm.labels.amount') || 'Số tiền',
+                dataIndex: 'amount',
+                key: 'amount',
+                align: 'right'
+              }
+            ],
+            pagination: {
+              current: page,
+              pageSize: pageSize,
+              total: total,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50'],
+              position: ['bottomRight']
+            }
+          }"
+          @change="onTableChange"
         >
-          <template #default="{ record }">
-              <TransactionItem :transaction="record" />
-            </template>
-            <!-- category -->
-            <template #column-category="{ record }">
-              {{ record.categoryName }}
-            </template>
-            <!-- account -->
-            <template #column-account="{ record }">
-              {{ record.accountName }}
-            </template>
-            <!-- time -->
-            <template #column-time="{ record }">
-              {{ formatDate(record.time) }}
-            </template>
-            <!-- amount -->
-            <template #column-amount="{ record }">
+          <!-- Name -->
+          <template #column-name="{ record }">
+            <div class="sora-transaction-name">
+              <div class="sora-text-wrapper">
+                <div class="sora-name">{{ record.name }}</div>
+                <div v-if="record.description" class="sora-desc">{{ record.description }}</div>
+              </div>
+            </div>
+          </template>
+          <!-- Time -->
+          <template #column-time="{ record }">
+            {{ formatDate(record.time) }}
+          </template>
+          <!-- Amount -->
+          <template #column-amount="{ record }">
+            <div class="sora-amount-cell">
               <div :class="Number(record.amount) >= 0 ? 'sora-income' : 'sora-expense'">
                 {{ formatCurrency(Math.abs(Number(record.amount || 0))) }}
               </div>
-            </template>
+            </div>
+          </template>
         </SoraTable>
-        <div
-          v-if="transactions.length === 0 && !loading"
-          data-testid="transactions-empty"
-          class="sora-empty"
-        >
-          {{ t('transactions.empty') }}
-        </div>
-        <div class="sora-pagination-wrapper">
-          <a-pagination
-            :current="page"
-            :page-size="pageSize"
-            :page-size-options="[10,20,50]"
-            :total="total"
-            @change="handlePageChange"
-            @showSizeChange="handlePageSizeChange"
-          />
-        </div>
       </section>
     </SoraCard>
   </div>
@@ -352,7 +443,8 @@ const sortSelectOptions = computed(() => [
   justify-content: space-between;
   align-items: center;
   gap: $spacing-md;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .sora-search-wrapper {
@@ -366,7 +458,8 @@ const sortSelectOptions = computed(() => [
 
 .sora-filters {
   display: flex;
-  gap: $spacing-sm;
+  gap: $spacing-md;
+  align-items: center;
 }
 
 .sora-select {
@@ -384,6 +477,23 @@ const sortSelectOptions = computed(() => [
 .sora-card {
   background-color: #fff;
   border-radius: $radius-md;
+}
+
+/* Padded variant for SoraCard used in filter and summary */
+.sora-card.sora-card-padded {
+  padding: $spacing-md;
+}
+
+/* Screen header styles */
+.sora-screen-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sora-screen-title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $text-primary-light;
 }
 
 /* Summary card specific styles */
@@ -425,6 +535,7 @@ const sortSelectOptions = computed(() => [
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: $spacing-md;
 }
 
 .sora-data-table {
@@ -432,12 +543,19 @@ const sortSelectOptions = computed(() => [
   flex: 1;
 }
 
-:deep(.el-table__cell) {
+:deep(.el-table__cell),
+:deep(.ant-table-cell) {
   padding: 8px 16px;
 }
 
-:deep(.el-table th.el-table__cell) {
+:deep(.el-table th.el-table__cell),
+:deep(.ant-table thead > tr > th) {
   padding: 12px 16px;
+}
+
+.sora-amount-cell {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .sora-pagination-wrapper {

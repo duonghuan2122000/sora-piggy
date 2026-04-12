@@ -59,10 +59,10 @@ const menuGroups: MenuGroup[] = [
 
 // Computed property to get localized menu groups
 const localizedMenuGroups = computed(() => {
-  return menuGroups.map(group => ({
+  return menuGroups.map((group) => ({
     ...group,
     title: t(`sidebar.${group.title.toLowerCase()}`),
-    items: group.items.map(item => ({
+    items: group.items.map((item) => ({
       ...item,
       label: t(`sidebar.${item.key.toLowerCase()}`)
     }))

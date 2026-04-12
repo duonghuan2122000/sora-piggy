@@ -3,7 +3,11 @@ $primary-color: $color-primary; // map from $color-primary
 $success-color: #52c41a;
 $warning-color: #faad14;
 $error-color: #ff4d4f;
-$font-family-base: 'Anthropic Sans', -apple-system, 'Segoe UI', sans-serif;
+$font-family-base:
+  'Anthropic Sans',
+  -apple-system,
+  'Segoe UI',
+  sans-serif;
 $body-background: #ffffff;
 $layout-body-background: #f8f9fa;
 // Add mappings for spacing and other variables as needed

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SoraInput from '@renderer/components/ui-wrappers/SoraInput.vue'
+import { SoraInput } from '@renderer/components/ui';
 // Ant components are registered globally via plugin; no local import required
 
 // Use a loose type for form rules during migration
 
 import { useTransactionFormStore } from '@renderer/stores/transactionForm';
-import { notifySuccess, notifyError } from '@renderer/utils/sora-notification'
+import { notifySuccess, notifyError } from '@renderer/utils/sora-notification';
 
 const { t } = useI18n();
 
@@ -25,7 +25,7 @@ interface AccountOption {
   isAdd?: boolean;
 }
 
-const formRef = ref<any>(null);
+const formRef = ref<unknown>(null);
 const formValue = ref({
   name: '',
   description: '',
@@ -35,7 +35,7 @@ const formValue = ref({
   account: null as string | null
 });
 
-const rules: any = {
+const rules: Record<string, unknown> = {
   name: [
     {
       required: true,
@@ -317,7 +317,10 @@ watch(showCategoryModal, (isOpen) => {
 const transactionFormStore = useTransactionFormStore();
 
 const handleSubmit = async (): Promise<void> => {
-  formRef.value?.validate(async (valid) => {
+  const formInstance = formRef.value as
+    | { validate?: (cb: (valid: boolean) => void) => void }
+    | undefined;
+  formInstance?.validate?.(async (valid: boolean) => {
     if (valid) {
       transactionFormStore.setLoading(true);
       try {
@@ -345,7 +348,7 @@ const handleSubmit = async (): Promise<void> => {
           categorySearchValue.value = '';
           accountSearchValue.value = '';
         }
-      } catch (error) {
+      } catch {
         notifyError(t('transactionForm.messages.error'));
       } finally {
         transactionFormStore.setLoading(false);
@@ -423,9 +426,9 @@ onUnmounted(() => {
             @select="handleCategorySelect"
             @focus="handleCategoryFocus"
           >
-            <template #default="{ item }">
-              <div :class="{ 'category-add-option': item.isAdd }">
-                {{ item.value }}
+            <template #default="slotProps">
+              <div :class="{ 'category-add-option': slotProps?.item?.isAdd || slotProps?.isAdd }">
+                {{ slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '' }}
               </div>
             </template>
           </a-select>
@@ -439,9 +442,9 @@ onUnmounted(() => {
             clearable
             @select="handleAccountSelect"
           >
-            <template #default="{ item }">
-              <div :class="{ 'account-add-option': item.isAdd }">
-                {{ item.value }}
+            <template #default="slotProps">
+              <div :class="{ 'account-add-option': slotProps?.item?.isAdd || slotProps?.isAdd }">
+                {{ slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '' }}
               </div>
             </template>
           </a-select>

@@ -1,9 +1,10 @@
+@use 'sass:color' as color;
 @use '@scss/variables' as *;
 
 // Map key design tokens from our SCSS variables to CSS variables used in Ant theme overrides
 :root {
   --sora-primary: #{$color-primary};
-  --sora-primary-dark: #{darken($color-primary, 6%)};
+  --sora-primary-dark: #{color.adjust($color-primary, $lightness: -6%)};
   --sora-success: #{$color-success};
   --sora-error: #{$color-error};
   --sora-warning: #{$color-warning};
@@ -76,7 +77,7 @@
 .ant-tooltip-inner {
   background: $bg-primary-light !important;
   color: $text-primary-light !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 // Layout: header / sider
@@ -95,22 +96,28 @@
 }
 .ant-menu-item-selected,
 .ant-menu-item-active {
-  background: rgba(0,0,0,0.04) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
 }
 
 // Utility colors
-.sora-income { color: $color-success !important; }
-.sora-expense { color: $color-error !important; }
+.sora-income {
+  color: $color-success !important;
+}
+.sora-expense {
+  color: $color-error !important;
+}
 
 // Accessibility: focus outlines
 .ant-btn:focus,
 .ant-input:focus,
 .ant-select-focused {
-  box-shadow: 0 0 0 3px rgba(66,211,146,0.12) !important; /* using --sora-primary */
+  box-shadow: 0 0 0 3px rgba(66, 211, 146, 0.12) !important; /* using --sora-primary */
 }
 
 // Small helpers
-.sora-card { background: $bg-primary-light !important; }
+.sora-card {
+  background: $bg-primary-light !important;
+}
 
 // Form: labels, validation messages, spacing
 .ant-form-item {
@@ -122,14 +129,14 @@
 }
 .ant-form-item-label > label.required::after {
   color: $color-error !important;
-  content: " *";
+  content: ' *';
 }
 
 // Inputs focus / hover
 .ant-input-affix-wrapper:hover,
 .ant-select-selector:hover,
 .ant-input-number:hover {
-  border-color: #{darken($color-primary, 6%)} !important; /* fallback to slightly darker */
+  border-color: #{color.adjust($color-primary, $lightness: -6%)} !important; /* fallback to slightly darker */
 }
 
 // Table: header, empty state, striped rows
@@ -137,7 +144,7 @@
   padding: 12px 16px !important;
 }
 .ant-table-row:nth-child(odd) {
-  background: rgba(0,0,0,0.02) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
 }
 .ant-empty {
   color: $text-secondary-light !important;
@@ -170,14 +177,16 @@
   margin-left: 12px;
 }
 .ant-menu-item:hover {
-  background: rgba(0,0,0,0.03) !important;
+  background: rgba(0, 0, 0, 0.03) !important;
 }
 .ant-menu-item-selected,
 .ant-menu-item-active {
-  background: linear-gradient(90deg, rgba($color-primary, 0.08), rgba(0,0,0,0)) !important;
+  background: linear-gradient(90deg, rgba($color-primary, 0.08), rgba(0, 0, 0, 0)) !important;
 }
 
 // Ensure small utilities are preserved
-.sora-card { box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.sora-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
 
 // Add more component-specific overrides as migration proceeds
