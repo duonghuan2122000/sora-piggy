@@ -405,13 +405,6 @@ const sortSelectOptions = computed(() => [
             </div>
           </template>
         </SoraTable>
-        <div
-          v-if="transactions.length === 0 && !loading"
-          data-testid="transactions-empty"
-          class="sora-empty"
-        >
-          {{ t('transactions.empty') }}
-        </div>
       </section>
     </SoraCard>
   </div>
