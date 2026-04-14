@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { SoraInput } from '@renderer/components/ui';
+import { SoraInput, SoraButton, SoraCard, SoraForm, SoraFormItem, SoraDatePicker, SoraInputNumber, SoraSelect, SoraModal } from '@renderer/components/ui';
 // Ant components are registered globally via plugin; no local import required
 
 // Use a loose type for form rules during migration
@@ -71,6 +71,13 @@ const rules: Record<string, unknown> = {
     {
       required: true,
       message: t('transactionForm.validation.accountRequired'),
+      trigger: ['change']
+    }
+  ],
+  time: [
+    {
+      required: true,
+      message: t('transactionForm.validation.timeRequired'),
       trigger: ['change']
     }
   ]
@@ -253,6 +260,14 @@ const querySearch = (queryString: string, cb: (options: CategoryOption[]) => voi
   cb(results);
 };
 
+// Template helpers for slot props (slotProps typing is dynamic)
+function slotIsAdd(slotProps: any): boolean {
+  return Boolean(slotProps?.item?.isAdd || slotProps?.isAdd);
+}
+function slotLabel(slotProps: any): string {
+  return slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '';
+}
+
 // Handle category selection
 const handleCategorySelect = (item: Record<string, unknown>): void => {
   // Prevent processing if modal is already open
@@ -317,44 +332,45 @@ watch(showCategoryModal, (isOpen) => {
 const transactionFormStore = useTransactionFormStore();
 
 const handleSubmit = async (): Promise<void> => {
-  const formInstance = formRef.value as
-    | { validate?: (cb: (valid: boolean) => void) => void }
-    | undefined;
-  formInstance?.validate?.(async (valid: boolean) => {
-    if (valid) {
-      transactionFormStore.setLoading(true);
-      try {
-        const success = await transactionFormStore.addTransaction({
-          name: formValue.value.name,
-          description: formValue.value.description,
-          time: formValue.value.time,
-          amount: formValue.value.amount,
-          category: formValue.value.category,
-          account: formValue.value.account
-        });
+  const formInstance = formRef.value as { validate?: () => Promise<unknown> } | undefined;
+  try {
+    await formInstance?.validate?.();
+  } catch {
+    // validation failed
+    return;
+  }
 
-        if (success) {
-          notifySuccess(t('transactionForm.messages.success'));
-          // Reset form after successful save
-          formValue.value = {
-            name: '',
-            description: '',
-            time: null,
-            amount: 0,
-            category: null,
-            account: null
-          };
-          // Reset category and account search values
-          categorySearchValue.value = '';
-          accountSearchValue.value = '';
-        }
-      } catch {
-        notifyError(t('transactionForm.messages.error'));
-      } finally {
-        transactionFormStore.setLoading(false);
-      }
+  transactionFormStore.setLoading(true);
+  try {
+    const success = await transactionFormStore.addTransaction({
+      name: formValue.value.name,
+      description: formValue.value.description,
+      time: formValue.value.time,
+      amount: formValue.value.amount,
+      category: formValue.value.category,
+      account: formValue.value.account
+    });
+
+    if (success) {
+      notifySuccess(t('transactionForm.messages.success'));
+      // Reset form after successful save
+      formValue.value = {
+        name: '',
+        description: '',
+        time: null,
+        amount: 0,
+        category: null,
+        account: null
+      };
+      // Reset category and account search values
+      categorySearchValue.value = '';
+      accountSearchValue.value = '';
     }
-  });
+  } catch {
+    notifyError(t('transactionForm.messages.error'));
+  } finally {
+    transactionFormStore.setLoading(false);
+  }
 };
 
 // Watch for trigger from TopNav
@@ -387,38 +403,59 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="sora-add-transaction-view">
-    <a-card class="sora-card">
+  <div class="sora-add-transaction">
+    <SoraCard class="sora-add-transaction__card">
       <template #header>
-        <div>{{ $t('transactionForm.title') }}</div>
+        <div class="sora-add-transaction__header">
+          <div class="sora-add-transaction__header-left">
+            <div class="sora-add-transaction__header-title">{{ $t('transactionForm.title') }}</div>
+          </div>
+          <div class="sora-add-transaction__header-actions">
+            <SoraButton type="primary" @click="handleSubmit">{{ $t('button.save') }}</SoraButton>
+          </div>
+        </div>
       </template>
-      <a-form ref="formRef" :model="formValue" :rules="rules" label-position="top">
-        <a-formItem :label="$t('transactionForm.labels.name')" prop="name">
+      <SoraForm ref="formRef" :model="formValue" :rules="rules" layout="vertical" :hide-required-mark="true">
+        <SoraFormItem prop="name">
+          <template #label>
+            <span>{{ $t('transactionForm.labels.name') }}<span class="sora-add-transaction__required-star">*</span></span>
+          </template>
           <SoraInput
             v-model="formValue.name"
             :placeholder="$t('transactionForm.placeholders.name')"
           />
-        </a-formItem>
+        </SoraFormItem>
 
-        <a-formItem :label="$t('transactionForm.labels.description')" prop="description">
+        <SoraFormItem :label="$t('transactionForm.labels.description')" prop="description">
           <SoraInput
             v-model="formValue.description"
             type="textarea"
             :placeholder="$t('transactionForm.placeholders.description')"
             :rows="3"
           />
-        </a-formItem>
+        </SoraFormItem>
 
-        <a-formItem :label="$t('transactionForm.labels.time')" prop="time">
-          <a-date-picker v-model="formValue.time" type="datetime" clearable />
-        </a-formItem>
+        <div class="sora-add-transaction__row sora-add-transaction__row--two">
+          <SoraFormItem prop="time">
+            <template #label>
+              <span>{{ $t('transactionForm.labels.time') }}<span class="sora-add-transaction__required-star">*</span></span>
+            </template>
+            <SoraDatePicker v-model="formValue.time" type="datetime" clearable />
+          </SoraFormItem>
 
-        <a-formItem :label="$t('transactionForm.labels.amount')" prop="amount">
-          <a-input-number v-model="formValue.amount" :min="1" />
-        </a-formItem>
+          <SoraFormItem prop="amount">
+            <template #label>
+              <span>{{ $t('transactionForm.labels.amount') }}<span class="sora-add-transaction__required-star">*</span></span>
+            </template>
+            <SoraInputNumber v-model="formValue.amount" :min="1" />
+          </SoraFormItem>
+        </div>
 
-        <a-formItem :label="$t('transactionForm.labels.category')" prop="category">
-          <a-select
+        <SoraFormItem prop="category">
+          <template #label>
+            <span>{{ $t('transactionForm.labels.category') }}<span class="sora-add-transaction__required-star">*</span></span>
+          </template>
+          <SoraSelect
             v-model="categorySearchValue"
             :fetch-suggestions="querySearch"
             :placeholder="$t('transactionForm.placeholders.category')"
@@ -427,15 +464,18 @@ onUnmounted(() => {
             @focus="handleCategoryFocus"
           >
             <template #default="slotProps">
-              <div :class="{ 'category-add-option': slotProps?.item?.isAdd || slotProps?.isAdd }">
-                {{ slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '' }}
+              <div :class="{ 'sora-category-add-option': slotIsAdd(slotProps) }">
+                {{ slotLabel(slotProps) }}
               </div>
             </template>
-          </a-select>
-        </a-formItem>
+          </SoraSelect>
+        </SoraFormItem>
 
-        <a-formItem :label="$t('transactionForm.labels.account')" prop="account">
-          <a-select
+        <SoraFormItem prop="account">
+          <template #label>
+            <span>{{ $t('transactionForm.labels.account') }}<span class="sora-add-transaction__required-star">*</span></span>
+          </template>
+          <SoraSelect
             v-model="accountSearchValue"
             :fetch-suggestions="queryAccountSearch"
             :placeholder="$t('transactionForm.placeholders.account')"
@@ -443,67 +483,67 @@ onUnmounted(() => {
             @select="handleAccountSelect"
           >
             <template #default="slotProps">
-              <div :class="{ 'account-add-option': slotProps?.item?.isAdd || slotProps?.isAdd }">
-                {{ slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '' }}
+              <div :class="{ 'sora-account-add-option': slotIsAdd(slotProps) }">
+                {{ slotLabel(slotProps) }}
               </div>
             </template>
-          </a-select>
-        </a-formItem>
-      </a-form>
-    </a-card>
+          </SoraSelect>
+        </SoraFormItem>
+      </SoraForm>
+    </SoraCard>
 
     <!-- Add Category Modal -->
-    <a-modal
+    <SoraModal
       v-model="showCategoryModal"
       :title="$t('transactionForm.dialogs.addCategory')"
       width="400px"
     >
-      <a-form>
-        <a-formItem :label="$t('transactionForm.categoryName')">
-          <a-input
+      <SoraForm>
+        <SoraFormItem :label="$t('transactionForm.categoryName')">
+          <SoraInput
             v-model="newCategoryName"
             :placeholder="$t('transactionForm.placeholders.categoryName')"
             @keyup.enter="saveCategoryFromModal"
             @keydown.enter.prevent
           />
-        </a-formItem>
-      </a-form>
+        </SoraFormItem>
+      </SoraForm>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
-          <a-button @click="showCategoryModal = false">Cancel</a-button>
-          <a-button type="primary" @click="saveCategoryFromModal">Save</a-button>
+          <SoraButton @click="showCategoryModal = false">{{$t('button.cancel')}}</SoraButton>
+          <SoraButton type="primary" @click="saveCategoryFromModal">{{$t('button.save')}}</SoraButton>
         </div>
       </template>
-    </a-modal>
+    </SoraModal>
 
     <!-- Add Account Modal -->
-    <a-modal
+    <SoraModal
       v-model="showAccountModal"
       :title="$t('transactionForm.dialogs.addAccount')"
       width="400px"
     >
-      <a-form>
-        <a-formItem :label="$t('transactionForm.accountName')">
-          <a-input
+      <SoraForm>
+        <SoraFormItem :label="$t('transactionForm.accountName')">
+          <SoraInput
             v-model="newAccountName"
             :placeholder="$t('transactionForm.placeholders.accountName')"
             @keyup.enter="saveAccountFromModal"
             @keydown.enter.prevent
           />
-        </a-formItem>
-      </a-form>
+        </SoraFormItem>
+      </SoraForm>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
-          <a-button @click="showAccountModal = false">Cancel</a-button>
-          <a-button type="primary" @click="saveAccountFromModal">Save</a-button>
+          <SoraButton @click="showAccountModal = false">{{$t('button.cancel')}}</SoraButton>
+          <SoraButton type="primary" @click="saveAccountFromModal">{{$t('button.save')}}</SoraButton>
         </div>
       </template>
-    </a-modal>
+    </SoraModal>
   </div>
 </template>
 
 <style scoped lang="scss">
-.sora-add-transaction-view {
+.sora-add-transaction {
   padding: $spacing-md;
   flex: 1;
   display: flex;
@@ -511,7 +551,7 @@ onUnmounted(() => {
   overflow-y: auto;
 }
 
-.sora-card {
+.sora-add-transaction__card {
   width: 100%;
   margin: 0 auto;
   background-color: #fff;
@@ -519,12 +559,72 @@ onUnmounted(() => {
   flex: 1;
 }
 
-:deep(.el-form-item__label) {
+.sora-add-transaction__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.sora-add-transaction__header-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sora-add-transaction__header-title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sora-add-transaction__header-actions {
+  display: flex;
+  gap: $spacing-sm;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.sora-add-transaction__row {
+  display: flex;
+  gap: $spacing-md;
+  align-items: flex-start;
+}
+
+.sora-add-transaction__row--two > * {
+  flex: 0 0 calc(50% - (#{$spacing-md} / 2));
+  max-width: calc(50% - (#{$spacing-md} / 2));
+}
+
+.sora-add-transaction__row--two :deep(.ant-picker) {
+  width: 100% !important;
+  display: block;
+}
+
+/* Fallback for inner input elements */
+.sora-add-transaction__row--two :deep(.ant-picker-input) {
+  width: 100% !important;
+}
+
+
+.sora-add-transaction__required-star {
+  color: $color-error;
+  margin-left: $spacing-xs;
+}
+
+/* Label spacing adjustments */
+:deep(.el-form-item__label),
+:deep(.ant-form-item-label) {
   font-weight: 500;
+  margin-bottom: $spacing-xs;
 }
 
 :deep(.el-autocomplete-suggestion__list) {
-  li.category-add-option {
+  .sora-category-add-option,
+  li.sora-category-add-option {
     color: $color-primary;
     font-style: italic;
     border-top: 1px solid #e0e0e0;
@@ -534,7 +634,8 @@ onUnmounted(() => {
     }
   }
 
-  li.account-add-option {
+  .sora-account-add-option,
+  li.sora-account-add-option {
     color: $color-primary;
     font-style: italic;
     border-top: 1px solid #e0e0e0;
@@ -543,5 +644,10 @@ onUnmounted(() => {
       background-color: #f0f7ff !important;
     }
   }
+}
+
+/* Ensure number input fills its column */
+:deep(.ant-input-number) {
+  width: 100%;
 }
 </style>
