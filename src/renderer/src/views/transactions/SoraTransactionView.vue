@@ -190,6 +190,11 @@ const onAccountSearch = (val: string): void => {
 onMounted(async () => {
   // Load transactions initially; categories/accounts are lazy-loaded on demand
   await fetchTransactions();
+
+  // Ensure default filter values: show 'Tất cả' for category/account and 'Mới nhất' for sort
+  selectedCategoryId.value = -1;
+  selectedAccountId.value = -1;
+  selectedSort.value = SORT_NEWEST;
 });
 
 // Watch for filter changes and refetch

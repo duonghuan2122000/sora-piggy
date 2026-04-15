@@ -1,9 +1,10 @@
 <template>
   <a-select
     v-bind="attrs"
+    :value="props.modelValue"
     show-search
     :filter-option="false"
-    :search-value="props.modelValue"
+    :search-value="currentQuery"
     @search="onSearch"
     @change="handleChange"
     @popup-scroll="onPopupScroll"
