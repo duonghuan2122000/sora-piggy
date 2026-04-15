@@ -1163,7 +1163,7 @@ mermaid.sequenceConfig = {
   boxTextMargin: 5,
   noteMargin: 10,
   messageMargin: 35,
-  mirrorActors: true,
+  mirrorActors: true
 };
 ```
 

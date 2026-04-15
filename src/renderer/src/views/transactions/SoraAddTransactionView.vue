@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { SoraInput, SoraButton, SoraCard, SoraForm, SoraFormItem, SoraDatePicker, SoraInputNumber, SoraSelect, SoraModal } from '@renderer/components/ui';
+import {
+  SoraInput,
+  SoraButton,
+  SoraCard,
+  SoraForm,
+  SoraFormItem,
+  SoraDatePicker,
+  SoraInputNumber,
+  SoraSelect,
+  SoraModal
+} from '@renderer/components/ui';
 // Ant components are registered globally via plugin; no local import required
 
 // Use a loose type for form rules during migration
@@ -107,10 +117,12 @@ const accountModalOpenedAt = ref(0);
 const loadCategories = async (): Promise<void> => {
   isLoadingCategories.value = true;
   try {
-    const categories = await window.api.getCategories();
+    const categories = (await window.api.searchCategories('', 100, 0)) as Array<{ id: number; name: string }>;
     // Convert database rows to select options
-    categoryOptions.value = categories.map((cat: { name: string }) => ({
-      value: cat.name
+    categoryOptions.value = categories.map((cat) => ({
+      value: cat.name,
+      label: cat.name,
+      id: cat.id
     }));
   } catch (error) {
     console.error('Failed to load categories:', error);
@@ -123,10 +135,12 @@ const loadCategories = async (): Promise<void> => {
 const loadAccounts = async (): Promise<void> => {
   isLoadingAccounts.value = true;
   try {
-    const accounts = await window.api.getAccounts();
+    const accounts = (await window.api.searchAccounts('', 100, 0)) as Array<{ id: number; name: string }>;
     // Convert database rows to select options
-    accountOptions.value = accounts.map((acc: { name: string }) => ({
-      value: acc.name
+    accountOptions.value = accounts.map((acc) => ({
+      value: acc.name,
+      label: acc.name,
+      id: acc.id
     }));
   } catch (error) {
     console.error('Failed to load accounts:', error);
@@ -135,37 +149,43 @@ const loadAccounts = async (): Promise<void> => {
   }
 };
 
-// Check if the typed account already exists
-const isAccountNew = computed(() => {
-  if (!accountSearchValue.value) return false;
-  const search = accountSearchValue.value.toLowerCase();
-  return !accountOptions.value.some((option) => option.value?.toString().toLowerCase() === search);
-});
+// Fetch account suggestions for a-select (supports pagination/append)
+const PAGE_SIZE = 5;
+const queryAccountSearch = async (
+  queryString: string,
+  cb: (options: AccountOption[]) => void,
+  opts?: { append?: boolean }
+): Promise<void> => {
+  const q = String(queryString || '').trim();
+  const append = Boolean(opts?.append);
+  const offset = append ? accountOptions.value.length : 0;
+  isLoadingAccounts.value = true;
+  try {
+    const results = (await window.api.searchAccounts(q, PAGE_SIZE, offset)) as Array<{ id: number; name: string }>;
+    const mapped = results.map((acc) => ({ value: acc.name, label: acc.name, id: acc.id }));
 
-// Fetch account suggestions for a-select
-const queryAccountSearch = (queryString: string, cb: (options: AccountOption[]) => void): void => {
-  let results = accountOptions.value;
+    if (append) {
+      accountOptions.value = [...accountOptions.value, ...mapped];
+    } else {
+      accountOptions.value = mapped;
+    }
 
-  if (queryString) {
-    results = accountOptions.value.filter((option) =>
-      option.value?.toString().toLowerCase().includes(queryString.toLowerCase())
-    );
+    // Add "Add Account" option at the bottom if the typed text is new (only when not appending)
+    if (
+      !append &&
+      q &&
+      !accountOptions.value.some((opt) => opt.value?.toString().toLowerCase() === q.toLowerCase())
+    ) {
+      accountOptions.value.push({ value: `Add Account "${q}"`, label: q, isAdd: true });
+    }
+
+    cb(accountOptions.value);
+  } catch (error) {
+    console.error('Failed to search accounts:', error);
+    cb([]);
+  } finally {
+    isLoadingAccounts.value = false;
   }
-
-  // Add "Add Account" option at the bottom if the typed text is new
-  if (isAccountNew.value && accountSearchValue.value.trim()) {
-    const accountName = accountSearchValue.value.trim();
-    results = [
-      ...results,
-      {
-        value: `Add Account "${accountName}"`,
-        label: accountName, // Store the actual account name separately
-        isAdd: true
-      }
-    ];
-  }
-
-  cb(results);
 };
 
 // Handle account selection
@@ -227,45 +247,54 @@ watch(showAccountModal, (isOpen) => {
   }
 });
 
-// Check if the typed category already exists
-const isNewCategory = computed(() => {
-  if (!categorySearchValue.value) return false;
-  const search = categorySearchValue.value.toLowerCase();
-  return !categoryOptions.value.some((option) => option.value?.toString().toLowerCase() === search);
-});
+// Fetch suggestions for a-select (supports pagination/append)
+const querySearch = async (
+  queryString: string,
+  cb: (options: CategoryOption[]) => void,
+  opts?: { append?: boolean }
+): Promise<void> => {
+  const q = String(queryString || '').trim();
+  const append = Boolean(opts?.append);
+  const offset = append ? categoryOptions.value.length : 0;
+  isLoadingCategories.value = true;
+  try {
+    const results = (await window.api.searchCategories(q, 5, offset)) as Array<{ id: number; name: string }>;
+    const mapped = results.map((cat) => ({ value: cat.name, label: cat.name, id: cat.id }));
 
-// Fetch suggestions for a-select
-const querySearch = (queryString: string, cb: (options: CategoryOption[]) => void): void => {
-  let results = categoryOptions.value;
+    if (append) {
+      categoryOptions.value = [...categoryOptions.value, ...mapped];
+    } else {
+      categoryOptions.value = mapped;
+    }
 
-  if (queryString) {
-    results = categoryOptions.value.filter((option) =>
-      option.value?.toString().toLowerCase().includes(queryString.toLowerCase())
-    );
+    // Add "Add Category" option at the bottom if the typed text is new (only when not appending)
+    if (
+      !append &&
+      q &&
+      !categoryOptions.value.some((opt) => opt.value?.toString().toLowerCase() === q.toLowerCase())
+    ) {
+      categoryOptions.value.push({ value: `Add Category "${q}"`, label: q, isAdd: true });
+    }
+
+    cb(categoryOptions.value);
+  } catch (error) {
+    console.error('Failed to search categories:', error);
+    cb([]);
+  } finally {
+    isLoadingCategories.value = false;
   }
-
-  // Add "Add Category" option at the bottom if the typed text is new
-  if (isNewCategory.value && categorySearchValue.value.trim()) {
-    const categoryName = categorySearchValue.value.trim();
-    results = [
-      ...results,
-      {
-        value: `Add Category "${categoryName}"`,
-        label: categoryName, // Store the actual category name separately
-        isAdd: true
-      }
-    ];
-  }
-
-  cb(results);
 };
 
 // Template helpers for slot props (slotProps typing is dynamic)
-function slotIsAdd(slotProps: any): boolean {
-  return Boolean(slotProps?.item?.isAdd || slotProps?.isAdd);
+function slotIsAdd(slotProps: unknown): boolean {
+  const sp = slotProps as Record<string, unknown>;
+  const item = sp?.item as Record<string, unknown> | undefined;
+  return Boolean((item && Boolean((item['isAdd'] as boolean))) || Boolean(sp?.isAdd));
 }
-function slotLabel(slotProps: any): string {
-  return slotProps?.item?.value ?? slotProps?.value ?? slotProps?.label ?? '';
+function slotLabel(slotProps: unknown): string {
+  const sp = slotProps as Record<string, unknown>;
+  const item = sp?.item as Record<string, unknown> | undefined;
+  return (item?.value as string | undefined) ?? (sp?.value as string | undefined) ?? (sp?.label as string | undefined) ?? '';
 }
 
 // Handle category selection
@@ -319,7 +348,14 @@ const saveCategoryFromModal = async (): Promise<void> => {
 
 // Handle category focus
 const handleCategoryFocus = (): void => {
-  // Ensure dropdown opens when focused
+  // Load initial page of categories when focused
+  querySearch('', () => {});
+};
+
+// Handle account focus
+const handleAccountFocus = (): void => {
+  // Load initial page of accounts when focused
+  queryAccountSearch('', () => {});
 };
 
 // Clear modal state when closed
@@ -391,8 +427,7 @@ const handleKeyPress = (event: KeyboardEvent): void => {
 
 // Load categories and accounts on mount
 onMounted(() => {
-  loadCategories();
-  loadAccounts();
+  // Lazy-loading: only load initial items on focus/search
   window.addEventListener('keydown', handleKeyPress);
 });
 
@@ -415,10 +450,19 @@ onUnmounted(() => {
           </div>
         </div>
       </template>
-      <SoraForm ref="formRef" :model="formValue" :rules="rules" layout="vertical" :hide-required-mark="true">
+      <SoraForm
+        ref="formRef"
+        :model="formValue"
+        :rules="rules"
+        layout="vertical"
+        :hide-required-mark="true"
+      >
         <SoraFormItem prop="name">
           <template #label>
-            <span>{{ $t('transactionForm.labels.name') }}<span class="sora-add-transaction__required-star">*</span></span>
+            <span
+              >{{ $t('transactionForm.labels.name')
+              }}<span class="sora-add-transaction__required-star">*</span></span
+            >
           </template>
           <SoraInput
             v-model="formValue.name"
@@ -438,14 +482,20 @@ onUnmounted(() => {
         <div class="sora-add-transaction__row sora-add-transaction__row--two">
           <SoraFormItem prop="time">
             <template #label>
-              <span>{{ $t('transactionForm.labels.time') }}<span class="sora-add-transaction__required-star">*</span></span>
+              <span
+                >{{ $t('transactionForm.labels.time')
+                }}<span class="sora-add-transaction__required-star">*</span></span
+              >
             </template>
             <SoraDatePicker v-model="formValue.time" type="datetime" clearable />
           </SoraFormItem>
 
           <SoraFormItem prop="amount">
             <template #label>
-              <span>{{ $t('transactionForm.labels.amount') }}<span class="sora-add-transaction__required-star">*</span></span>
+              <span
+                >{{ $t('transactionForm.labels.amount')
+                }}<span class="sora-add-transaction__required-star">*</span></span
+              >
             </template>
             <SoraInputNumber v-model="formValue.amount" :min="1" />
           </SoraFormItem>
@@ -453,10 +503,14 @@ onUnmounted(() => {
 
         <SoraFormItem prop="category">
           <template #label>
-            <span>{{ $t('transactionForm.labels.category') }}<span class="sora-add-transaction__required-star">*</span></span>
+            <span
+              >{{ $t('transactionForm.labels.category')
+              }}<span class="sora-add-transaction__required-star">*</span></span
+            >
           </template>
           <SoraSelect
             v-model="categorySearchValue"
+            :options="categoryOptions"
             :fetch-suggestions="querySearch"
             :placeholder="$t('transactionForm.placeholders.category')"
             clearable
@@ -473,14 +527,19 @@ onUnmounted(() => {
 
         <SoraFormItem prop="account">
           <template #label>
-            <span>{{ $t('transactionForm.labels.account') }}<span class="sora-add-transaction__required-star">*</span></span>
+            <span
+              >{{ $t('transactionForm.labels.account')
+              }}<span class="sora-add-transaction__required-star">*</span></span
+            >
           </template>
           <SoraSelect
             v-model="accountSearchValue"
+            :options="accountOptions"
             :fetch-suggestions="queryAccountSearch"
             :placeholder="$t('transactionForm.placeholders.account')"
             clearable
             @select="handleAccountSelect"
+            @focus="handleAccountFocus"
           >
             <template #default="slotProps">
               <div :class="{ 'sora-account-add-option': slotIsAdd(slotProps) }">
@@ -510,8 +569,10 @@ onUnmounted(() => {
       </SoraForm>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
-          <SoraButton @click="showCategoryModal = false">{{$t('button.cancel')}}</SoraButton>
-          <SoraButton type="primary" @click="saveCategoryFromModal">{{$t('button.save')}}</SoraButton>
+          <SoraButton @click="showCategoryModal = false">{{ $t('button.cancel') }}</SoraButton>
+          <SoraButton type="primary" @click="saveCategoryFromModal">{{
+            $t('button.save')
+          }}</SoraButton>
         </div>
       </template>
     </SoraModal>
@@ -534,8 +595,10 @@ onUnmounted(() => {
       </SoraForm>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
-          <SoraButton @click="showAccountModal = false">{{$t('button.cancel')}}</SoraButton>
-          <SoraButton type="primary" @click="saveAccountFromModal">{{$t('button.save')}}</SoraButton>
+          <SoraButton @click="showAccountModal = false">{{ $t('button.cancel') }}</SoraButton>
+          <SoraButton type="primary" @click="saveAccountFromModal">{{
+            $t('button.save')
+          }}</SoraButton>
         </div>
       </template>
     </SoraModal>
@@ -608,7 +671,6 @@ onUnmounted(() => {
 .sora-add-transaction__row--two :deep(.ant-picker-input) {
   width: 100% !important;
 }
-
 
 .sora-add-transaction__required-star {
   color: $color-error;

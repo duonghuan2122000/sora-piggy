@@ -528,7 +528,7 @@ mermaid.ganttConfig = {
   tickInterval: '1week', // Axis ticks
   topAxis: true, // When this flag is set, date labels will be added to the top of the chart
   displayMode: 'compact', // Turns compact mode on
-  weekday: 'sunday', // On which day a week-based interval should start
+  weekday: 'sunday' // On which day a week-based interval should start
 };
 ```
 
@@ -578,7 +578,7 @@ Beginner's tip—a full example using interactive links in an HTML context:
     };
     const config = {
       startOnLoad: true,
-      securityLevel: 'loose',
+      securityLevel: 'loose'
     };
     mermaid.initialize(config);
   </script>

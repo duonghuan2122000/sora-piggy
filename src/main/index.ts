@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain, shell } from 'electron';
+import { BrowserWindow, app, ipcMain, shell, IpcMainInvokeEvent } from 'electron';
 import { join } from 'path';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
@@ -26,7 +26,9 @@ import {
   closeDatabase,
   getTransactionsPaginated,
   getAllCategories,
-  getAllAccounts
+  getAllAccounts,
+  searchCategories,
+  searchAccounts
 } from './database';
 import { TransactionFilterParams, PaginatedTransactions } from './types/transaction';
 import { ICategory, IAccount } from './database';
@@ -186,6 +188,27 @@ app.whenReady().then(() => {
       return accounts;
     } catch (error) {
       console.error('[IPC] Error fetching all accounts:', error);
+      return [];
+    }
+  });
+
+  // Search handlers for lazy-loading selects
+  ipcMain.handle('db:searchCategories', (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): ICategory[] => {
+    console.log(`[IPC] searchCategories: q="${q}", limit=${limit}, offset=${offset}`);
+    try {
+      return searchCategories(q, limit, offset);
+    } catch (error) {
+      console.error('[IPC] Error searching categories:', error);
+      return [];
+    }
+  });
+
+  ipcMain.handle('db:searchAccounts', (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): IAccount[] => {
+    console.log(`[IPC] searchAccounts: q="${q}", limit=${limit}, offset=${offset}`);
+    try {
+      return searchAccounts(q, limit, offset);
+    } catch (error) {
+      console.error('[IPC] Error searching accounts:', error);
       return [];
     }
   });

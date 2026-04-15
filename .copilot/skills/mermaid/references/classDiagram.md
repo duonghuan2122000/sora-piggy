@@ -844,7 +844,7 @@ Beginner's tip—a full example using interactive links in an HTML page:
     };
     const config = {
       startOnLoad: true,
-      securityLevel: 'loose',
+      securityLevel: 'loose'
     };
     mermaid.initialize(config);
   </script>

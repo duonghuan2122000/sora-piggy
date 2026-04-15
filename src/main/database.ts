@@ -488,7 +488,7 @@ export const addTransaction = (transaction: Omit<ITransaction, 'id'>): string =>
   const timeValue =
     typeof transaction.time === 'number'
       ? new Date(transaction.time).toISOString()
-      : transaction.time ?? new Date().toISOString();
+      : (transaction.time ?? new Date().toISOString());
   stmt.run({
     id,
     name: transaction.name,
@@ -510,8 +510,8 @@ export const updateTransaction = (id: string, transaction: Partial<ITransaction>
     transaction.time === undefined || transaction.time === null
       ? undefined
       : typeof transaction.time === 'number'
-      ? new Date(transaction.time).toISOString()
-      : transaction.time;
+        ? new Date(transaction.time).toISOString()
+        : transaction.time;
   stmt.run({
     id,
     name: transaction.name,
@@ -711,6 +711,32 @@ export const getAllAccounts = (): IAccount[] => {
  * @param filters - Filter parameters including pagination
  * @returns Paginated transactions with summary
  */
+export const searchCategories = (query: string, limit = 5, offset = 0): ICategory[] => {
+  if (!db) initDb();
+  const q = query ?? '';
+  const qNoDiacritics = q ? removeDiacritics(q) : '';
+  const stmt = db!.prepare(`
+    SELECT id, name, type, icon, color FROM categories
+    WHERE (:q IS NULL OR :q = '' OR LOWER(name) LIKE '%' || LOWER(:q) || '%' OR LOWER(name) LIKE '%' || LOWER(:qNoDiacritics) || '%')
+    ORDER BY name
+    LIMIT :limit OFFSET :offset
+  `);
+  return stmt.all({ q, qNoDiacritics, limit, offset }) as ICategory[];
+};
+
+export const searchAccounts = (query: string, limit = 5, offset = 0): IAccount[] => {
+  if (!db) initDb();
+  const q = query ?? '';
+  const qNoDiacritics = q ? removeDiacritics(q) : '';
+  const stmt = db!.prepare(`
+    SELECT id, name, type, balance FROM accounts
+    WHERE (:q IS NULL OR :q = '' OR LOWER(name) LIKE '%' || LOWER(:q) || '%' OR LOWER(name) LIKE '%' || LOWER(:qNoDiacritics) || '%')
+    ORDER BY name
+    LIMIT :limit OFFSET :offset
+  `);
+  return stmt.all({ q, qNoDiacritics, limit, offset }) as IAccount[];
+};
+
 export const getTransactionsPaginated = (
   filters: TransactionFilterParams
 ): PaginatedTransactions => {
