@@ -1,5 +1,0 @@
-fix: normalize transaction time to ISO before IPC
-
-Convert transaction.time to ISO string before sending via IPC to avoid "An object could not be cloned" error.
-
-Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
