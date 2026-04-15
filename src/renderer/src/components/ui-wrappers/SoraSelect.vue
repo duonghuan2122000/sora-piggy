@@ -3,6 +3,7 @@
     v-bind="attrs"
     show-search
     :filter-option="false"
+    :search-value="props.modelValue"
     @search="onSearch"
     @change="handleChange"
     @popup-scroll="onPopupScroll"

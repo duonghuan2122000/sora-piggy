@@ -9,6 +9,8 @@ export interface Transaction {
   amount: number;
   category: string | null;
   account: string | null;
+  categoryId?: number | null;
+  accountId?: number | null;
 }
 
 export const useTransactionFormStore = defineStore('transactionForm', () => {
@@ -27,19 +29,77 @@ export const useTransactionFormStore = defineStore('transactionForm', () => {
     isLoading.value = loading;
   };
 
-  const addTransaction = async (transaction: Omit<Transaction, 'id'>): Promise<boolean> => {
+  const addTransaction = async (transaction: Omit<Transaction, 'id'> & { categoryId?: number | null; accountId?: number | null }): Promise<boolean> => {
     isLoading.value = true;
     try {
+      // Resolve categoryId
+      let categoryId: number | null = transaction.categoryId ?? null;
+      if (!categoryId && transaction.category) {
+        try {
+          const categories = (await window.api.getAllCategories()) as Array<{ id: number; name: string }>;
+          const found = (categories || []).find((c) => String(c.name).toLowerCase() === String(transaction.category).toLowerCase());
+          if (found) {
+            categoryId = found.id;
+          } else {
+            // create new category and use returned id
+            const created = await window.api.createCategory({ name: transaction.category, type: 'expense' });
+            if (typeof created === 'number') categoryId = created;
+            else {
+              const createdRes = created as unknown as { lastInsertRowid?: number };
+              if (createdRes && typeof createdRes.lastInsertRowid === 'number') categoryId = Number(createdRes.lastInsertRowid);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to resolve categoryId, falling back to first category', e);
+          const allCats = (await window.api.getAllCategories()) as Array<{ id: number; name: string }>;
+          categoryId = allCats.length > 0 ? allCats[0].id : null;
+        }
+      }
+
+      // Resolve accountId
+      let accountId: number | null = transaction.accountId ?? null;
+      if (!accountId && transaction.account) {
+        try {
+          const accounts = (await window.api.getAllAccounts()) as Array<{ id: number; name: string }>;
+          const found = (accounts || []).find((a) => String(a.name).toLowerCase() === String(transaction.account).toLowerCase());
+          if (found) {
+            accountId = found.id;
+          } else {
+            const created = await window.api.createAccount({ name: transaction.account, type: 'general', balance: 0 });
+            if (typeof created === 'number') accountId = created;
+            else {
+              const createdRes = created as unknown as { lastInsertRowid?: number };
+              if (createdRes && typeof createdRes.lastInsertRowid === 'number') accountId = Number(createdRes.lastInsertRowid);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to resolve accountId, falling back to first account', e);
+          const allAccs = (await window.api.getAllAccounts()) as Array<{ id: number; name: string }>;
+          accountId = allAccs.length > 0 ? allAccs[0].id : null;
+        }
+      }
+
       // Convert timestamp to ISO string for the API
-      const apiTransaction = {
+      let timeIso: string;
+      if (transaction.time) {
+        const parsed = new Date(transaction.time as unknown as string | number);
+        if (!isNaN(parsed.getTime())) {
+          timeIso = parsed.toISOString();
+        } else {
+          // Fallback to current time if provided value is invalid
+          timeIso = new Date().toISOString();
+        }
+      } else {
+        timeIso = new Date().toISOString();
+      }
+
+      const apiTransaction: { name: string; description: string; time: string; amount: number; categoryId: number | null; accountId: number | null } = {
         name: transaction.name,
         description: transaction.description || '',
-        time: transaction.time
-          ? new Date(transaction.time).toISOString()
-          : new Date().toISOString(),
+        time: timeIso as string,
         amount: transaction.amount,
-        category: transaction.category || '',
-        account: transaction.account || ''
+        categoryId,
+        accountId
       };
 
       // Call the API using the correct method name

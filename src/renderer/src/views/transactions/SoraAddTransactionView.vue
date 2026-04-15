@@ -42,7 +42,9 @@ const formValue = ref({
   time: null,
   amount: 0,
   category: null as string | null,
-  account: null as string | null
+  account: null as string | null,
+  categoryId: null as number | null,
+  accountId: null as number | null
 });
 
 const rules: Record<string, unknown> = {
@@ -209,6 +211,13 @@ const handleAccountSelect = (item: Record<string, unknown>): void => {
   // Normal account selection - update form value and search field
   formValue.value.account = itemValue;
   accountSearchValue.value = itemValue;
+  // If the option contains an id, store it for submission
+  const maybeId = (item as Record<string, unknown>)?.id as number | undefined;
+  if (maybeId !== undefined) {
+    formValue.value.accountId = Number(maybeId);
+  } else {
+    formValue.value.accountId = null;
+  }
 };
 
 // Save account from modal
@@ -220,7 +229,7 @@ const saveAccountFromModal = async (): Promise<void> => {
 
   const accountName = newAccountName.value.trim();
   try {
-    await window.api.createAccount({
+    const res = await window.api.createAccount({
       name: accountName,
       type: 'general' // Default type
     });
@@ -231,6 +240,18 @@ const saveAccountFromModal = async (): Promise<void> => {
     // Select the newly added account
     formValue.value.account = accountName;
     accountSearchValue.value = '';
+
+    // Try to set returned id
+    try {
+      if (typeof res === 'number') {
+        formValue.value.accountId = res;
+      } else if (res) {
+        const createdRes = res as unknown as { lastInsertRowid?: number };
+        if (createdRes.lastInsertRowid) formValue.value.accountId = Number(createdRes.lastInsertRowid);
+      }
+    } catch (e) {
+      console.error('Failed to parse created account id', e);
+    }
 
     // Close modal
     showAccountModal.value = false;
@@ -315,6 +336,13 @@ const handleCategorySelect = (item: Record<string, unknown>): void => {
 
   formValue.value.category = item.value as string;
   categorySearchValue.value = item.value as string;
+  // If the option contains an id, store it for submission
+  const maybeId = (item as Record<string, unknown>)?.id as number | undefined;
+  if (maybeId !== undefined) {
+    formValue.value.categoryId = Number(maybeId);
+  } else {
+    formValue.value.categoryId = null;
+  }
 };
 
 // Save category from modal
@@ -326,7 +354,7 @@ const saveCategoryFromModal = async (): Promise<void> => {
 
   const categoryName = newCategoryName.value.trim();
   try {
-    await window.api.createCategory({
+    const res = await window.api.createCategory({
       name: categoryName,
       type: 'expense' // Default type, can be made configurable
     });
@@ -337,6 +365,18 @@ const saveCategoryFromModal = async (): Promise<void> => {
     // Select the newly added category
     formValue.value.category = categoryName;
     categorySearchValue.value = '';
+
+    // Try to set returned id
+    try {
+      if (typeof res === 'number') {
+        formValue.value.categoryId = res;
+      } else if (res) {
+        const createdRes = res as unknown as { lastInsertRowid?: number };
+        if (createdRes.lastInsertRowid) formValue.value.categoryId = Number(createdRes.lastInsertRowid);
+      }
+    } catch (e) {
+      console.error('Failed to parse created category id', e);
+    }
 
     // Close modal
     showCategoryModal.value = false;
@@ -384,7 +424,9 @@ const handleSubmit = async (): Promise<void> => {
       time: formValue.value.time,
       amount: formValue.value.amount,
       category: formValue.value.category,
-      account: formValue.value.account
+      account: formValue.value.account,
+      categoryId: formValue.value.categoryId,
+      accountId: formValue.value.accountId
     });
 
     if (success) {
@@ -396,7 +438,9 @@ const handleSubmit = async (): Promise<void> => {
         time: null,
         amount: 0,
         category: null,
-        account: null
+        account: null,
+        categoryId: null,
+        accountId: null
       };
       // Reset category and account search values
       categorySearchValue.value = '';

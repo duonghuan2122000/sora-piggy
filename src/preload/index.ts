@@ -22,8 +22,8 @@ const api = {
   createTransaction: (transaction: {
     name: string;
     description?: string;
-    category: string;
-    account: string;
+    categoryId?: number | null;
+    accountId?: number | null;
     amount: number;
     time: string;
   }) => ipcRenderer.invoke('db:addTransaction', transaction),
@@ -32,8 +32,8 @@ const api = {
     transaction: {
       name?: string;
       description?: string;
-      category?: string;
-      account?: string;
+      categoryId?: number | null;
+      accountId?: number | null;
       amount?: number;
       time?: string;
     }

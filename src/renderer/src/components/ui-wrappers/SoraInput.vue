@@ -1,5 +1,5 @@
 <template>
-  <a-input v-bind="attrs" :value="modelValue" @input="onInput" />
+  <a-input v-bind="attrs" :value="props.modelValue" @input="onInput" />
 </template>
 
 <script setup lang="ts" name="SoraInput">
@@ -11,7 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const attrs = useAttrs();
 
-const modelValue = props.modelValue as string | number;
+
 function onInput(e: Event | string): void {
   // Ant input emits an event whose target.value contains the string
   const value =

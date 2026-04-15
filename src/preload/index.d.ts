@@ -60,18 +60,18 @@ interface API {
   createTransaction: (transaction: {
     name: string;
     description?: string;
-    category: string;
-    account: string;
+    categoryId?: number | null;
+    accountId?: number | null;
     amount: number;
     time: string;
-  }) => Promise<number>;
+  }) => Promise<string>;
   updateTransaction: (
     id: number,
     transaction: {
       name?: string;
       description?: string;
-      category?: string;
-      account?: string;
+      categoryId?: number | null;
+      accountId?: number | null;
       amount?: number;
       time?: string;
     }
