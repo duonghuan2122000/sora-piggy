@@ -3,7 +3,13 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
-import { SoraInput, SoraTable, SoraButton, SoraSelect, SoraDateRange } from '@renderer/components/ui';
+import {
+  SoraInput,
+  SoraTable,
+  SoraButton,
+  SoraSelect,
+  SoraDateRange
+} from '@renderer/components/ui';
 import { ROUTE_NAMES } from '@renderer/constants';
 import { notifyError } from '@renderer/utils/sora-notification';
 import {
@@ -41,7 +47,10 @@ const categorySearchText = ref('');
 const accountSearchText = ref('');
 
 // Date range filter (default: current month)
-const dateRange = ref<[number | null, number | null]>([dayjs().startOf('month').valueOf(), dayjs().endOf('month').valueOf()]);
+const dateRange = ref<[number | null, number | null]>([
+  dayjs().startOf('month').valueOf(),
+  dayjs().endOf('month').valueOf()
+]);
 
 // Loading states
 const loading = ref(false);
@@ -115,8 +124,14 @@ const fetchTransactions = async (): Promise<void> => {
   loading.value = true;
   try {
     // Normalize date range to local startOf day / endOf day to make date selections inclusive
-    const startTimeMs = dateRange.value && dateRange.value[0] ? dayjs(dateRange.value[0]).startOf('day').valueOf() : undefined;
-    const endTimeMs = dateRange.value && dateRange.value[1] ? dayjs(dateRange.value[1]).endOf('day').valueOf() : undefined;
+    const startTimeMs =
+      dateRange.value && dateRange.value[0]
+        ? dayjs(dateRange.value[0]).startOf('day').valueOf()
+        : undefined;
+    const endTimeMs =
+      dateRange.value && dateRange.value[1]
+        ? dayjs(dateRange.value[1]).endOf('day').valueOf()
+        : undefined;
 
     const filters: TransactionFilterParams = {
       name: searchQuery.value || undefined,
@@ -306,11 +321,7 @@ const sortSelectOptions = computed(() => [
           />
         </div>
         <div class="sora-filters">
-          <SoraDateRange
-            v-model="dateRange"
-            class="sora-date-range"
-            :format="'YYYY-MM-DD'"
-          />
+          <SoraDateRange v-model="dateRange" class="sora-date-range" :format="'YYYY-MM-DD'" />
 
           <SoraSelect
             v-model="selectedCategoryId"

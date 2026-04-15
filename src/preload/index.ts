@@ -22,8 +22,8 @@ const api = {
   createTransaction: (transaction: {
     name: string;
     description?: string;
-    category: string;
-    account: string;
+    categoryId?: number | null;
+    accountId?: number | null;
     amount: number;
     time: string;
   }) => ipcRenderer.invoke('db:addTransaction', transaction),
@@ -32,8 +32,8 @@ const api = {
     transaction: {
       name?: string;
       description?: string;
-      category?: string;
-      account?: string;
+      categoryId?: number | null;
+      accountId?: number | null;
       amount?: number;
       time?: string;
     }
@@ -47,6 +47,10 @@ const api = {
   // Category APIs
   getCategories: () => ipcRenderer.invoke('db:getCategories'),
   getAllCategories: () => ipcRenderer.invoke('db:getAllCategories'),
+  searchCategories: (q: string, limit = 5, offset = 0) =>
+    ipcRenderer.invoke('db:searchCategories', q, limit, offset),
+  searchAccounts: (q: string, limit = 5, offset = 0) =>
+    ipcRenderer.invoke('db:searchAccounts', q, limit, offset),
   getCategoryById: (id: number) => ipcRenderer.invoke('db:getCategoryById', id),
   createCategory: (category: { name: string; type: string; icon?: string; color?: string }) =>
     ipcRenderer.invoke('db:createCategory', category),

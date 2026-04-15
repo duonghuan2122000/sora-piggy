@@ -31,7 +31,7 @@ Example of `initialize` call setting `theme` to `base`:
 ```javascript
 mermaid.initialize({
   securityLevel: 'loose',
-  theme: 'base',
+  theme: 'base'
 });
 ```
 

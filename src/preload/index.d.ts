@@ -60,18 +60,18 @@ interface API {
   createTransaction: (transaction: {
     name: string;
     description?: string;
-    category: string;
-    account: string;
+    categoryId?: number | null;
+    accountId?: number | null;
     amount: number;
     time: string;
-  }) => Promise<number>;
+  }) => Promise<string>;
   updateTransaction: (
     id: number,
     transaction: {
       name?: string;
       description?: string;
-      category?: string;
-      account?: string;
+      categoryId?: number | null;
+      accountId?: number | null;
       amount?: number;
       time?: string;
     }
@@ -84,6 +84,7 @@ interface API {
   // Category APIs
   getCategories: () => Promise<Category[]>;
   getAllCategories: () => Promise<Category[]>;
+  searchCategories: (q: string, limit?: number, offset?: number) => Promise<Category[]>;
   getCategoryById: (id: number) => Promise<Category | undefined>;
   createCategory: (category: {
     name: string;
@@ -105,6 +106,7 @@ interface API {
   // Account APIs
   getAccounts: () => Promise<Account[]>;
   getAllAccounts: () => Promise<Account[]>;
+  searchAccounts: (q: string, limit?: number, offset?: number) => Promise<Account[]>;
   getAccountById: (id: number) => Promise<Account | undefined>;
   createAccount: (account: { name: string; type: string; balance?: number }) => Promise<number>;
   updateAccount: (

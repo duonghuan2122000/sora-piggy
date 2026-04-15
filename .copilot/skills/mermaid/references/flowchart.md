@@ -1758,7 +1758,7 @@ Beginner's tip—a full example using interactive links in a html context:
       startOnLoad: true,
       htmlLabels: true,
       flowchart: { useMaxWidth: true, curve: 'cardinal' },
-      securityLevel: 'loose',
+      securityLevel: 'loose'
     };
     mermaid.initialize(config);
   </script>

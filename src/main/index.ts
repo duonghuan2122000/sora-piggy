@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain, shell } from 'electron';
+import { BrowserWindow, app, ipcMain, shell, IpcMainInvokeEvent } from 'electron';
 import { join } from 'path';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
@@ -26,7 +26,9 @@ import {
   closeDatabase,
   getTransactionsPaginated,
   getAllCategories,
-  getAllAccounts
+  getAllAccounts,
+  searchCategories,
+  searchAccounts
 } from './database';
 import { TransactionFilterParams, PaginatedTransactions } from './types/transaction';
 import { ICategory, IAccount } from './database';
@@ -153,7 +155,17 @@ app.whenReady().then(() => {
   // Category handlers
   ipcMain.handle('db:getCategories', () => getCategories());
   ipcMain.handle('db:getCategoryById', (_, id) => getCategoryById(id));
-  ipcMain.handle('db:createCategory', (_, category) => createCategory(category));
+  ipcMain.handle('db:createCategory', (_event, category) => {
+    try {
+      const res = createCategory(category);
+      // Return the newly created id for convenience
+      const createdRes = res as unknown as { lastInsertRowid?: number };
+      return typeof createdRes.lastInsertRowid === 'number' ? createdRes.lastInsertRowid : null;
+    } catch (error) {
+      console.error('[IPC] Error creating category:', error);
+      throw error;
+    }
+  });
   ipcMain.handle('db:updateCategory', (_, id, category) => updateCategory(id, category));
   ipcMain.handle('db:deleteCategory', (_, id) => deleteCategory(id));
 
@@ -173,7 +185,16 @@ app.whenReady().then(() => {
   // Account handlers
   ipcMain.handle('db:getAccounts', () => getAccounts());
   ipcMain.handle('db:getAccountById', (_, id) => getAccountById(id));
-  ipcMain.handle('db:createAccount', (_, account) => createAccount(account));
+  ipcMain.handle('db:createAccount', (_event, account) => {
+    try {
+      const res = createAccount(account);
+      const createdRes = res as unknown as { lastInsertRowid?: number };
+      return typeof createdRes.lastInsertRowid === 'number' ? createdRes.lastInsertRowid : null;
+    } catch (error) {
+      console.error('[IPC] Error creating account:', error);
+      throw error;
+    }
+  });
   ipcMain.handle('db:updateAccount', (_, id, account) => updateAccount(id, account));
   ipcMain.handle('db:deleteAccount', (_, id) => deleteAccount(id));
 
@@ -186,6 +207,27 @@ app.whenReady().then(() => {
       return accounts;
     } catch (error) {
       console.error('[IPC] Error fetching all accounts:', error);
+      return [];
+    }
+  });
+
+  // Search handlers for lazy-loading selects
+  ipcMain.handle('db:searchCategories', (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): ICategory[] => {
+    console.log(`[IPC] searchCategories: q="${q}", limit=${limit}, offset=${offset}`);
+    try {
+      return searchCategories(q, limit, offset);
+    } catch (error) {
+      console.error('[IPC] Error searching categories:', error);
+      return [];
+    }
+  });
+
+  ipcMain.handle('db:searchAccounts', (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): IAccount[] => {
+    console.log(`[IPC] searchAccounts: q="${q}", limit=${limit}, offset=${offset}`);
+    try {
+      return searchAccounts(q, limit, offset);
+    } catch (error) {
+      console.error('[IPC] Error searching accounts:', error);
       return [];
     }
   });
