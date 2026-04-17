@@ -1,5 +1,6 @@
 export const ROUTE_NAMES = {
   HOME: 'Home',
+  DASHBOARD: 'Dashboard',
   BUDGET: 'Budget',
   GOALS: 'Goals',
   REPORTS: 'Reports',
