@@ -60,16 +60,6 @@ const rules: Record<string, unknown> = {
       required: true,
       message: t('transactionForm.validation.amountRequired'),
       trigger: ['blur', 'change']
-    },
-    {
-      validator: (_rule, value, callback) => {
-        if (value <= 0) {
-          callback(new Error(t('transactionForm.validation.amountGreaterThanZero')));
-        } else {
-          callback();
-        }
-      },
-      trigger: ['blur', 'change']
     }
   ],
   category: [
@@ -541,7 +531,7 @@ onUnmounted(() => {
                 }}<span class="sora-add-transaction__required-star">*</span></span
               >
             </template>
-            <SoraInputNumber v-model="formValue.amount" :min="1" />
+            <SoraInputNumber v-model="formValue.amount" />
           </SoraFormItem>
         </div>
 
