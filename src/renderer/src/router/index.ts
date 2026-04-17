@@ -8,6 +8,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@renderer/views/HomeView.vue')
   },
   {
+    path: '/dashboard',
+    name: ROUTE_NAMES.DASHBOARD,
+    component: () => import('@renderer/views/SoraDashboardView.vue')
+  },
+
+  {
     path: '/budget',
     name: ROUTE_NAMES.BUDGET,
     component: () => import('@renderer/views/BudgetView.vue')

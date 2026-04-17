@@ -36,7 +36,7 @@ const menuGroups: MenuGroup[] = [
   {
     title: 'Summary',
     items: [
-      { key: 'Dashboard', label: 'Dashboard', icon: faChartLine, to: '/' },
+      { key: 'Dashboard', label: 'Dashboard', icon: faChartLine, to: '/dashboard' },
       { key: 'Transaction', label: 'Transaction', icon: faExchangeAlt, to: '/transactions' }
     ]
   },
