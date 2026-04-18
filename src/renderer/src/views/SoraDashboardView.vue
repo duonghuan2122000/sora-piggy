@@ -89,7 +89,12 @@ const chartOptions = ref<ApexOptions>({
       formatter: (val: number) => vndFormatter.format(Number(val) || 0)
     }
   },
-  stroke: { curve: 'smooth' },
+  stroke: { curve: 'smooth', width: 2 },
+  markers: {
+    size: 5,
+    strokeWidth: 2,
+    hover: { sizeOffset: 4 }
+  },
   dataLabels: { enabled: false },
   legend: { position: 'top' }
 });
