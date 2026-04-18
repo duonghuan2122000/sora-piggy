@@ -33,6 +33,7 @@
 import { ref, defineAsyncComponent, onMounted, watch } from 'vue';
 import type { ApexOptions } from 'apexcharts';
 import { SoraCard, SoraSelect } from '@renderer/components/ui';
+type Transaction = { time?: string | number | Date; amount?: number | string | number; [key: string]: unknown };
 
 const ApexCharts = defineAsyncComponent(() => import('vue3-apexcharts'));
 
@@ -102,7 +103,7 @@ const chartOptions = ref<ApexOptions>({
 async function loadAndAggregate(): Promise<void> {
   try {
     // @ts-ignore - exposed by preload
-    const all = (await window.api.getTransactions()) as Array<Record<string, any>>;
+    const all = (await window.api.getTransactions()) as Transaction[];
     const month = Number(selectedMonth.value);
     const year = Number(selectedYear.value);
 
@@ -125,7 +126,7 @@ async function loadAndAggregate(): Promise<void> {
         } else {
           expenseData[day - 1] += Math.abs(amt);
         }
-      } catch (e) {
+      } catch (_e) {
         // ignore malformed row
       }
     }
