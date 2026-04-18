@@ -22,7 +22,10 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:linux": "npm run build && electron-builder --linux",
+    "ci:check": "npm run lint && npm run typecheck && npm run test:unit",
+    "ci:build": "npm run ci:check && npm run build",
+    "ci:package": "npm run ci:build && electron-builder --publish never"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
@@ -70,7 +73,7 @@
     "sass": "^1.98.0",
     "typescript": "^5.9.3",
     "vite": "^7.2.6",
-    "vitest": "^1.3.0",
+    "vitest": "^4.1.4",
     "vue": "^3.5.25",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.1.6"

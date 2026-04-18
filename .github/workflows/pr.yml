@@ -1,0 +1,38 @@
+name: PR CI
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: CI checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint, typecheck and unit tests
+        run: npm run ci:check
+
+      - name: Build
+        run: npm run ci:build
+
+      - name: Upload build artifacts (if present)
+        uses: actions/upload-artifact@v4
+        with:
+          name: renderer-build-${{ matrix.node-version }}
+          path: |
+            dist/**
+            out/**
+          if-no-files-found: 'warn'
