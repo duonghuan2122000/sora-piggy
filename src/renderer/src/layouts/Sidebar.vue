@@ -64,16 +64,24 @@ const menuGroups: MenuGroup[] = [
   }
 ];
 
-// Computed property to get localized menu groups
+// Keys to hide temporarily (do not remove definitions so can be re-enabled easily)
+const HIDDEN_MENU_KEYS = ['Budget', 'Target', 'Report', 'Cash', 'Bank'];
+
+// Computed property to get localized menu groups (filters out hidden items)
 const localizedMenuGroups = computed(() => {
-  return menuGroups.map((group) => ({
-    ...group,
-    title: t(`sidebar.${group.title.toLowerCase()}`),
-    items: group.items.map((item) => ({
-      ...item,
-      label: t(`sidebar.${item.key.toLowerCase()}`)
+  return menuGroups
+    .map((group) => ({
+      ...group,
+      title: t(`sidebar.${group.title.toLowerCase()}`),
+      items: group.items
+        .filter((item) => !HIDDEN_MENU_KEYS.includes(item.key))
+        .map((item) => ({
+          ...item,
+          label: t(`sidebar.${item.key.toLowerCase()}`)
+        }))
     }))
-  }));
+    // Remove groups with no visible items to avoid empty headers
+    .filter((g) => (g.items || []).length > 0);
 });
 
 const isActive = (key: string): boolean => {
