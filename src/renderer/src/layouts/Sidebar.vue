@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -19,6 +19,10 @@ import {
 const { t } = useI18n();
 const route = useRoute();
 const activeKey = ref<string>(route.name as string);
+
+watch(() => route.name, (newName) => {
+  activeKey.value = newName as string;
+});
 
 interface MenuItem {
   key: string;
