@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.sora.sora-piggy
 productName: sora-piggy
 directories:
   buildResources: build
@@ -13,6 +13,7 @@ files:
 asarUnpack:
   - resources/**
 win:
+  icon: build/icon.jpg
   executableName: sora-piggy
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
