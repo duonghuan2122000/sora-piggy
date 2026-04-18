@@ -4,8 +4,7 @@ import { ROUTE_NAMES } from '@renderer/constants';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: ROUTE_NAMES.HOME,
-    component: () => import('@renderer/views/HomeView.vue')
+    redirect: { name: ROUTE_NAMES.DASHBOARD }
   },
   {
     path: '/dashboard',
