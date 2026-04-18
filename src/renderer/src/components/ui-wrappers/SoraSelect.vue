@@ -5,10 +5,10 @@
     show-search
     :filter-option="false"
     :search-value="currentQuery"
+    :allow-clear="allowClear"
     @search="onSearch"
     @change="handleChange"
     @popup-scroll="onPopupScroll"
-    :allow-clear="allowClear"
   >
     <template v-for="opt in internalOptions" :key="getKey(opt)">
       <a-select-option :value="getOptValue(opt)">
@@ -97,7 +97,7 @@ function isOptAdd(opt: unknown): boolean {
 const currentQuery = ref('');
 const loadingMore = ref(false);
 const hasMore = ref(true);
-const pageSize = ref<number>(((props as unknown) as { pageSize?: number }).pageSize ?? 5);
+const pageSize = ref<number>((props as unknown as { pageSize?: number }).pageSize ?? 5);
 
 function onSearch(val: string): void {
   currentQuery.value = val ?? '';

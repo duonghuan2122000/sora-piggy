@@ -2,7 +2,13 @@
   <div class="sora-dashboard">
     <SoraCard class="sora-dashboard__card">
       <template #header>Thu/chi trong 7 ngày</template>
-      <component :is="ApexCharts" type="line" :options="chartOptions" :series="series" height="500" />
+      <component
+        :is="ApexCharts"
+        type="line"
+        :options="chartOptions"
+        :series="series"
+        height="500"
+      />
     </SoraCard>
   </div>
 </template>
@@ -37,7 +43,11 @@ const series = ref([
   }
 ]);
 
-const vndFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+const vndFormatter = new Intl.NumberFormat('vi-VN', {
+  style: 'currency',
+  currency: 'VND',
+  maximumFractionDigits: 0
+});
 
 const chartOptions = ref<ApexOptions>({
   chart: { id: 'dashboard-line', toolbar: { show: false }, height: 500 },

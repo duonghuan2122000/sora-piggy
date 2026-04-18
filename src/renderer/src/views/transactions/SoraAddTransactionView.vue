@@ -109,7 +109,10 @@ const accountModalOpenedAt = ref(0);
 const loadCategories = async (): Promise<void> => {
   isLoadingCategories.value = true;
   try {
-    const categories = (await window.api.searchCategories('', 100, 0)) as Array<{ id: number; name: string }>;
+    const categories = (await window.api.searchCategories('', 100, 0)) as Array<{
+      id: number;
+      name: string;
+    }>;
     // Convert database rows to select options
     categoryOptions.value = categories.map((cat) => ({
       value: cat.name,
@@ -127,7 +130,10 @@ const loadCategories = async (): Promise<void> => {
 const loadAccounts = async (): Promise<void> => {
   isLoadingAccounts.value = true;
   try {
-    const accounts = (await window.api.searchAccounts('', 100, 0)) as Array<{ id: number; name: string }>;
+    const accounts = (await window.api.searchAccounts('', 100, 0)) as Array<{
+      id: number;
+      name: string;
+    }>;
     // Convert database rows to select options
     accountOptions.value = accounts.map((acc) => ({
       value: acc.name,
@@ -153,7 +159,10 @@ const queryAccountSearch = async (
   const offset = append ? accountOptions.value.length : 0;
   isLoadingAccounts.value = true;
   try {
-    const results = (await window.api.searchAccounts(q, PAGE_SIZE, offset)) as Array<{ id: number; name: string }>;
+    const results = (await window.api.searchAccounts(q, PAGE_SIZE, offset)) as Array<{
+      id: number;
+      name: string;
+    }>;
     const mapped = results.map((acc) => ({ value: acc.name, label: acc.name, id: acc.id }));
 
     if (append) {
@@ -237,7 +246,8 @@ const saveAccountFromModal = async (): Promise<void> => {
         formValue.value.accountId = res;
       } else if (res) {
         const createdRes = res as unknown as { lastInsertRowid?: number };
-        if (createdRes.lastInsertRowid) formValue.value.accountId = Number(createdRes.lastInsertRowid);
+        if (createdRes.lastInsertRowid)
+          formValue.value.accountId = Number(createdRes.lastInsertRowid);
       }
     } catch (e) {
       console.error('Failed to parse created account id', e);
@@ -269,7 +279,10 @@ const querySearch = async (
   const offset = append ? categoryOptions.value.length : 0;
   isLoadingCategories.value = true;
   try {
-    const results = (await window.api.searchCategories(q, 5, offset)) as Array<{ id: number; name: string }>;
+    const results = (await window.api.searchCategories(q, 5, offset)) as Array<{
+      id: number;
+      name: string;
+    }>;
     const mapped = results.map((cat) => ({ value: cat.name, label: cat.name, id: cat.id }));
 
     if (append) {
@@ -300,12 +313,17 @@ const querySearch = async (
 function slotIsAdd(slotProps: unknown): boolean {
   const sp = slotProps as Record<string, unknown>;
   const item = sp?.item as Record<string, unknown> | undefined;
-  return Boolean((item && Boolean((item['isAdd'] as boolean))) || Boolean(sp?.isAdd));
+  return Boolean((item && Boolean(item['isAdd'] as boolean)) || Boolean(sp?.isAdd));
 }
 function slotLabel(slotProps: unknown): string {
   const sp = slotProps as Record<string, unknown>;
   const item = sp?.item as Record<string, unknown> | undefined;
-  return (item?.value as string | undefined) ?? (sp?.value as string | undefined) ?? (sp?.label as string | undefined) ?? '';
+  return (
+    (item?.value as string | undefined) ??
+    (sp?.value as string | undefined) ??
+    (sp?.label as string | undefined) ??
+    ''
+  );
 }
 
 // Handle category selection
@@ -362,7 +380,8 @@ const saveCategoryFromModal = async (): Promise<void> => {
         formValue.value.categoryId = res;
       } else if (res) {
         const createdRes = res as unknown as { lastInsertRowid?: number };
-        if (createdRes.lastInsertRowid) formValue.value.categoryId = Number(createdRes.lastInsertRowid);
+        if (createdRes.lastInsertRowid)
+          formValue.value.categoryId = Number(createdRes.lastInsertRowid);
       }
     } catch (e) {
       console.error('Failed to parse created category id', e);

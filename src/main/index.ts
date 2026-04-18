@@ -40,7 +40,11 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     title: 'Sora Piggy',
-    ...(process.platform === 'win32' ? { icon: winIconPath } : process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'win32'
+      ? { icon: winIconPath }
+      : process.platform === 'linux'
+        ? { icon }
+        : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -214,25 +218,31 @@ app.whenReady().then(() => {
   });
 
   // Search handlers for lazy-loading selects
-  ipcMain.handle('db:searchCategories', (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): ICategory[] => {
-    console.log(`[IPC] searchCategories: q="${q}", limit=${limit}, offset=${offset}`);
-    try {
-      return searchCategories(q, limit, offset);
-    } catch (error) {
-      console.error('[IPC] Error searching categories:', error);
-      return [];
+  ipcMain.handle(
+    'db:searchCategories',
+    (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): ICategory[] => {
+      console.log(`[IPC] searchCategories: q="${q}", limit=${limit}, offset=${offset}`);
+      try {
+        return searchCategories(q, limit, offset);
+      } catch (error) {
+        console.error('[IPC] Error searching categories:', error);
+        return [];
+      }
     }
-  });
+  );
 
-  ipcMain.handle('db:searchAccounts', (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): IAccount[] => {
-    console.log(`[IPC] searchAccounts: q="${q}", limit=${limit}, offset=${offset}`);
-    try {
-      return searchAccounts(q, limit, offset);
-    } catch (error) {
-      console.error('[IPC] Error searching accounts:', error);
-      return [];
+  ipcMain.handle(
+    'db:searchAccounts',
+    (_event: IpcMainInvokeEvent, q: string, limit = 5, offset = 0): IAccount[] => {
+      console.log(`[IPC] searchAccounts: q="${q}", limit=${limit}, offset=${offset}`);
+      try {
+        return searchAccounts(q, limit, offset);
+      } catch (error) {
+        console.error('[IPC] Error searching accounts:', error);
+        return [];
+      }
     }
-  });
+  );
 
   // Language handlers
   ipcMain.handle('db:getLanguages', () => getLanguages());
