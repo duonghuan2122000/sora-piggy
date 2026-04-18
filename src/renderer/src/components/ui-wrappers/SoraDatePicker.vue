@@ -8,7 +8,6 @@ const props = defineProps({ modelValue: null });
 const emit = defineEmits(['update:modelValue']);
 const attrs = useAttrs();
 
-
 function onChange(val: unknown): void {
   emit('update:modelValue', val);
 }

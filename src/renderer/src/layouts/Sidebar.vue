@@ -20,9 +20,12 @@ const { t } = useI18n();
 const route = useRoute();
 const activeKey = ref<string>(route.name as string);
 
-watch(() => route.name, (newName) => {
-  activeKey.value = newName as string;
-});
+watch(
+  () => route.name,
+  (newName) => {
+    activeKey.value = newName as string;
+  }
+);
 
 interface MenuItem {
   key: string;

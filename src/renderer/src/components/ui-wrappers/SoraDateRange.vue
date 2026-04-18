@@ -1,5 +1,5 @@
 <template>
-  <a-range-picker v-bind="attrs" :value="pickerValue" @change="onChange" :format="format" />
+  <a-range-picker v-bind="attrs" :value="pickerValue" :format="format" @change="onChange" />
 </template>
 
 <script setup lang="ts">

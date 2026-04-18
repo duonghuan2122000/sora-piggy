@@ -11,7 +11,6 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const attrs = useAttrs();
 
-
 function onInput(e: Event | string): void {
   // Ant input emits an event whose target.value contains the string
   const value =

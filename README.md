@@ -31,6 +31,7 @@ Sora Piggy là ứng dụng desktop để ghi chép giao dịch, quản lý ngâ
 ## Bắt đầu (tiếng Việt)
 
 Yêu cầu trước:
+
 - Node.js 18+
 - npm (hoặc yarn)
 
@@ -44,6 +45,7 @@ npm run dev
 ```
 
 Lệnh hữu ích:
+
 - Phát triển: npm run dev
 - Xem bản dựng preview: npm run start
 - Build production (kèm kiểm tra TypeScript): npm run build
@@ -54,6 +56,7 @@ Lệnh hữu ích:
 - Test (Vitest): npm run test
 
 Tạo build cho nền tảng cụ thể:
+
 - npm run build:win | npm run build:mac | npm run build:linux | npm run build:unpack
 
 ---
@@ -78,6 +81,7 @@ Tạo build cho nền tảng cụ thể:
 - build / dist — kết quả build; electron-builder config tại electron-builder.yml
 
 Các file quan trọng:
+
 - src/main/index.ts — entry main process
 - src/main/database.ts — helpers SQLite (better-sqlite3)
 - src/preload/index.ts — contextBridge API
@@ -97,6 +101,7 @@ Các file quan trọng:
 ## Đóng góp
 
 Chào mừng PR, issue, và ý tưởng. Quy trình cơ bản:
+
 1. Fork → tạo branch tính năng
 2. Chạy typecheck + lint + test liên quan
 3. Tạo PR mô tả ngắn và checklist test
