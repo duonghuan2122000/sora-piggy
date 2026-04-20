@@ -3,8 +3,16 @@ import { defineConfig } from 'electron-vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  main: {},
-  preload: {},
+  main: {
+    build: {
+      outDir: 'out/main'
+    }
+  },
+  preload: {
+    build: {
+      outDir: 'out/preload'
+    }
+  },
   renderer: {
     resolve: {
       alias: {
@@ -24,6 +32,9 @@ export default defineConfig({
         }
       }
     },
-    plugins: [vue()]
+    plugins: [vue()],
+    build: {
+      outDir: 'out/renderer'
+    }
   }
 });
