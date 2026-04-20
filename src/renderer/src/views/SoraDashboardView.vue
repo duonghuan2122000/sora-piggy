@@ -33,7 +33,11 @@
 import { ref, defineAsyncComponent, onMounted, watch } from 'vue';
 import type { ApexOptions } from 'apexcharts';
 import { SoraCard, SoraSelect } from '@renderer/components/ui';
-type Transaction = { time?: string | number | Date; amount?: number | string | number; [key: string]: unknown };
+type Transaction = {
+  time?: string | number | Date;
+  amount?: number | string | number;
+  [key: string]: unknown;
+};
 
 const ApexCharts = defineAsyncComponent(() => import('vue3-apexcharts'));
 
@@ -57,11 +61,17 @@ function daysInMonth(month: number, year: number): number {
 }
 
 // Month options (1..12)
-const monthOptions = Array.from({ length: 12 }).map((_, i) => ({ value: i + 1, label: `Tháng ${i + 1}` }));
+const monthOptions = Array.from({ length: 12 }).map((_, i) => ({
+  value: i + 1,
+  label: `Tháng ${i + 1}`
+}));
 
 const currentYear = new Date().getFullYear();
 // Years descending: currentYear, currentYear-1, ..., currentYear-5
-const yearOptions = Array.from({ length: 6 }).map((_, i) => ({ value: currentYear - i, label: `Năm ${currentYear - i}` }));
+const yearOptions = Array.from({ length: 6 }).map((_, i) => ({
+  value: currentYear - i,
+  label: `Năm ${currentYear - i}`
+}));
 
 const selectedMonth = ref<number>(new Date().getMonth() + 1);
 const selectedYear = ref<number>(currentYear);
@@ -126,7 +136,7 @@ async function loadAndAggregate(): Promise<void> {
         } else {
           expenseData[day - 1] += Math.abs(amt);
         }
-      } catch (_e) {
+      } catch {
         // ignore malformed row
       }
     }
