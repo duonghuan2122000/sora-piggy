@@ -25,8 +25,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Package app
-        run: npm run ci:package
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: npm run build:win
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: sudo npm run build:linux
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: sudo npm run build:mac
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
