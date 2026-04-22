@@ -1,5 +1,6 @@
 import { BrowserWindow, app, ipcMain, shell, IpcMainInvokeEvent } from 'electron';
 import { join } from 'path';
+import { readFileSync } from 'fs';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import {
@@ -32,6 +33,17 @@ import {
 } from './database';
 import { TransactionFilterParams, PaginatedTransactions } from './types/transaction';
 import { ICategory, IAccount } from './database';
+
+type ImportTx = {
+  category?: string;
+  account?: string;
+  type?: string;
+  title?: string;
+  name?: string;
+  description?: string | null;
+  amount?: number | string;
+  time?: string | number;
+};
 
 function createWindow(): void {
   // Create the browser window.
@@ -86,6 +98,75 @@ app.whenReady().then(() => {
 
   // Initialize database
   initDb();
+
+  // Auto-import fake transactions if DB has few transactions
+  try {
+    const existing = getAllTransactions();
+    if (existing.length < 50) {
+      console.log(
+        '[Startup] DB has',
+        existing.length,
+        'transactions — importing fake transactions...'
+      );
+      const fakePath = join(__dirname, '../../resources/fake-transactions.json');
+      const raw = readFileSync(fakePath, 'utf8');
+      const items = JSON.parse(raw) as ImportTx[];
+
+      const categories = getAllCategories();
+      const accounts = getAllAccounts();
+      const defaultCategoryId = categories[0]?.id ?? 1;
+      const defaultAccountId = accounts[0]?.id ?? 1;
+      const catMap = new Map(categories.map((c: ICategory) => [c.name.toLowerCase(), c.id]));
+      const accMap = new Map(accounts.map((a: IAccount) => [a.name.toLowerCase(), a.id]));
+
+      for (const t of items) {
+        const catName = (t.category || 'Others').toString();
+        const accName = (t.account || 'Cash').toString();
+
+        let categoryId = catMap.get(catName.toLowerCase());
+        if (categoryId === undefined) {
+          const res = createCategory({
+            name: catName,
+            type: t.type === 'income' ? 'income' : 'expense'
+          }) as unknown as { lastInsertRowid?: number };
+          const created = getAllCategories().find((c: ICategory) => c.name === catName);
+          categoryId = res?.lastInsertRowid ?? created?.id ?? defaultCategoryId;
+          catMap.set(catName.toLowerCase(), categoryId);
+        }
+
+        let accountId = accMap.get(accName.toLowerCase());
+        if (accountId === undefined) {
+          const res = createAccount({
+            name: accName,
+            type: accName.toLowerCase().includes('bank') ? 'bank' : 'cash',
+            balance: 0
+          }) as unknown as { lastInsertRowid?: number };
+          const created = getAllAccounts().find((a: IAccount) => a.name === accName);
+          accountId = res?.lastInsertRowid ?? created?.id ?? defaultAccountId;
+          accMap.set(accName.toLowerCase(), accountId);
+        }
+
+        addTransaction({
+          name: t.title || t.name || 'Imported transaction',
+          description: (t.description ?? '') as string,
+          categoryId,
+          accountId,
+          amount: Number(t.amount) || 0,
+          time: typeof t.time === 'number' ? new Date(t.time).toISOString() : (t.time ?? new Date().toISOString())
+        });
+      }
+
+      console.log('[Startup] Fake transactions import completed:', items.length);
+    } else {
+      console.log(
+        '[Startup] Skipping auto-import, DB already has',
+        existing.length,
+        'transactions'
+      );
+    }
+  } catch (error) {
+    console.error('[Startup] Error importing fake transactions:', error);
+  }
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
@@ -251,6 +332,66 @@ app.whenReady().then(() => {
   ipcMain.handle('db:setLanguagePreference', (_, userId, language) => {
     setUserPreference(userId, 'language', language);
     return true;
+  });
+
+  // Import fake transactions handler
+  ipcMain.handle('db:importFakeTransactions', () => {
+    try {
+      const fakePath = join(__dirname, '../../resources/fake-transactions.json');
+      const raw = readFileSync(fakePath, 'utf8');
+      const items = JSON.parse(raw) as ImportTx[];
+
+      // Helper maps
+      const categories = getAllCategories();
+      const accounts = getAllAccounts();
+      const defaultCategoryId = categories[0]?.id ?? 1;
+      const defaultAccountId = accounts[0]?.id ?? 1;
+      const catMap = new Map(categories.map((c: ICategory) => [c.name.toLowerCase(), c.id]));
+      const accMap = new Map(accounts.map((a: IAccount) => [a.name.toLowerCase(), a.id]));
+
+      for (const t of items) {
+        const catName = (t.category || 'Others').toString();
+        const accName = (t.account || 'Cash').toString();
+
+        let categoryId = catMap.get(catName.toLowerCase());
+        if (categoryId === undefined) {
+          const res = createCategory({
+            name: catName,
+            type: t.type === 'income' ? 'income' : 'expense'
+          }) as unknown as { lastInsertRowid?: number };
+          const created = getAllCategories().find((c: ICategory) => c.name === catName);
+          categoryId = res?.lastInsertRowid ?? created?.id ?? defaultCategoryId;
+          catMap.set(catName.toLowerCase(), categoryId);
+        }
+
+        let accountId = accMap.get(accName.toLowerCase());
+        if (accountId === undefined) {
+          const res = createAccount({
+            name: accName,
+            type: accName.toLowerCase().includes('bank') ? 'bank' : 'cash',
+            balance: 0
+          }) as unknown as { lastInsertRowid?: number };
+          const created = getAllAccounts().find((a: IAccount) => a.name === accName);
+          accountId = res?.lastInsertRowid ?? created?.id ?? defaultAccountId;
+          accMap.set(accName.toLowerCase(), accountId);
+        }
+
+        // Insert transaction (amount as number, time ISO)
+        addTransaction({
+          name: t.title || t.name || 'Imported transaction',
+          description: (t.description ?? '') as string,
+          categoryId,
+          accountId,
+          amount: Number(t.amount) || 0,
+          time: typeof t.time === 'number' ? new Date(t.time).toISOString() : (t.time ?? new Date().toISOString())
+        });
+      }
+
+      return { success: true, inserted: items.length };
+    } catch (error) {
+      console.error('[IPC] Error importing fake transactions:', error);
+      throw error;
+    }
   });
 
   createWindow();
