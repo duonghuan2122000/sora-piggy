@@ -451,6 +451,7 @@ const sortSelectOptions = computed(() => [
   color: $text-primary-light;
   height: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Header */
@@ -543,15 +544,18 @@ const sortSelectOptions = computed(() => [
 .sora-detail-card {
   flex: 1;
   padding: 0 !important;
+  overflow: hidden;
 }
 
 /* Detail Table */
 .sora-detail {
+  height: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: $spacing-md;
+  overflow: hidden;
 }
 
 .sora-data-table {
