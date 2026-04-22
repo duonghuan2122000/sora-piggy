@@ -1,0 +1,8 @@
+feat: add fake transactions generator and importer
+
+- Add scripts/generate-fake-transactions.js to create resources/fake-transactions.json with 100 transactions.
+- Add scripts/import-fake-transactions.js to insert fake data into app DB.
+- Add IPC handler db:importFakeTransactions and expose window.api.importFakeTransactions in preload.
+- Add auto-import on startup (imports when DB has <50 transactions) for development convenience.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

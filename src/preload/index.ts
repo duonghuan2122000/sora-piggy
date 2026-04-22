@@ -81,6 +81,9 @@ const api = {
   ) => ipcRenderer.invoke('db:updateAccount', id, account),
   deleteAccount: (id: number) => ipcRenderer.invoke('db:deleteAccount', id),
 
+  // Import helper for fake data
+  importFakeTransactions: () => ipcRenderer.invoke('db:importFakeTransactions'),
+
   // Language APIs
   getLanguages: () => ipcRenderer.invoke('db:getLanguages'),
   getLanguageByCode: (code: string) => ipcRenderer.invoke('db:getLanguageByCode', code),
