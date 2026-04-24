@@ -33,10 +33,18 @@ npm run typecheck:web          # Type check renderer
 npm run rebuild                # Rebuild native dependencies (better-sqlite3)
 
 # Testing
-npm run test                   # Run all tests with Vitest
+npm run test                   # Run all tests with Vitest (unit + integration)
 npm run test:unit              # Alias for unit tests
 npm run test:watch             # Run Vitest in watch mode
 # Run a single test: npm run test -- -t "<pattern>" or npx vitest -t "<pattern>"
+
+# CI (check before push / PR)
+npm run ci:check               # Lint + typecheck + test
+npm run ci:build               # ci:check + build
+npm run ci:package             # ci:build + package (electron-builder)
+
+# E2E tests (Playwright — needs dev server at localhost:3000)
+# npx playwright test test/e2e --config=playwright.config.cjs
 ```
 
 ## Kiến trúc tổng quan
@@ -124,15 +132,36 @@ src/
 
 SQLite database ở `~/.config/Sora Piggy/sora-piggy.db` (userData directory):
 
-- `transactions`: id, name, description, category, account, amount, time
+- `transactions`: id (UUID v7), name, description, categoryId, accountId, amount, time
 - `categories`: id, name, type, icon, color
 - `accounts`: id, name, type, balance
 
+### Migrations
+
+- Dùng `PRAGMA user_version` để track schema version (hiện tại: version 2)
+- Migration code trong `src/main/database.ts` — chạy tự động khi app khởi động
+- Migration history: v1 (text columns `category`/`account`) → v2 (UUID v7 + FK columns `categoryId`/`accountId`)
+- Tự động tạo backup file `.db.bak` trước khi migrate
+- Seed data: `npm run dev` tự động tạo categories và accounts mặc định nếu chưa có
+
 ## Testing
 
-- Test runner: Vitest (xem package.json scripts)
-- Không có test files lớn hiện tại — thêm test cạnh file tương ứng
+- **Unit + Integration**: Vitest (`npm run test`) — cấu hình ở `vitest.config.ts`, dùng jsdom environment
+- **E2E**: Playwright (`npx playwright test test/e2e --config=playwright.config.cjs`) — cần dev server đang chạy
+- Vitest config exclude `test/e2e/` và `tests/e2e/` để tránh xung đột
+
+### Test directory structure
+
+```
+test/unit/           # Unit tests (Vitest)
+test/integration/    # Integration tests (Vitest)
+test/e2e/            # E2E tests (Playwright)
+tests/unit/          # Unit tests (alternative location)
+tests/e2e/           # E2E tests (alternative location)
+```
+
 - Chạy một test cụ thể: `npm run test -- -t "<pattern>"` hoặc `npx vitest -t "<pattern>"`
+- Nếu test tương tác với DB thật, tạo DB test riêng để tránh ghi đè data người dùng
 
 ## Development Tips
 
@@ -141,6 +170,18 @@ SQLite database ở `~/.config/Sora Piggy/sora-piggy.db` (userData directory):
 - IPC calls: async ở renderer, handlers sync hoặc async ở main
 - Dùng alias `@renderer/` cho imports trong Vue để code sạch hơn
 - Kiểm tra `_variables.scss` khi gặp vấn đề styling
+- **Wrapper components**: Các component bọc (wrap) Ant Design UI phải có tiền tố `Sora` (vd: `SoraButton`, `SoraModal`, `SoraTable`, `SoraInput`, ...) — xem trong `src/renderer/src/components/ui-wrappers/`
+- Khi tham chiếu code, ghi kèm `file_path:line_number` (vd: `src/main/index.ts:1`)
+- **Seed data**: Gọi `window.api.importFakeTransactions()` từ console renderer để tạo dữ liệu giả
+
+## Git & PR Conventions
+
+- Trợ lý KHÔNG tự động git commit/push/tạo PR — phải chờ xác nhận rõ ràng từ người dùng
+- Commit message format: `<type>(<scope>): <description>` (vd: `feat(transactions): add pagination`)
+- Trước khi commit, chạy `typecheck && lint && test` và `gitnexus_detect_changes()`
+- Khi tạo PR, cung cấp: tiêu đề ngắn, tóm tắt 1-3 bullet points, checklist test plan
+- Nếu thay đổi ảnh hưởng nhiều file/symbol, kèm kết quả `gitnexus_impact` trong mô tả PR
+- Không thực hiện hành động phá hủy (force push, xóa branch remote) trừ khi có yêu cầu rõ ràng
 
 <!-- gitnexus:start -->
 
@@ -328,44 +369,7 @@ specs/
 
 - Các quy tắc an toàn gitnexus: Tiếp tục tuân thủ các yêu cầu GitNexus (ví dụ: chạy `gitnexus_impact` trước khi sửa symbol và `gitnexus_detect_changes()` trước khi commit). Nếu impact report là HIGH/CRITICAL, trợ lý phải cảnh báo và chờ chỉ thị của người dùng trước khi tiếp tục.
 
-## Bổ sung (thêm, không ghi đè)
-
-Các mục dưới đây được thêm vào CLAUDE.md để hỗ trợ tác vụ hàng ngày và điều hướng nhanh. Lưu ý: tôi sẽ không ghi đè phần trước — đây là phần bổ sung.
-
-- Ngôn ngữ: LUÔN TRẢ LỜI BẰNG TIẾNG VIỆT. Khi tham chiếu đoạn mã hoặc file, luôn dùng định dạng file_path:line_number (ví dụ: src/main/index.ts:1) để người đọc dễ điều hướng.
-
-- Tham chiếu nhanh tới file quan trọng (dùng khi cần chỉ rõ code):
-  - src/main/index.ts:1 — entry Electron chính, đăng ký IPC handlers
-  - src/main/database.ts:1 — helpers CRUD với SQLite
-  - src/preload/index.ts:1 — contextBridge / API cho renderer
-  - src/renderer/src/main.ts:1 — entrypoint Vue renderer (plugins, i18n, router, Pinia)
-  - src/renderer/src/stores/transactionForm.ts:1 — store mẫu cho transaction form
-  - src/renderer/src/assets/scss/\_variables.scss:1 — biến SCSS chính cho theme
-
-- Lệnh Git an toàn (tóm tắt):
-  - Trợ lý có thể soạn thay đổi và đề xuất commit message, nhưng KHÔNG thực hiện git commit / push / force-push / rebase --interactive mà không có xác nhận rõ ràng từ người dùng.
-  - Trước khi commit, chạy `gitnexus_detect_changes()` (hoặc tương đương) để xác nhận phạm vi thay đổi.
-  - Nếu cần chạy lệnh git từ môi trường, dùng tiền tố rtk nếu có hướng dẫn toàn cục cho RTK (ví dụ: rtk git status).
-
-- Hướng dẫn ngắn cho PR / review:
-  - Khi chuẩn bị PR, cung cấp: tiêu đề ngắn, tóm tắt 1–3 bullet points, checklist test plan.
-  - Đối với thay đổi ảnh hưởng tới nhiều file/symbol, kèm kết quả `gitnexus_impact` trong mô tả PR.
-
-- Test & DB:
-  - Nếu test tương tác với DB thật, tạo DB test riêng hoặc mock rõ ràng để tránh ghi đè data người dùng.
-  - Chạy test đơn lẻ: `npm run test -- -t "<pattern>"`.
-
-- Các nguyên tắc an toàn bổ sung:
-  - Mặc định, không thực hiện hành động phá hủy (xóa file/branch remote, force push) trừ khi người dùng yêu cầu rõ ràng.
-  - Khi một thay đổi đòi hỏi xóa hoặc overwrite state quan trọng, thông báo rõ rủi ro và chờ xác nhận.
-
-- Yêu cầu tương tác với người dùng:
-  - Nếu assistent cần thực hiện git commit / push / tạo PR, hãy hỏi người dùng một câu hỏi lựa chọn (ví dụ: "Tôi đã soạn commit. Có muốn tôi chạy git commit và push không? [Có/Không]").
-  - Nếu impact analysis là HIGH/CRITICAL, dừng và trình bày báo cáo tóm tắt trước khi thực hiện bất kỳ chỉnh sửa nào.
-
-- Khi context của conversation đạt ngưỡng 90000 trở lên, trợ lý phải thực hiện compact conversation trước khi tiếp tục các công việc tiếp theo. Compact conversation có nghĩa là:
-  - Tóm tắt các nội dung chính của hội thoại (mục tiêu, quyết định đã đưa ra, thay đổi mã đề xuất, file liên quan).
-  - Loại bỏ hoặc gộp các đoạn hội thoại lặp/không cần thiết để giảm kích thước context.
-  - Trình bày tóm tắt ngắn (1–3 bullets) và hỏi người dùng xem có tiếp tục không.
-
-Nếu bạn muốn tôi chuyển phần bổ sung này vào file CLAUDE.md trong repo, xác nhận bằng từ "Áp dụng" — tôi sẽ cập nhật file (không ghi đè phần trước, chỉ append phần bổ sung).
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
