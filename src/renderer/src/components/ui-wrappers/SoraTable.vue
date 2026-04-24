@@ -25,6 +25,9 @@ defineProps({
   tableProps: { type: Object, default: () => ({}) }
 });
 function onChange(...args: unknown[]): void {
+  // Debug: forward change events and log args
+  // eslint-disable-next-line no-console
+  console.debug('[SoraTable] onChange args:', ...args);
   const inst = getCurrentInstance() as unknown as { emit?: (...args: unknown[]) => void } | null;
   const compEmit = inst?.emit;
   compEmit && compEmit('change', ...args);

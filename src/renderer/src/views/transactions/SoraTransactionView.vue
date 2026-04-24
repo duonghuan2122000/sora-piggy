@@ -223,12 +223,16 @@ watch([page, pageSize], () => {
 
 const onTableChange = (pagination: { current?: number; pageSize?: number } | null): void => {
   if (!pagination) return;
+  // eslint-disable-next-line no-console
+  console.debug('[SoraTransactionView] onTableChange received pagination:', pagination, 'current page:', page.value);
   if (pagination.current !== undefined && pagination.current !== page.value) {
     page.value = pagination.current;
   }
   if (pagination.pageSize !== undefined && pagination.pageSize !== pageSize.value) {
     pageSize.value = pagination.pageSize;
   }
+  // eslint-disable-next-line no-console
+  console.debug('[SoraTransactionView] page now:', page.value, 'pageSize now:', pageSize.value);
 };
 
 const formatCurrency = (amount: number): string => {
@@ -302,6 +306,35 @@ const sortSelectOptions = computed(() => [
   { value: SORT_NEWEST, label: t('transactions.sort.newest') || 'Mới nhất' },
   { value: SORT_OLDEST, label: t('transactions.sort.oldest') || 'Cũ nhất' }
 ]);
+
+const tableProps = computed(() => ({
+  columns: [
+    {
+      title: t('transactionForm.labels.name') || 'Tên giao dịch',
+      dataIndex: 'name',
+      key: 'name'
+    },
+    {
+      title: t('transactionForm.labels.time') || t('transactions.columns.date') || 'Thời gian',
+      dataIndex: 'time',
+      key: 'time'
+    },
+    {
+      title: t('transactionForm.labels.amount') || 'Số tiền',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'right'
+    }
+  ],
+  pagination: {
+    current: page.value,
+    pageSize: pageSize.value,
+    total: total.value,
+    showSizeChanger: true,
+    pageSizeOptions: ['10', '20', '50'],
+    position: ['bottomRight']
+  }
+}));
 </script>
 
 <template>
@@ -383,35 +416,7 @@ const sortSelectOptions = computed(() => [
           :data-source="transactions"
           class="sora-data-table"
           style="width: 100%"
-          :table-props="{
-            columns: [
-              {
-                title: t('transactionForm.labels.name') || 'Tên giao dịch',
-                dataIndex: 'name',
-                key: 'name'
-              },
-              {
-                title:
-                  t('transactionForm.labels.time') || t('transactions.columns.date') || 'Thời gian',
-                dataIndex: 'time',
-                key: 'time'
-              },
-              {
-                title: t('transactionForm.labels.amount') || 'Số tiền',
-                dataIndex: 'amount',
-                key: 'amount',
-                align: 'right'
-              }
-            ],
-            pagination: {
-              current: page,
-              pageSize: pageSize,
-              total: total,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
-              position: ['bottomRight']
-            }
-          }"
+          :table-props="tableProps"
           @change="onTableChange"
         >
           <!-- Name -->
