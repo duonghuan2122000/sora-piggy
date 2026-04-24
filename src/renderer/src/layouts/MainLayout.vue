@@ -94,5 +94,6 @@ const handleSaveTransaction = (): void => {
   flex-direction: column;
   background-color: $bg-secondary-light;
   overflow: hidden;
+  min-height: 0;
 }
 </style>
