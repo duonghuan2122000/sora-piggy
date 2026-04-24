@@ -11,6 +11,10 @@ disable-model-invocation: false
 ---
 
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời và file được tạo ra phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 ## User Input
 
 ```text

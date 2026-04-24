@@ -7,6 +7,10 @@ metadata:
   source: git:commands/speckit.git.validate.md
 ---
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 # Validate Feature Branch
 
 Validate that the current Git branch follows the expected feature branch naming conventions.

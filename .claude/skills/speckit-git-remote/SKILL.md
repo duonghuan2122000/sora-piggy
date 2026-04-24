@@ -7,6 +7,10 @@ metadata:
   source: git:commands/speckit.git.remote.md
 ---
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 # Detect Git Remote URL
 
 Detect the Git remote URL for integration with GitHub services (e.g., issue creation).

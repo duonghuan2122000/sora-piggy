@@ -7,6 +7,10 @@ metadata:
   source: git:commands/speckit.git.feature.md
 ---
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 # Create Feature Branch
 
 Create and switch to a new git feature branch for the given specification. This command handles **branch creation only** — the spec directory and files are created by the core `/speckit.specify` workflow.

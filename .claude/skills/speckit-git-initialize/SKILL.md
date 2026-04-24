@@ -7,6 +7,10 @@ metadata:
   source: git:commands/speckit.git.initialize.md
 ---
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 # Initialize Git Repository
 
 Initialize a Git repository in the current project directory if one does not already exist.

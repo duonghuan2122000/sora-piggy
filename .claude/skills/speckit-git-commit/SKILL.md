@@ -7,6 +7,10 @@ metadata:
   source: git:commands/speckit.git.commit.md
 ---
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 # Auto-Commit Changes
 
 Automatically stage and commit all changes after a Spec Kit command completes.

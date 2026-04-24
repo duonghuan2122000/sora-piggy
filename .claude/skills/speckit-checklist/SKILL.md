@@ -32,6 +32,10 @@ disable-model-invocation: false
 
 **Metaphor**: If your spec is code written in English, the checklist is its unit test suite. You're testing whether the requirements are well-written, complete, unambiguous, and ready for implementation - NOT whether the implementation works.
 
+## Ngôn ngữ
+
+Tất cả nội dung trả lời và file được tạo ra phải bằng TIẾNG VIỆT. Chỉ giữ lại tiếng Anh cho tên kỹ thuật (thư viện, framework, tên file, mã nguồn).
+
 ## User Input
 
 ```text

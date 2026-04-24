@@ -1,50 +1,50 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Hiến pháp [TÊN DỰ ÁN]
+<!-- Ví dụ: Hiến pháp Đặc tả, Hiến pháp Quy trình, v.v. -->
 
-## Core Principles
+## Nguyên tắc Cốt lõi
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### [TÊN_NGUYÊN_TẮC_1]
+<!-- Ví dụ: I. Thư viện-Trước -->
+[MÔ TẢ_NGUYÊN_TẮC_1]
+<!-- Ví dụ: Mọi tính năng bắt đầu như một thư viện độc lập; Thư viện phải tự chứa, có thể kiểm thử độc lập, có tài liệu; Mục đích rõ ràng - không có thư viện chỉ để tổ chức -->
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### [TÊN_NGUYÊN_TẮC_2]
+<!-- Ví dụ: II. Giao diện CLI -->
+[MÔ TẢ_NGUYÊN_TẮC_2]
+<!-- Ví dụ: Mọi thư viện暴露 chức năng qua CLI; Giao thức text in/out: stdin/args → stdout, lỗi → stderr; Hỗ trợ định dạng JSON + con người đọc được -->
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### [TÊN_NGUYÊN_TẮC_3]
+<!-- Ví dụ: III. Kiểm thử-Trước (KHÔNG THƯƠNG LƯỢNG) -->
+[MÔ TẢ_NGUYÊN_TẮC_3]
+<!-- Ví dụ: TDD bắt buộc: Viết kiểm thử → Người dùng phê duyệt → Kiểm thử thất bại → Sau đó triển khai; Chu trình Red-Green-Refactor được thực thi nghiêm ngặt -->
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### [TÊN_NGUYÊN_TẮC_4]
+<!-- Ví dụ: IV. Kiểm thử Tích hợp -->
+[MÔ TẢ_NGUYÊN_TẮC_4]
+<!-- Ví dụ: Các lĩnh vực cần kiểm thử tích hợp: Kiểm thử contract thư viện mới, Thay đổi contract, Giao tiếp liên dịch vụ, Schema dùng chung -->
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### [TÊN_NGUYÊN_TẮC_5]
+<!-- Ví dụ: V. Quan sát được, VI. Phiên bản & Thay đổi Phá vỡ, VII. Đơn giản -->
+[MÔ TẢ_NGUYÊN_TẮC_5]
+<!-- Ví dụ: I/O text đảm bảo khả năng gỡ lỗi; Log có cấu trúc bắt buộc; Hoặc: Định dạng MAJOR.MINOR.BUILD; Hoặc: Bắt đầu đơn giản, nguyên tắc YAGNI -->
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## [TÊN_MỤC_2]
+<!-- Ví dụ: Ràng buộc Bổ sung, Yêu cầu Bảo mật, Tiêu chuẩn Hiệu năng, v.v. -->
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+[NỘI_DUNG_MỤC_2]
+<!-- Ví dụ: Yêu cầu công nghệ, tiêu chuẩn tuân thủ, chính sách triển khai, v.v. -->
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## [TÊN_MỤC_3]
+<!-- Ví dụ: Quy trình Phát triển, Quy trình Xem xét, Cổng Chất lượng, v.v. -->
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+[NỘI_DUNG_MỤC_3]
+<!-- Ví dụ: Yêu cầu review code, cổng kiểm thử, quy trình phê duyệt triển khai, v.v. -->
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+## Quản trị
+<!-- Ví dụ: Hiến pháp thay thế mọi thực hành khác; Sửa đổi yêu cầu tài liệu, phê duyệt, kế hoạch di chuyển -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+[QUY_TẮC_QUẢN_TRỊ]
+<!-- Ví dụ: Mọi PR/review phải xác minh tuân thủ; Độ phức tạp phải được biện minh; Sử dụng [FILE_HƯỚNG_DẪN] cho hướng dẫn phát triển runtime -->
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Phiên bản**: [PHIÊN_BẢN_HIẾN_PHÁP] | **Phê chuẩn**: [NGÀY_PHÊ_CHUẨN] | **Sửa đổi lần cuối**: [NGÀY_SỬA_ĐỔI_CUỐI]
+<!-- Ví dụ: Phiên bản: 2.1.1 | Phê chuẩn: 2025-06-13 | Sửa đổi lần cuối: 2025-07-16 -->
