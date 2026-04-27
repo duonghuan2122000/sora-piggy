@@ -178,6 +178,7 @@ tests/e2e/           # E2E tests (alternative location)
 
 - Trợ lý KHÔNG tự động git commit/push/tạo PR — phải chờ xác nhận rõ ràng từ người dùng
 - Commit message format: `<type>(<scope>): <description>` (vd: `feat(transactions): add pagination`)
+- **KHÔNG thêm dòng `Co-Authored-By`** vào commit message
 - Trước khi commit, chạy `typecheck && lint && test` và `gitnexus_detect_changes()`
 - Khi tạo PR, cung cấp: tiêu đề ngắn, tóm tắt 1-3 bullet points, checklist test plan
 - Nếu thay đổi ảnh hưởng nhiều file/symbol, kèm kết quả `gitnexus_impact` trong mô tả PR
