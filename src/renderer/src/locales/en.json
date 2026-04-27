@@ -31,7 +31,13 @@
     "target": "Target",
     "report": "Report",
     "cash": "Cash",
-    "bank": "Bank"
+    "bank": "Bank",
+    "about": "About"
+  },
+  "about": {
+    "title": "About",
+    "appName": "App Name",
+    "version": "Version"
   },
   "transactionForm": {
     "title": "Add Transaction",

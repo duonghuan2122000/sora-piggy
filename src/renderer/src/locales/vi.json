@@ -31,7 +31,13 @@
     "target": "Mục tiêu",
     "report": "Báo cáo",
     "cash": "Tiền mặt",
-    "bank": "Ngân hàng"
+    "bank": "Ngân hàng",
+    "about": "Thông tin app"
+  },
+  "about": {
+    "title": "Thông tin app",
+    "appName": "Tên ứng dụng",
+    "version": "Phiên bản"
   },
   "common": {
     "all": "Tất cả"

@@ -84,6 +84,9 @@ const api = {
   // Import helper for fake data
   importFakeTransactions: () => ipcRenderer.invoke('db:importFakeTransactions'),
 
+  // App info
+  getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
+
   // Language APIs
   getLanguages: () => ipcRenderer.invoke('db:getLanguages'),
   getLanguageByCode: (code: string) => ipcRenderer.invoke('db:getLanguageByCode', code),
