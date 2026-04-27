@@ -13,7 +13,8 @@ import {
   faFileAlt,
   faMoneyBillWave,
   faUniversity,
-  faPiggyBank
+  faPiggyBank,
+  faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 const { t } = useI18n();
@@ -44,7 +45,8 @@ const menuGroups: MenuGroup[] = [
     title: 'Summary',
     items: [
       { key: 'Dashboard', label: 'Dashboard', icon: faChartLine, to: '/dashboard' },
-      { key: 'Transaction', label: 'Transaction', icon: faExchangeAlt, to: '/transactions' }
+      { key: 'Transaction', label: 'Transaction', icon: faExchangeAlt, to: '/transactions' },
+      { key: 'About', label: 'About', icon: faInfoCircle, to: '/about' }
     ]
   },
   {

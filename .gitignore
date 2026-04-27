@@ -7,3 +7,4 @@ out
 .claude/settings.local.json
 .gitnexus
 .opencode/package-lock.json
+.env

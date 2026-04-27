@@ -119,6 +119,9 @@ interface API {
   ) => Promise<void>;
   deleteAccount: (id: number) => Promise<void>;
 
+  // App info
+  getAppInfo: () => Promise<{ name: string; version: string }>;
+
   // Language APIs
   getLanguages: () => Promise<Language[]>;
   getLanguageByCode: (code: string) => Promise<Language | undefined>;

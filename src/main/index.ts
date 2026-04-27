@@ -394,6 +394,31 @@ app.whenReady().then(() => {
     }
   });
 
+  // App info handler — read from .env with fallback
+  ipcMain.handle('app:getInfo', () => {
+    let appName = 'Sora Piggy';
+    let appVersion = app.getVersion();
+    try {
+      const envPath = join(__dirname, '../../.env');
+      const content = readFileSync(envPath, 'utf8');
+      for (const line of content.split('\n')) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const eqIdx = trimmed.indexOf('=');
+          if (eqIdx > 0) {
+            const key = trimmed.slice(0, eqIdx).trim();
+            const val = trimmed.slice(eqIdx + 1).trim();
+            if (key === 'APP_NAME' && val) appName = val;
+            if (key === 'APP_VERSION' && val) appVersion = val;
+          }
+        }
+      }
+    } catch {
+      // .env not found, use defaults
+    }
+    return { name: appName, version: appVersion };
+  });
+
   createWindow();
 
   app.on('activate', function () {
