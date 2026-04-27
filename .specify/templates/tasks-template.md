@@ -8,7 +8,7 @@ description: "Template danh sách tác vụ cho triển khai tính năng"
 **Đầu vào**: Tài liệu thiết kế từ `/specs/[###-ten-tinh-nang]/`
 **Tiên quyết**: plan.md (bắt buộc), spec.md (bắt buộc cho user stories), research.md, data-model.md, contracts/
 
-**Kiểm thử**: Các ví dụ bên dưới bao gồm tác vụ kiểm thử. Kiểm thử là TÙY CHỌN - chỉ bao gồm nếu được yêu cầu trong đặc tả tính năng.
+**Kiểm thử**: BẮT BUỘC theo Hiến pháp (mục II). Viết test TRƯỚC khi triển khai, đảm bảo test fail (red), sau đó implement (green).
 
 **Tổ chức**: Tác vụ được nhóm theo user story để cho phép triển khai và kiểm thử độc lập từng story.
 
@@ -79,7 +79,7 @@ Ví dụ tác vụ nền tảng (điều chỉnh theo dự án):
 
 **Kiểm thử độc lập**: [Cách xác minh story này hoạt động độc lập]
 
-### Kiểm thử cho User Story 1 (TÙY CHỌN - chỉ nếu có yêu cầu kiểm thử) ⚠️
+### Kiểm thử cho User Story 1 (BẮT BUỘC - theo Hiến pháp) 🔴
 
 > **GHI CHÚ**: Viết các kiểm thử này TRƯỚC, đảm bảo chúng THẤT BẠI trước khi triển khai
 
@@ -105,7 +105,7 @@ Ví dụ tác vụ nền tảng (điều chỉnh theo dự án):
 
 **Kiểm thử độc lập**: [Cách xác minh story này hoạt động độc lập]
 
-### Kiểm thử cho User Story 2 (TÙY CHỌN - chỉ nếu có yêu cầu kiểm thử) ⚠️
+### Kiểm thử cho User Story 2 (BẮT BUỘC - theo Hiến pháp) 🔴
 
 - [ ] T018 [P] [US2] Kiểm thử contract cho [endpoint] trong tests/contract/test_[tên].py
 - [ ] T019 [P] [US2] Kiểm thử tích hợp cho [hành trình người dùng] trong tests/integration/test_[tên].py
@@ -127,7 +127,7 @@ Ví dụ tác vụ nền tảng (điều chỉnh theo dự án):
 
 **Kiểm thử độc lập**: [Cách xác minh story này hoạt động độc lập]
 
-### Kiểm thử cho User Story 3 (TÙY CHỌN - chỉ nếu có yêu cầu kiểm thử) ⚠️
+### Kiểm thử cho User Story 3 (BẮT BUỘC - theo Hiến pháp) 🔴
 
 - [ ] T024 [P] [US3] Kiểm thử contract cho [endpoint] trong tests/contract/test_[tên].py
 - [ ] T025 [P] [US3] Kiểm thử tích hợp cho [hành trình người dùng] trong tests/integration/test_[tên].py
